@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-
+import { cloneDeep } from 'lodash';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -83,8 +83,6 @@ export class AppComponent {
 
   }
   main() {
-
-
     const arr: number[] = [1, 3, 5, 7, 9];
     // console.log(
     //   this.timeConversion('01:05:45PM'),
@@ -123,9 +121,393 @@ export class AppComponent {
     // const text = 'We promptly judged antique ivory buckles for the next prize';
     // console.log(this.pangrams(text));
 
-    console.log(this.buildArray([1, 3], 10));
+    // console.log(this.buildArray([1, 3], 10));
+
+    // console.log(this.twoArrays(10, [2, 1, 3], [7, 8, 9]));
+    //   console.log(this.birthday([2, 2, 1, 3, 2], 4, 2));
+    //console.log(this.sockMerchant(0, [10, 20, 20, 10, 10, 30, 50, 10, 20]))
+    // console.log(this.pageCount(15, 5));
+    // for (let i = 0; i < 25; ++i) {
+    //   console.log(i, this.sumXor(i), i ^ 10);
+    // }
+    // XOR ^ 
+    // console.log(this.isValid('(([][][]))(){}'));
+    // //console.log(this.longestValidParentheses('()(()'))
+    // console.log(this.longestPalindrome('babad'));
+    // console.log(this.longestPalindrome('cbbd'));
+    // console.log(this.longestPalindrome(''));
+    // console.log(this.longestPalindrome('ccc'));
+    // console.log(this.longestPalindrome('aaaa'));
+    // console.log(this.longestPalindrome('baabbaa'))
+    // console.log(this.longestPalindrome(`aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    // aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    // aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    // aaaaaaaaaaaaaaaaaaaaaaaaaaaaaabcaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    // aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    // aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    // aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`))
+    // // console.log(this.letterCombinations('234'));
+
+
+    console.log(this.solveNQueens(4));
+    // console.log(this.lengthOfLastWord("  fly me to the moon "))
   }
 
+  lengthOfLastWord(s: string): number {
+    const clean = s.split(/\s/);
+    console.log(clean);
+    return clean[clean.length - 1].length;
+  };
+
+  private printBoard(b: string[][]): void {
+    console.log(b);
+  }
+  private buildBoard(n: number): string[][] {
+    const arr: string[][] = [];
+    for (let i = 0; i < n; ++i) {
+      arr.push([]);
+      for (let x = 0; x < n; ++x) {
+        arr[i].push('.');
+      }
+    }
+
+    return arr;
+  }
+
+
+  checkAttack(b: string[][], horizontal: number, vertical: number): { i: number, j: number }[] {
+    let n = b.length;
+    const stack: any[] = [];
+    let shouldMove = false;
+
+    for (let i = 0; i < n && !shouldMove; ++i) { // Horizontal
+      if (b[horizontal][i] == 'Q' && i !== vertical) {
+        stack.push({ i: horizontal, j: i });
+        shouldMove = true;
+      }
+    }
+
+    shouldMove = false;
+    for (let i = 0; i < n && !shouldMove; ++i) { // Vertical
+      if (b[i][vertical] == 'Q' && i !== horizontal) {
+        stack.push({ i, j: vertical });
+        shouldMove = true;
+      }
+    }
+
+    shouldMove = false;
+
+    let row = 0;
+    let col = 0;
+
+    if (horizontal < vertical) {
+      row = 0;
+      col = vertical - horizontal;
+    } else {
+      col = 0;
+      row = horizontal - vertical;
+    }
+
+    console.log({ row, col }, 'Start');
+    for (let i = row; i < n && !shouldMove;) { // Diagonal Start
+      for (let x = col; x < n && i < n && !shouldMove; ++x, ++i) {
+        if (b[i][x] == 'Q' && i !== horizontal && x !== vertical) {
+          stack.push({ i, j: x });
+          shouldMove = true;
+        }
+      }
+    }
+
+    shouldMove = false;
+
+
+    if ((n - 1 - horizontal) < vertical) {
+      row = n - 1;
+      col = vertical - (n - 1 - horizontal);
+    }
+    else {
+      col = 0;
+      row = vertical + horizontal;
+    }
+    console.log({ row, col }, 'End');
+
+    for (let i = row; i >= 0 && !shouldMove;) { // Diagonal End
+      for (let x = col; x < n && i >= 0 && !shouldMove; ++x, --i) {
+        if (b[i][x] == 'Q' && i !== horizontal && x !== vertical) {
+          stack.push({ i, j: x });
+          shouldMove = true;
+        }
+      }
+    }
+    return stack;
+  }
+
+  checkCollission(b: string[][], row: number, column: number): any {
+    let shouldMove = false;
+    let n = b.length;
+
+    shouldMove = false;
+  }
+
+  solveNQueens(n: number): string[][] {
+    const board = this.buildBoard(n);
+    // board[0] = Array(n).fill('Q');
+    board[0][0] = 'Q';
+    board[1][1] = 'Q';
+    board[1][2] = 'Q';
+    board[3][2] = 'Q';
+    for (let i = 0; i < n; ++i) {
+      for (let x = 0; x < n; ++x) {
+        console.log({ row: x, column: i, stats: cloneDeep(this.checkAttack(board, x, i)), board: cloneDeep(board) });
+      }
+    }
+    this.printBoard(board);
+
+
+
+
+    return board;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  letterCombinations(digits: string): string[] {
+
+    let dict: any = {
+      2: 'abc',
+      3: 'def',
+      4: 'ghi',
+      5: 'jkl',
+      6: 'mno',
+      7: 'pqrs',
+      8: 'tuv',
+      9: 'wxyz'
+    };
+
+    // Input: digits = "23"
+    // Output: ["ad", "ae", "af", "bd", "be", "bf", "cd", "ce", "cf"]
+
+    let totalLegnth = 1;
+    let maxLength = 0;
+    for (let i = 0; i < digits.length; ++i) {
+      const currLen = dict[digits[i]].length;
+      totalLegnth *= currLen;
+      if (currLen > maxLength) {
+        maxLength = currLen;
+      }
+    }
+    const out: string[] = Array(totalLegnth);
+
+
+    for (let z = 0; z < digits.length; ++z) {
+      const currStr = dict[digits[z]];
+      console.log({ currStr, maxLength })
+      for (let i = 0, index = 0; i < out.length; ++i) {
+        out[i] = out[i] ? out[i] + currStr[index] : currStr[index];
+        if ((i + 1) % maxLength == 0 || (digits.length - z) % 2 == 1) {
+          index = index == maxLength - 1 ? 0 : index + 1;
+        }
+
+        console.log({ out: [...out], index, i })
+      }
+    }
+
+    console.log({ totalLegnth })
+    return out;
+  };
+
+  longestPalindrome(s: string): string {
+    let maxPal = "";
+    for (let i = 0; i < s.length; ++i) {
+      let subStr = "";
+      let isPal = false;
+      for (let j = s.length - 1; j >= 0 && !isPal; --j) {
+        subStr = s.slice(i, j + 1);
+        isPal = this.isPalindrome(subStr);
+      }
+      if (isPal && subStr.length > maxPal.length) {
+        maxPal = subStr;
+      }
+    }
+    return maxPal;
+  };
+
+
+  isPalindrome(s: string): boolean {
+    for (let i = 0, j = s.length - 1; i < s.length; ++i, --j) {
+      if (s[i] !== s[j]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+
+  longestValidParentheses(s: string): number {
+    let maxLength = 0;
+    const dict: any = {};
+    let sum = 0;
+    let currentIndex = 0;
+
+    let stack: string[] = [];
+    for (let i = 0; i < s.length; ++i) {
+      if (s[i] == '(') {
+        stack.unshift('(');
+        dict[i] = sum;
+        currentIndex = i;
+      } else if (stack.shift() == '(') {
+        sum += 2;
+        if (stack.length == 0)
+          dict[currentIndex] = sum;
+        else
+          sum = dict[currentIndex]
+      } else {
+        maxLength = Math.max(maxLength, sum);
+        sum = 0;
+        stack = [];
+      }
+    }
+    // sum = stack.length ? 0 : sum
+    console.log(dict);
+    return Math.max(maxLength, sum);
+  };
+
+  isValid(s: string): boolean {
+    const test: any = {
+      '(': ')',
+      '{': '}',
+      '[': ']'
+    };
+
+    const stack: string[] = [];
+    const arr = [...s];
+    for (let i = 0; i < arr.length; ++i) {
+      console.log({ stack, currentValue: arr[i], Test: test[arr[i]], condition: stack.length && !test[arr[i]] });
+      if (test[arr[i]]) {
+        stack.unshift(arr[i]);
+      } else if (test[stack.shift() as string] !== arr[i]) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+
+  toBinary(n: number): string {
+    let value = n;
+    const obj: any = {};
+
+    for (let i = 14; i >= 0; --i) {
+      const power = Math.pow(2, i);
+      obj[power] = 0;
+      if (value - power >= 0) {
+        obj[power] = 1;
+        value = value - power;
+      }
+    }
+    const lol = Object.values(obj).toString().replace(/,/g, '');
+    return lol;
+  }
+
+  xOr(first: string, second: string): string {
+    const arr: string[] = [];
+    for (let i = 0; i < first.length; ++i) {
+      arr.push(Number(first[i]) + Number(second[i]) === 1 ? '1' : '0');
+    }
+
+    return arr.toString().replace(/,/g, '');
+  }
+
+  sumXor(n: number): number {
+    let sum = 0;
+    for (let i = 0; i <= n; ++i) {
+      if (this.toBinary(n + i) === this.xOr(this.toBinary(n), this.toBinary(i))) {
+        sum++;
+      }
+    }
+    return sum;
+  }
+
+  pageCount(n: number, p: number): number {
+    return Math.min(Math.ceil((p - 1) / 2), Math.ceil((n - p - (n % 2 == 0 || n - p === 0 ? 0 : 1)) / 2));
+  }
+
+  sockMerchant(n: number, ar: number[]): number {
+    // Write your code here
+    const keys: any = {};
+
+    ar.forEach(value => {
+      if (!(!!keys[value] || keys[value] >= 0)) {
+        keys[value] = 1;
+      }
+      else {
+        keys[value]++;
+      }
+    });
+
+    let sum = 0;
+    Object.keys(keys).forEach(key => {
+      sum += Math.floor(keys[key] / 2);
+    });
+
+    return sum;
+  }
+
+  birthday(s: number[], d: number, m: number): number {
+    // Write your code here
+
+    let div = 0;
+
+    for (let i = 0; i < s.length; ++i) {
+      let sum = 0;
+      for (let x = 0; x < m; ++x) {
+        sum += s[i + x];
+      }
+      console.log(sum)
+      if (sum === d) {
+        div++;
+      }
+    }
+    return div;
+  }
+
+  twoArrays(k: number, A: number[], B: number[]): string {
+    // Write your code here
+    let isValid = true;
+
+
+    const sortedA = A.sort((a, b) => a - b);
+    const sortedB = B.sort((a, b) => b - a);
+
+    sortedA.forEach((valA, i) => {
+      if (isValid && valA + sortedB[i] < k) {
+        isValid = false;
+      }
+    })
+    let dict = {};
+
+
+    return isValid ? 'YES' : 'NO';
+
+  }
 
   buildArray(target: number[], n: number): string[] {
 
@@ -209,7 +591,8 @@ export class AppComponent {
         object[index]++;
       }
     }
-
+    const arr: any[] = [];
+    arr.splice(0, 0, 1);
     return Number(Object.keys(object).find(key => object[key] === 1));
   }
 
