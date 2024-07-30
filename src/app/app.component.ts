@@ -271,24 +271,6 @@ export class AppComponent {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   letterCombinations(digits: string): string[] {
 
     let dict: any = {

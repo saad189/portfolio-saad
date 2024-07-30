@@ -1,0 +1,74 @@
+$followColor: orange;
+.footer-container {
+  background-color: rgba(255, 255, 255, 0.762);
+  color: black;
+  padding: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  border-radius: 0.5rem;
+  border: 1px solid black;
+  box-shadow: 2px 1px rgb(128, 121, 121);
+  margin: 5px;
+}
+
+.footer-section {
+  flex: 1;
+  margin: 10px;
+}
+
+.footer-section h2 {
+  font-size: 1.5em;
+}
+
+.aesthetics {
+  color: #e75480; /* Pink */
+}
+
+.functionality {
+  color: $followColor;
+}
+
+.explore ul,
+.follow-me ul {
+  list-style: none;
+  padding: 0;
+}
+
+.explore li,
+.follow-me li {
+  margin: 5px 0;
+}
+
+.follow-me li a {
+  color: $followColor;
+  text-decoration: none;
+}
+
+.contact-me a,
+.my-projects a {
+  display: block;
+  color: black;
+  text-decoration: none;
+  margin: 10px 0;
+}
+
+.contact-me a span,
+.my-projects a span {
+  display: block;
+  color: #aaa;
+}
+
+.fa-arrow-right {
+  margin-left: 10px;
+}
+
+.footer-bottom {
+  text-align: center;
+  flex-basis: 100%;
+}
+
+.footer-bottom a {
+  color: #aaa;
+  text-decoration: none;
+}

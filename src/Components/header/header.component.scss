@@ -1,0 +1,43 @@
+ul {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+
+  li {
+    margin: 0 15px;
+    font-size: medium;
+    a {
+      padding: 0.2rem;
+      color: white;
+      text-decoration: none;
+
+      transition: 0.15s ease-in-out;
+    }
+    a:hover {
+      border-bottom: 2px solid;
+      border-radius: 0.5rem;
+      color: lightpink;
+    }
+  }
+}
+
+.mat-toolbar {
+  background-color: purple;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+
+  .logo {
+    font-weight: bold;
+    font-size: 1.2em;
+  }
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+
+  button {
+    margin: 0 10px;
+  }
+}
