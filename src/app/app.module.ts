@@ -5,6 +5,7 @@ import { AppComponent } from './app.component';
 import { HeaderComponent } from "../Components/header/header.component";
 import { FooterComponent } from "../Components/footer/footer.component";
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { SharedModule } from 'src/shared/shared.module';
 
 
 @NgModule({
@@ -16,7 +17,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
     AppRoutingModule,
     HeaderComponent,
     FooterComponent,
-
+    SharedModule
   ],
   providers: [
     provideAnimationsAsync()

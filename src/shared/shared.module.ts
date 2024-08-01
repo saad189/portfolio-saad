@@ -6,20 +6,22 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatListModule } from '@angular/material/list';
+import { RouterModule } from '@angular/router';
 
 const materialModules = [
-  BrowserAnimationsModule,
+  // BrowserAnimationsModule,
   MatToolbarModule,
   MatButtonModule,
   MatIconModule,
   MatMenuModule,
-  MatListModule
+  MatListModule,
 ]
 
 @NgModule({
   declarations: [],
   imports: [
     CommonModule,
+    RouterModule,
     ...materialModules
   ],
   exports: [materialModules, CommonModule]

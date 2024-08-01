@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-footer',
@@ -12,4 +13,9 @@ export class FooterComponent {
 
   githubUrl = `https://github.com/saad189`
 
+  constructor(private router: Router) { }
+
+  navigateTo(route: string): void {
+    this.router.navigate([route]);
+  }
 }
