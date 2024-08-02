@@ -1,6 +1,41 @@
-<app-header></app-header>
-<router-outlet></router-outlet>
-<app-footer></app-footer>
-<button *ngIf="pageYoffset > 0" mat-raised-button (click)="scrollToTop()">
-  <mat-icon>arrow_upward</mat-icon>
-</button>
+<mat-sidenav-container [hasBackdrop]="" class="sidenav-container">
+  <mat-sidenav
+    #drawer
+    class="sidenav"
+    fixedInViewport
+    [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+    [mode]="(isHandset$ | async) ? 'over' : 'side'"
+    [opened]="(isHandset$ | async) === true"
+  >
+    <mat-nav-list>
+      <a mat-list-item routerLink="/podcast"> PODCAST </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <!-- Start of Content -->
+  <mat-sidenav-content id="name">
+    <app-header *ngIf="(isHandset$ | async) === false"></app-header>
+    <mat-toolbar *ngIf="(isHandset$ | async) === true">
+      <button
+        type="button"
+        aria-label="Toggle sidenav"
+        mat-icon-button
+        (click)="drawer.toggle()"
+      ></button>
+    </mat-toolbar>
+
+    <div
+      class="pt-6"
+      *ngIf="isNavBarFixed && (isHandset$ | async) === false"
+    ></div>
+    <router-outlet></router-outlet>
+    <app-footer></app-footer>
+    <button
+      *ngIf="pageYoffset > 0"
+      (click)="scrollToTop()"
+      class="mat-elevation-z8"
+    >
+      <mat-icon>arrow_upward</mat-icon>
+    </button>
+  </mat-sidenav-content>
+</mat-sidenav-container>
