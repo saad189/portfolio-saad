@@ -1,6 +1,10 @@
-import { ViewportScroller } from '@angular/common';
-import { Component, HostListener } from '@angular/core';
+
+import { Component, HostListener, ViewChild } from '@angular/core';
 import { cloneDeep } from 'lodash';
+import { BreakpointObserver, Breakpoints } from "@angular/cdk/layout";
+import { map, Observable, shareReplay } from 'rxjs';
+
+import { MatSidenav } from '@angular/material/sidenav';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -10,15 +14,23 @@ export class AppComponent {
   title = 'portfolio-saad';
   showScroll = false;
   pageYoffset = 0;
-
+  isNavBarFixed = true;
   @HostListener('window:scroll', ['$event']) onScroll(event: any) {
     this.pageYoffset = window.pageYOffset;
   }
+  @ViewChild('drawer') drawer!: MatSidenav;
+  isHandset$: Observable<boolean> = this.breakpointObserver
+    .observe(Breakpoints.Handset)
+    .pipe(
+      map((result) => result.matches),
+      shareReplay()
+    );
 
   scrollToTop() {
-    this.scroll.scrollToPosition([0, 0]);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
-  constructor(private scroll: ViewportScroller) {
+
+  constructor(private breakpointObserver: BreakpointObserver) {
     //  this.main();
     /**
      * Things to Implement:

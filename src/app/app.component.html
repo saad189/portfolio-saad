@@ -1,4 +1,4 @@
-<mat-sidenav-container [hasBackdrop]="" class="sidenav-container">
+<mat-sidenav-container [hasBackdrop]="true" class="sidenav-container">
   <mat-sidenav
     #drawer
     class="sidenav"
@@ -8,7 +8,31 @@
     [opened]="(isHandset$ | async) === true"
   >
     <mat-nav-list>
-      <a mat-list-item routerLink="/podcast"> PODCAST </a>
+      <a mat-list-item routerLink="/" routerLinkActive="focused">ABOUT</a>
+      <a
+        mat-list-item
+        routerLink="/"
+        routerLinkActive="focused"
+        fragment="skills"
+        >SKILLS</a
+      >
+      <a
+        mat-list-item
+        routerLink="/experience"
+        fragment="experience"
+        routerLinkActive="focused"
+        >EXPERIENCE</a
+      >
+      <a
+        mat-list-item
+        routerLink="/experience"
+        fragment="projects"
+        routerLinkActive="focused"
+        >PROJECTS</a
+      >
+      <a mat-list-item routerLink="/credentials" routerLinkActive="focused"
+        >CREDENTIALS</a
+      >
     </mat-nav-list>
   </mat-sidenav>
 
@@ -21,7 +45,9 @@
         aria-label="Toggle sidenav"
         mat-icon-button
         (click)="drawer.toggle()"
-      ></button>
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
     </mat-toolbar>
 
     <div
@@ -33,7 +59,7 @@
     <button
       *ngIf="pageYoffset > 0"
       (click)="scrollToTop()"
-      class="mat-elevation-z8"
+      class="mat-elevation-z8 top-button"
     >
       <mat-icon>arrow_upward</mat-icon>
     </button>

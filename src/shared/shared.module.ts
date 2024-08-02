@@ -6,8 +6,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatListModule } from '@angular/material/list';
-import { RouterModule } from '@angular/router';
-
+import { Router, RouterModule } from '@angular/router';
+import { MatSidenavModule } from "@angular/material/sidenav";
 const materialModules = [
   // BrowserAnimationsModule,
   MatToolbarModule,
@@ -15,6 +15,7 @@ const materialModules = [
   MatIconModule,
   MatMenuModule,
   MatListModule,
+  MatSidenavModule
 ]
 
 @NgModule({
@@ -24,6 +25,6 @@ const materialModules = [
     RouterModule,
     ...materialModules
   ],
-  exports: [materialModules, CommonModule]
+  exports: [materialModules, CommonModule, RouterModule]
 })
 export class SharedModule { }
