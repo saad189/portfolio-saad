@@ -2,27 +2,44 @@
   <span class="logo">SAAD AHMED</span>
   <span class="spacer"></span>
   <ul>
-    <li><a routerLinkActive="focused" routerLink="/main">ABOUT</a></li>
     <li>
-      <a routerLink="/main" routerLinkActive="focused" fragment="skills"
+      <a appFragmentLinkActive="main" fragment="main" routerLink="/main"
+        >ABOUT</a
+      >
+    </li>
+    <li>
+      <a routerLink="/main" appFragmentLinkActive="skills" fragment="skills"
         >SKILLS</a
       >
     </li>
     <li>
-      <a routerLinkActive="focused" routerLink="/experience">EXPERIENCE</a>
+      <a
+        appFragmentLinkActive="experience"
+        routerLink="/experience"
+        fragment="experience"
+        >EXPERIENCE</a
+      >
     </li>
     <li>
-      <a routerLinkActive="focused" fragment="projects" routerLink="/experience"
+      <a
+        appFragmentLinkActive="projects"
+        fragment="projects"
+        routerLink="/experience"
         >PROJECTS</a
       >
     </li>
     <li>
-      <a routerLinkActive="focused" routerLink="/credentials">CREDENTIALS</a>
+      <a
+        appFragmentLinkActive="credentials"
+        routerLink="/credentials"
+        fragment="credentials"
+        >CREDENTIALS</a
+      >
     </li>
   </ul>
   <span class="spacer"></span>
 
-  <button mat-raised-button color="primary">
-    <a href="{{ resumeUrl }}" target="_blank"> RESUME</a>
+  <button mat-raised-button color="primary" (click)="openResume()">
+    RESUME
   </button>
 </mat-toolbar>

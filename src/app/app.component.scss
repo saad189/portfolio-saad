@@ -2,11 +2,12 @@
   position: fixed;
   bottom: 20px;
   right: 30px;
-  background-color: rgba(181, 26, 150, 0.533) !important;
+  background-color: rgba(181, 26, 150, 0.6) !important;
   border-radius: 3rem;
   border: 1px groove;
   width: 3rem;
   height: 3rem;
+  cursor: pointer;
 }
 
 .mat-drawer-container {

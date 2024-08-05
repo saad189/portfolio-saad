@@ -1,11 +1,7 @@
 {
   "hosting": {
-    "public": "dist/portfolio-saad",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
+    "public": "dist/portfolio-saad/browser",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {
         "source": "**",

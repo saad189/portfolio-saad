@@ -8,6 +8,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatListModule } from '@angular/material/list';
 import { Router, RouterModule } from '@angular/router';
 import { MatSidenavModule } from "@angular/material/sidenav";
+import { FragmentLinkActiveDirective } from 'src/Directives/fragment-link.directive';
 const materialModules = [
   // BrowserAnimationsModule,
   MatToolbarModule,
@@ -18,13 +19,15 @@ const materialModules = [
   MatSidenavModule
 ]
 
+const otherAndDirectives = [RouterModule]
+
 @NgModule({
-  declarations: [],
+  declarations: [FragmentLinkActiveDirective],
   imports: [
     CommonModule,
-    RouterModule,
+    ...otherAndDirectives,
     ...materialModules
   ],
-  exports: [materialModules, CommonModule, RouterModule]
+  exports: [materialModules, otherAndDirectives, CommonModule, FragmentLinkActiveDirective]
 })
 export class SharedModule { }
