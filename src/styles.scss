@@ -7,4 +7,10 @@ body {
 body {
   margin: 0;
   font-family: monospace !important;
+  color: black !important;
+}
+.focused {
+  color: #ff4081; /* Example color */
+  font-weight: bold; /* Example style */
+  border-bottom: 2px solid #ff4081; /* Example style */
 }
