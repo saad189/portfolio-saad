@@ -7,19 +7,20 @@ ul {
   li {
     margin: 0 15px;
     font-size: medium;
-    a {
-      padding: 0.2rem;
-      color: white;
-      text-decoration: none;
-      cursor: default;
-      transition: 0.15s ease-in-out;
-    }
-    a:hover {
-      border-bottom: 2px solid;
-      border-radius: 0.5rem;
-      color: lightpink;
-    }
   }
+}
+
+a {
+  padding: 0.2rem;
+  color: white;
+  text-decoration: none;
+  cursor: default;
+  transition: 0.15s ease-in-out;
+}
+a:hover {
+  border-bottom: 2px solid;
+  border-radius: 0.5rem;
+  color: lightpink;
 }
 
 .mat-toolbar {

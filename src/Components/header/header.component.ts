@@ -9,5 +9,5 @@ import { SharedModule } from 'src/shared/shared.module';
   styleUrl: './header.component.scss'
 })
 export class HeaderComponent {
-
+  resumeUrl = 'assets/Resume_SaadAhmed.pdf'
 }
