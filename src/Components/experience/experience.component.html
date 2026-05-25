@@ -1,5 +1,13 @@
-<section class="section-container">Job Experience</section>
-<section class="section-container">
-  Projects
-  <app-projects></app-projects>
+<section id="experience">
+  <div class="container">
+    <app-section-header
+      eyebrow="03 — Career"
+      title="Experience"
+      subtitle="5+ years across IoT, enterprise CRM, and consumer mobile — most as the engineer who owned the stack end-to-end."
+    ></app-section-header>
+
+    <div class="timeline" id="hire">
+      <app-job-item *ngFor="let job of jobs" [job]="job"></app-job-item>
+    </div>
+  </div>
 </section>

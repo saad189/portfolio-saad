@@ -1,3 +1,28 @@
-<p>
-  job-item works!
-</p>
+<div class="timeline-item" [class.past]="job.isPast" appReveal>
+  <span class="timeline-dot"></span>
+  <article class="glass-card">
+    <header class="job-head">
+      <div class="job-head-left">
+        <span class="company">{{ job.company }}</span>
+        <span class="role">{{ job.role }}</span>
+      </div>
+      <span class="pill pill--current" *ngIf="job.isCurrent">Current</span>
+    </header>
+    <div class="job-meta">
+      <span>{{ job.duration }}</span>
+      <ng-container *ngIf="job.tenure">
+        <span class="sep"></span>
+        <span>{{ job.tenure }}</span>
+      </ng-container>
+      <span class="sep"></span>
+      <span>{{ job.location }}</span>
+    </div>
+    <p class="job-description">{{ job.description }}</p>
+    <div class="job-stats" *ngIf="job.stats && job.stats.length">
+      <span class="pill pill--metric" *ngFor="let stat of job.stats"><strong>{{ stat }}</strong></span>
+    </div>
+    <div class="job-tags">
+      <span class="pill" *ngFor="let tag of job.techTags">{{ tag }}</span>
+    </div>
+  </article>
+</div>

@@ -1,4 +1,19 @@
-.section-container {
-  display: flex;
-  height: clamp(40rem, 30vw, 50rem);
+.timeline {
+  position: relative;
+  padding-left: 2.5rem;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  left: 8px;
+  width: 2px;
+  background: rgba(0,0,0,0.07);
+}
+
+@media (max-width: 768px) {
+  .timeline { padding-left: 0; }
+  .timeline::before { display: none; }
 }

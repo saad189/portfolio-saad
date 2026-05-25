@@ -1,15 +1,15 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Project } from 'src/shared/interfaces';
+import { Education } from 'src/shared/interfaces';
 import { RevealDirective } from 'src/Directives/reveal.directive';
 
 @Component({
-  selector: 'app-project-item',
+  selector: 'app-education-item',
   standalone: true,
   imports: [CommonModule, RevealDirective],
-  templateUrl: './project-item.component.html',
-  styleUrl: './project-item.component.scss'
+  templateUrl: './education-item.component.html',
+  styleUrl: './education-item.component.scss'
 })
-export class ProjectItemComponent {
-  @Input() project!: Project;
+export class EducationItemComponent {
+  @Input() edu!: Education;
 }

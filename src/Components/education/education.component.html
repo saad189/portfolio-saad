@@ -1,0 +1,12 @@
+<section id="education">
+  <div class="container">
+    <app-section-header
+      eyebrow="05 — Foundation"
+      title="Education"
+    ></app-section-header>
+
+    <div class="edu-grid">
+      <app-education-item *ngFor="let edu of education" [edu]="edu"></app-education-item>
+    </div>
+  </div>
+</section>

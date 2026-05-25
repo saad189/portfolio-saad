@@ -1,0 +1,16 @@
+<article class="glass-card edu-card" appReveal>
+  <span class="institution-badge">{{ edu.shortName }}</span>
+  <h3>{{ edu.university.name }}</h3>
+  <p class="degree">{{ edu.programName }}</p>
+  <p class="duration">{{ edu.startDate }} – {{ edu.endDate }}</p>
+  <ng-container *ngIf="edu.description">
+    <p class="thesis"><strong>Thesis:</strong> {{ edu.description }}</p>
+  </ng-container>
+  <div class="courses-label">Selected coursework</div>
+  <div class="courses">
+    <span class="pill" *ngFor="let course of edu.courses">{{ course }}</span>
+  </div>
+  <div class="honors-row" *ngIf="edu.honors?.length">
+    <span class="pill pill--gold" *ngFor="let honor of edu.honors">{{ honor }}</span>
+  </div>
+</article>

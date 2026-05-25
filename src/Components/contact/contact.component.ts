@@ -1,15 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { RevealDirective } from 'src/Directives/reveal.directive';
 
 @Component({
   selector: 'app-contact',
+  standalone: true,
+  imports: [RevealDirective],
   templateUrl: './contact.component.html',
-  styleUrls: ['./contact.component.scss']
+  styleUrl: './contact.component.scss'
 })
-export class ContactComponent implements OnInit {
+export class ContactComponent {
+  email = 'saad18910@hotmail.com';
 
-  constructor() { }
-
-  ngOnInit(): void {
+  copyEmail() {
+    navigator.clipboard.writeText(this.email);
   }
-
 }
