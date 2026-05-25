@@ -1,33 +1,45 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatListModule } from '@angular/material/list';
-import { Router, RouterModule } from '@angular/router';
-import { MatSidenavModule } from "@angular/material/sidenav";
+import { RouterModule } from '@angular/router';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { FragmentLinkActiveDirective } from 'src/Directives/fragment-link.directive';
-const materialModules = [
-  // BrowserAnimationsModule,
-  MatToolbarModule,
-  MatButtonModule,
-  MatIconModule,
-  MatMenuModule,
-  MatListModule,
-  MatSidenavModule
-]
-
-const otherAndDirectives = [RouterModule]
+import { PillTagComponent } from './components/pill-tag/pill-tag.component';
+import { StatPillComponent } from './components/stat-pill/stat-pill.component';
+import { SectionHeaderComponent } from './components/section-header/section-header.component';
 
 @NgModule({
   declarations: [FragmentLinkActiveDirective],
   imports: [
     CommonModule,
-    ...otherAndDirectives,
-    ...materialModules
+    RouterModule,
+    MatToolbarModule,
+    MatButtonModule,
+    MatIconModule,
+    MatMenuModule,
+    MatListModule,
+    MatSidenavModule,
+    PillTagComponent,
+    StatPillComponent,
+    SectionHeaderComponent
   ],
-  exports: [materialModules, otherAndDirectives, CommonModule, FragmentLinkActiveDirective]
+  exports: [
+    CommonModule,
+    RouterModule,
+    MatToolbarModule,
+    MatButtonModule,
+    MatIconModule,
+    MatMenuModule,
+    MatListModule,
+    MatSidenavModule,
+    FragmentLinkActiveDirective,
+    PillTagComponent,
+    StatPillComponent,
+    SectionHeaderComponent
+  ]
 })
 export class SharedModule { }
