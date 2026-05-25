@@ -1,53 +1,30 @@
-<div class="footer-container">
-  <div class="footer-section">
-    <h2>
-      Mixing <span class="aesthetics">tech</span> with
-      <span class="functionality">value generation</span>
-    </h2>
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <p class="footer-brand">Saad Ahmed</p>
+        <p class="footer-tagline">Software Engineer · Lahore, Pakistan</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigate</h4>
+        <ul>
+          <li><a routerLink="/main" [fragment]="'about'">About</a></li>
+          <li><a routerLink="/main" [fragment]="'experience'">Experience</a></li>
+          <li><a routerLink="/main" [fragment]="'projects'">Projects</a></li>
+          <li><a routerLink="/main" [fragment]="'credentials'">Credentials</a></li>
+          <li><a routerLink="/main" [fragment]="'contact'">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Connect</h4>
+        <ul>
+          <li><a href="https://www.linkedin.com/in/saad189" target="_blank" rel="noopener">LinkedIn</a></li>
+          <li><a href="https://github.com/saad189" target="_blank" rel="noopener">GitHub</a></li>
+          <li><a href="https://leetcode.com/saad189" target="_blank" rel="noopener">LeetCode</a></li>
+          <li><a href="mailto:saad18910@hotmail.com">Email</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">saad189 © 2026 — Lahore, Pakistan</div>
   </div>
-
-  <div class="footer-section explore">
-    <h3>Explore</h3>
-    <ul>
-      <li>Home</li>
-      <li>About Me</li>
-      <li>Contact</li>
-    </ul>
-  </div>
-
-  <div class="footer-section follow-me">
-    <h3>Follow Me</h3>
-    <ul>
-      <li>
-        <a href="{{ linkedInUrl }}" target="_blank"
-          ><i class="fa-brands fa-linkedin"></i> LinkedIn</a
-        >
-      </li>
-
-      <li>
-        <a href="{{ githubUrl }}" target="_blank"
-          ><i class="fa-brands fa-github"></i> Github</a
-        >
-      </li>
-      <!-- <li>
-        <a href="#"><i class="fa-brands fa-github"></i> LeetCode</a>
-      </li> -->
-    </ul>
-  </div>
-
-  <div class="footer-section contact-me">
-    <a href="#"
-      >Contact Me <i class="fa fa-arrow-right"></i> <span>Say Hello !</span></a
-    >
-
-    <a routerLinkActive="focused" (click)="navigateTo('/experience')"
-      >My Projects <i class="fa fa-arrow-right"></i
-      ><span>Explore Projects</span>
-    </a>
-  </div>
-
-  <div class="footer-section footer-bottom">
-    <p>saad189 ©2024 - <a href="#">Privacy Policy</a></p>
-    <p>Pakistan</p>
-  </div>
-</div>
+</footer>

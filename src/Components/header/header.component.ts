@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, HostListener, Output } from '@angular/core';
 import { SharedModule } from 'src/shared/shared.module';
 
 @Component({
@@ -9,9 +9,15 @@ import { SharedModule } from 'src/shared/shared.module';
   styleUrl: './header.component.scss'
 })
 export class HeaderComponent {
-  resumeUrl = 'assets/Resume_SaadAhmed.pdf';
+  @Output() openDrawer = new EventEmitter<void>();
+  scrolled = false;
+
+  @HostListener('window:scroll', [])
+  onScroll() {
+    this.scrolled = window.scrollY > 20;
+  }
 
   openResume() {
-    window.open(this.resumeUrl, '_blank');
+    window.open('assets/Resume_SaadAhmed.pdf', '_blank');
   }
 }
