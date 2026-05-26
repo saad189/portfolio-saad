@@ -1,15 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, HostBinding } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Project } from 'src/shared/interfaces';
+import { RevealDirective } from 'src/Directives/reveal.directive';
 
 @Component({
   selector: 'app-project-item',
+  standalone: true,
+  imports: [CommonModule, RevealDirective],
   templateUrl: './project-item.component.html',
-  styleUrls: ['./project-item.component.css']
+  styleUrl: './project-item.component.scss'
 })
-export class ProjectItemComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
+export class ProjectItemComponent {
+  @Input() project!: Project;
+  @HostBinding('class.featured') get isFeatured() { return this.project?.isFeatured; }
 }

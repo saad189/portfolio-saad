@@ -1,3 +1,48 @@
-<p>
-  project-item works!
-</p>
+<article
+  class="glass-card project-card"
+  [class.featured]="project.isFeatured"
+  appReveal
+>
+  <ng-container *ngIf="project.isFeatured">
+    <div class="project-art" [class.has-image]="project.artImageUrl">
+      <img *ngIf="project.artImageUrl" [src]="project.artImageUrl" [alt]="project.title + ' logo'" class="art-image" />
+      <span *ngIf="!project.artImageUrl" class="art-label">Live Web Application</span>
+    </div>
+    <div>
+      <div class="project-tag-row">
+        <span class="pill pill--featured">{{ project.tag }}</span>
+      </div>
+      <h3>{{ project.title }}</h3>
+      <p>{{ project.description }}</p>
+      <div class="project-stats" *ngIf="project.stats?.length">
+        <span class="pill pill--metric" *ngFor="let stat of project.stats"><strong>{{ stat }}</strong></span>
+      </div>
+      <div class="project-tags">
+        <span class="pill" *ngFor="let tag of project.techTags">{{ tag }}</span>
+      </div>
+      <div class="project-links" *ngIf="project.links?.length">
+        <a [href]="link.href" target="_blank" rel="noopener noreferrer" class="btn btn-ghost-indigo" *ngFor="let link of project.links">{{ link.label }}</a>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="!project.isFeatured">
+    <div class="project-tag-row">
+      <span class="pill" [ngClass]="'pill--' + project.tagVariant">{{ project.tag }}</span>
+    </div>
+    <h3>
+      {{ project.title }}
+      <span class="subtitle" *ngIf="project.subtitle">{{ project.subtitle }}</span>
+    </h3>
+    <p>{{ project.description }}</p>
+    <div class="project-stats" *ngIf="project.stats?.length">
+      <span class="pill pill--metric" *ngFor="let stat of project.stats"><strong>{{ stat }}</strong></span>
+    </div>
+    <div class="project-tags">
+      <span class="pill" *ngFor="let tag of project.techTags">{{ tag }}</span>
+    </div>
+    <div class="project-links" *ngIf="project.links?.length">
+      <a [href]="link.href" target="_blank" rel="noopener noreferrer" class="btn btn-ghost-indigo" *ngFor="let link of project.links">{{ link.label }}</a>
+    </div>
+  </ng-container>
+</article>

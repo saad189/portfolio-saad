@@ -1,45 +1,23 @@
-<mat-toolbar color="primary">
-  <span class="logo">SAAD AHMED</span>
-  <span class="spacer"></span>
-  <ul>
-    <li>
-      <a appFragmentLinkActive="main" fragment="main" routerLink="/main"
-        >ABOUT</a
-      >
-    </li>
-    <li>
-      <a routerLink="/main" appFragmentLinkActive="skills" fragment="skills"
-        >SKILLS</a
-      >
-    </li>
-    <li>
-      <a
-        appFragmentLinkActive="experience"
-        routerLink="/experience"
-        fragment="experience"
-        >EXPERIENCE</a
-      >
-    </li>
-    <li>
-      <a
-        appFragmentLinkActive="projects"
-        fragment="projects"
-        routerLink="/experience"
-        >PROJECTS</a
-      >
-    </li>
-    <li>
-      <a
-        appFragmentLinkActive="credentials"
-        routerLink="/credentials"
-        fragment="credentials"
-        >CREDENTIALS</a
-      >
-    </li>
-  </ul>
-  <span class="spacer"></span>
+<header class="site-header" [class.scrolled]="scrolled">
+  <div class="container nav-inner">
+    <a routerLink="/main" class="logo">Saad Ahmed</a>
 
-  <button mat-raised-button color="primary" (click)="openResume()">
-    RESUME
-  </button>
-</mat-toolbar>
+    <nav>
+      <ul class="nav-links">
+        <li><a routerLink="/main" [fragment]="'about'" appFragmentLinkActive="about">About</a></li>
+        <li><a routerLink="/main" [fragment]="'experience'" appFragmentLinkActive="experience">Experience</a></li>
+        <li><a routerLink="/main" [fragment]="'education'" appFragmentLinkActive="education">Education</a></li>
+        <li><a routerLink="/main" [fragment]="'projects'" appFragmentLinkActive="projects">Projects</a></li>
+        <li><a routerLink="/main" [fragment]="'credentials'" appFragmentLinkActive="credentials">Credentials</a></li>
+      </ul>
+    </nav>
+
+    <div class="nav-actions">
+      <a routerLink="/main" [fragment]="'contact'" class="btn btn-ghost-indigo">Contact Me</a>
+      <button class="btn btn-solid" (click)="openResume()">Résumé</button>
+      <button class="hamburger" aria-label="Open menu" (click)="openDrawer.emit()">
+        <span></span>
+      </button>
+    </div>
+  </div>
+</header>

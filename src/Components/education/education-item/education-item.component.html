@@ -1,0 +1,28 @@
+<article class="glass-card edu-card" appReveal>
+  <a *ngIf="edu.university.link" class="institution-badge institution-badge-link" [href]="edu.university.link" target="_blank" rel="noopener noreferrer">{{ edu.shortName }}</a>
+  <span *ngIf="!edu.university.link" class="institution-badge">{{ edu.shortName }}</span>
+  <a *ngIf="edu.university.link" class="uni-name-link" [href]="edu.university.link" target="_blank" rel="noopener noreferrer">
+    <h3>{{ edu.university.name }}</h3>
+  </a>
+  <h3 *ngIf="!edu.university.link">{{ edu.university.name }}</h3>
+  <a *ngIf="edu.university.programUrl" class="degree degree-link" [href]="edu.university.programUrl" target="_blank" rel="noopener noreferrer">
+    {{ edu.programName }}
+    <svg class="ext-icon" width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 2H2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V7"/>
+      <polyline points="8 1 11 1 11 4"/>
+      <line x1="11" y1="1" x2="5.5" y2="6.5"/>
+    </svg>
+  </a>
+  <p *ngIf="!edu.university.programUrl" class="degree">{{ edu.programName }}</p>
+  <p class="duration">{{ edu.startDate }} – {{ edu.endDate }}</p>
+  <ng-container *ngIf="edu.description">
+    <p class="thesis"><strong>Thesis:</strong> {{ edu.description }}</p>
+  </ng-container>
+  <div class="courses-label">Selected coursework</div>
+  <div class="courses">
+    <span class="pill" *ngFor="let course of edu.courses">{{ course }}</span>
+  </div>
+  <div class="honors-row" *ngIf="edu.honors?.length">
+    <span class="pill pill--gold" *ngFor="let honor of edu.honors">{{ honor }}</span>
+  </div>
+</article>

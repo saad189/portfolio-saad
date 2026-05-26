@@ -1,14 +1,18 @@
 import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { SharedModule } from 'src/shared/shared.module';
+import { CommonModule } from '@angular/common';
+import { PortfolioService } from 'src/shared/portfolio.service';
+import { CertificateItemComponent } from './certificate-item/certificate-item.component';
+import { SectionHeaderComponent } from 'src/shared/components/section-header/section-header.component';
+import { RevealDirective } from 'src/Directives/reveal.directive';
 
 @Component({
   selector: 'app-credentials',
   standalone: true,
-  imports: [SharedModule],
+  imports: [CommonModule, CertificateItemComponent, SectionHeaderComponent, RevealDirective],
   templateUrl: './credentials.component.html',
   styleUrl: './credentials.component.scss'
 })
 export class CredentialsComponent {
-
+  certificates = this.portfolio.getCertificates();
+  constructor(private portfolio: PortfolioService) {}
 }

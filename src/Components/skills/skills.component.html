@@ -1,0 +1,21 @@
+<section id="skills">
+  <div class="container">
+    <app-section-header
+      eyebrow="02 — Toolkit"
+      title="Skills"
+      subtitle="A working stack, not a wish list — every tool below has shipped to production."
+    ></app-section-header>
+
+    <div class="skills-grid">
+      <app-skill-category-card
+        *ngFor="let category of categories"
+        [category]="category"
+      ></app-skill-category-card>
+    </div>
+
+    <div class="now-row" appReveal>
+      <span class="now-label">Currently working with</span>
+      <span class="pill" *ngFor="let item of currentWorkingWith">{{ item }}</span>
+    </div>
+  </div>
+</section>

@@ -1,41 +1,78 @@
-import { Directive, ElementRef, Renderer2, OnDestroy, OnInit, Input } from '@angular/core';
+import {
+  Directive,
+  ElementRef,
+  Renderer2,
+  OnDestroy,
+  OnInit,
+  Input,
+} from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { ScrollSpyService } from '../shared/scroll-spy.service';
 
+/**
+ * appFragmentLinkActive — marks a nav link as active based on:
+ *  1. The URL fragment after a router navigation (click-based)
+ *  2. The scroll-spy service that tracks which section is in view (scroll-based)
+ *
+ * Usage:
+ *   <a routerLink="/main" [fragment]="'experience'" appFragmentLinkActive="experience">
+ */
 @Directive({
-    selector: '[appFragmentLinkActive]'
+  selector: '[appFragmentLinkActive]',
 })
 export class FragmentLinkActiveDirective implements OnInit, OnDestroy {
-    @Input('appFragmentLinkActive')
-    fragment!: string;
-    @Input() activeClass: string = 'focused';
-    private subscription!: Subscription;
+  @Input('appFragmentLinkActive') fragment!: string;
+  @Input() activeClass: string = 'active';
 
-    constructor(private el: ElementRef, private renderer: Renderer2, private router: Router) { }
+  private subs = new Subscription();
 
-    ngOnInit() {
-        this.subscription = this.router.events.subscribe(event => {
+  constructor(
+    private el: ElementRef,
+    private renderer: Renderer2,
+    private router: Router,
+    private scrollSpy: ScrollSpyService
+  ) {}
 
-            if (event instanceof NavigationEnd) {
-                this.updateActiveClass();
-            }
-        });
-        this.updateActiveClass();
-    }
+  ngOnInit() {
+    // Register the section so the scroll-spy can observe it.
+    this.scrollSpy.observe(this.fragment);
 
-    ngOnDestroy() {
-        if (this.subscription) {
-            this.subscription.unsubscribe();
+    // 1. Router navigation — keeps active state correct after clicking a nav link
+    //    or on initial page load with a fragment in the URL.
+    this.subs.add(
+      this.router.events.subscribe((event) => {
+        if (event instanceof NavigationEnd) {
+          this.syncWithRouter();
         }
-    }
+      })
+    );
+    this.syncWithRouter();
 
-    private updateActiveClass() {
-        const urlTree = this.router.parseUrl(this.router.url);
-        console.log(this.router.url, { thiFragment: this.fragment, urlTreeFragment: urlTree.fragment });
-        if (urlTree.fragment === this.fragment) {
-            this.renderer.addClass(this.el.nativeElement, this.activeClass);
-        } else {
-            this.renderer.removeClass(this.el.nativeElement, this.activeClass);
+    // 2. Scroll-spy updates driven by IntersectionObserver.
+    this.subs.add(
+      this.scrollSpy.activeFragment$.subscribe((activeId) => {
+        if (activeId === this.fragment) {
+          this.renderer.addClass(this.el.nativeElement, this.activeClass);
+        } else if (activeId) {
+          // Only remove when the spy has an opinion — avoids flickering on init.
+          this.renderer.removeClass(this.el.nativeElement, this.activeClass);
         }
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subs.unsubscribe();
+    this.scrollSpy.unobserve(this.fragment);
+  }
+
+  private syncWithRouter(): void {
+    const urlTree = this.router.parseUrl(this.router.url);
+    if (urlTree.fragment === this.fragment) {
+      this.renderer.addClass(this.el.nativeElement, this.activeClass);
+    } else {
+      this.renderer.removeClass(this.el.nativeElement, this.activeClass);
     }
+  }
 }

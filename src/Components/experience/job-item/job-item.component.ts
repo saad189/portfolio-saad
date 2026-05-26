@@ -1,15 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Job } from 'src/shared/interfaces';
+import { RevealDirective } from 'src/Directives/reveal.directive';
 
 @Component({
   selector: 'app-job-item',
+  standalone: true,
+  imports: [CommonModule, RevealDirective],
   templateUrl: './job-item.component.html',
-  styleUrls: ['./job-item.component.css']
+  styleUrl: './job-item.component.scss'
 })
-export class JobItemComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
+export class JobItemComponent {
+  @Input() job!: Job;
 }
