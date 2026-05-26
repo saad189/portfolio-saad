@@ -58,6 +58,7 @@ export interface Project {
   techTags: string[];
   links?: { label: string; href: string }[];
   isFeatured?: boolean;
+  artImageUrl?: string;
 }
 
 export interface SkillCategory {

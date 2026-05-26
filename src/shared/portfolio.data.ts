@@ -48,31 +48,37 @@ export const JOBS: Job[] = [
 
 export const PROJECTS: Project[] = [
   {
-    title: 'Glotte — Cross-Platform Product',
-    description: 'Architected and shipped a full consumer mobile product from zero: React Native app (iOS + Android), NestJS backend, MySQL + Redis + Elasticsearch data layer, AWS + Railway cloud infra, and a RevenueCat subscription system. Launched on both app stores.',
-    tag: 'Featured',
+    title: 'VisionMedia — SnE Organization Website',
+    description: 'Built the official website for the Scientists & Engineers (SnE) organization. Fully dynamic content powered by Supabase — events, research papers, and projects are all managed in real-time through a full-featured admin panel, letting organization staff publish and update content without touching code.',
+    tag: 'Live Product',
     tagVariant: 'featured',
-    stats: ['iOS + Android', 'Full-stack ownership', 'Launched 2024'],
-    techTags: ['React Native', 'NestJS', 'MySQL', 'Redis', 'Elasticsearch', 'AWS', 'RevenueCat'],
-    links: [{ label: 'GitHub ↗', href: '#' }, { label: 'App Store ↗', href: '#' }],
-    isFeatured: true
+    stats: ['Live on Web', 'Full Admin Panel', 'Supabase-powered'],
+    techTags: ['Angular', 'TypeScript', 'Supabase'],
+    links: [
+      { label: 'Live Site ↗', href: 'https://snevisionmedia.com' },
+      { label: 'Admin ↗', href: 'https://snevisionmedia.com/admin/login' }
+    ],
+    isFeatured: true,
+    artImageUrl: 'assets/media-logo.png'
   },
   {
-    title: 'Zameen CRM',
-    subtitle: '— Dubizzle Labs',
-    description: 'Enhanced internal CRM serving 4,000+ users across 4 companies. Rebuilt reporting modules, improved lead flow by 50%, led full codebase refactor with 90%+ test coverage.',
-    tag: 'Enterprise',
+    title: 'Lab Booking App — Enhanced Accessibility',
+    description: 'Built a digital lab scheduling system for an institution previously relying on error-prone manual processes, eliminating booking conflicts and double-bookings. Instructors gain full visibility and control over lab usage through a dedicated management interface. Designed with accessibility at its core — tailored for users with visual impairments, filling a gap left by existing market solutions.',
+    tag: 'Accessibility',
     tagVariant: 'accent',
-    stats: ['4,000+ users', '50% faster'],
-    techTags: ['Angular', 'Node.js', 'MySQL', 'Redis', 'AWS']
+    stats: ['Instructor Control Panel', 'Visual Impairment Support', 'Zero Conflicts'],
+    techTags: ['Angular', 'ASP.NET Core', 'C#', 'MySQL', 'TypeScript']
   },
   {
-    title: 'Maritime IoT Platform',
-    subtitle: '— Ciklum',
-    description: 'Location tracking and geographical-compliance system for remotely managing vessels in a B2B maritime context. Multi-service architecture on Linux / Azure with PostGIS spatial databases.',
-    tag: 'IoT',
+    title: 'Scientists & Engineers Platform',
+    description: 'A full-featured interactive platform for the SnE community. Includes dynamically-controlled visualizations of classic sorting and search algorithms (adjustable speed and array size), built-in mini games, and a community hub for events, papers, and projects — all backed by Firebase for real-time data sync.',
+    tag: 'Interactive',
     tagVariant: 'accent',
-    techTags: ['Angular', '.NET Core', 'PostGIS', 'Azure', 'Docker']
+    stats: ['Algorithm Visualizer', 'Mini Games', 'Firebase Real-time'],
+    techTags: ['Angular', 'TypeScript', 'Firebase', 'Angular Material'],
+    links: [
+      { label: 'Live Site ↗', href: 'https://scientistsandengineers-243ca.web.app/dashboard' }
+    ]
   }
 ];
 

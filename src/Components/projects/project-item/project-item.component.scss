@@ -36,6 +36,27 @@
   }
 }
 
+.art-image {
+  position: relative;
+  max-width: 72%;
+  max-height: 72%;
+  object-fit: contain;
+  border-radius: 8px;
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.12));
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.project-art.has-image {
+  background: linear-gradient(135deg, #F0F4FF 0%, #FAFAFA 60%, #FFF8F0 100%);
+
+  &::before { opacity: 0.4; }
+
+  &:hover .art-image {
+    transform: scale(1.04);
+    filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.18));
+  }
+}
+
 .art-label {
   position: relative;
   font-family: var(--font-mono);
