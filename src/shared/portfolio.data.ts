@@ -4,10 +4,10 @@ export const JOBS: Job[] = [
   {
     company: 'Motive',
     companyUrl: 'https://gomotive.com',
-    role: 'Software Engineer',
+    role: 'Software Engineer - Frontend',
     duration: 'Jan 2026 — Present',
     location: 'Lahore, Pakistan',
-    description: 'Working on AI-based documentation analysis systems — improving tooling for how engineering teams handle compliance and technical docs.',
+    description: 'Working on AI-based documentation analysis systems — improving tooling for how logistics companies manage documentation.',
     techTags: ['AI', 'Documentation', 'Full-Stack'],
     isCurrent: true
   },
