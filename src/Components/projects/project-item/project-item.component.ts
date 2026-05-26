@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, HostBinding } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Project } from 'src/shared/interfaces';
 import { RevealDirective } from 'src/Directives/reveal.directive';
@@ -12,4 +12,5 @@ import { RevealDirective } from 'src/Directives/reveal.directive';
 })
 export class ProjectItemComponent {
   @Input() project!: Project;
+  @HostBinding('class.featured') get isFeatured() { return this.project?.isFeatured; }
 }

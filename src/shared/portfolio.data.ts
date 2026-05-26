@@ -104,7 +104,7 @@ export const EDUCATION: Education[] = [
     university: { name: 'Lahore University of Management Sciences', link: '', iconUrl: '' },
     shortName: 'LUMS',
     programName: 'MS — Technology Management & Entrepreneurship',
-    description: 'Thesis: Best Practices in Project Management, Documentation & Compliance.',
+    description: 'Best Practices in Project Management, Documentation & Compliance.',
     startDate: 'Jul 2022',
     endDate: 'Jun 2024',
     courses: ['Operations Management', 'Data Analysis', 'Technology Entrepreneurship']

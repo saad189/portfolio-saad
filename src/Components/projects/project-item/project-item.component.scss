@@ -1,5 +1,16 @@
-.project-card.featured {
+:host {
+  display: flex;
+  flex-direction: column;
+}
+:host:not(.featured) article.project-card {
+  flex: 1;
+}
+
+:host.featured {
   grid-column: 1 / -1;
+}
+
+.project-card.featured {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
   gap: 2rem;
@@ -94,3 +105,4 @@ p {
   }
   .project-art { min-height: 180px; }
 }
+
