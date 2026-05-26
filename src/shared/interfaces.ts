@@ -13,6 +13,7 @@ export interface University {
   name: string;
   link: string;
   iconUrl: string;
+  programUrl?: string;
 }
 
 export interface Certificate {
@@ -35,6 +36,7 @@ export interface Experience {
 
 export interface Job {
   company: string;
+  companyUrl?: string;
   role: string;
   duration: string;
   tenure?: string;

@@ -3,6 +3,7 @@ import { Certificate, Education, Job, Project, SkillCategory } from './interface
 export const JOBS: Job[] = [
   {
     company: 'Motive',
+    companyUrl: 'https://gomotive.com',
     role: 'Software Engineer',
     duration: 'Jan 2026 — Present',
     location: 'Lahore, Pakistan',
@@ -12,6 +13,7 @@ export const JOBS: Job[] = [
   },
   {
     company: 'Glotte',
+    companyUrl: 'https://glotte.org',
     role: 'Lead Software Engineer / CTO',
     duration: 'May 2024 — Jan 2026',
     tenure: '1 yr 9 mos',
@@ -22,6 +24,7 @@ export const JOBS: Job[] = [
   },
   {
     company: 'Dubizzle Labs',
+    companyUrl: 'https://dubizzlelabs.com',
     role: 'Software Engineer · Full Stack',
     duration: 'May 2021 — Apr 2023',
     tenure: '2 yrs',
@@ -32,6 +35,7 @@ export const JOBS: Job[] = [
   },
   {
     company: 'Ciklum',
+    companyUrl: 'https://www.ciklum.com',
     role: 'Software Engineer · Full Stack',
     duration: 'Jun 2019 — Nov 2020',
     tenure: '1.5 yrs',
@@ -101,7 +105,12 @@ export const CURRENT_WORKING_WITH: string[] = [
 
 export const EDUCATION: Education[] = [
   {
-    university: { name: 'Lahore University of Management Sciences', link: '', iconUrl: '' },
+    university: {
+      name: 'Lahore University of Management Sciences',
+      link: 'https://lums.edu.pk',
+      iconUrl: '',
+      programUrl: 'https://lums.edu.pk/programmes/ms-technology-management-and-entrepreneurship'
+    },
     shortName: 'LUMS',
     programName: 'MS — Technology Management & Entrepreneurship',
     description: 'Best Practices in Project Management, Documentation & Compliance.',
@@ -110,7 +119,12 @@ export const EDUCATION: Education[] = [
     courses: ['Operations Management', 'Data Analysis', 'Technology Entrepreneurship']
   },
   {
-    university: { name: 'National University of Computer & Emerging Sciences', link: '', iconUrl: '' },
+    university: {
+      name: 'National University of Computer & Emerging Sciences',
+      link: 'https://nu.edu.pk',
+      iconUrl: '',
+      programUrl: 'https://nu.edu.pk/Program/BS(CS)'
+    },
     shortName: 'FAST',
     programName: 'BS — Computer Science',
     description: '',

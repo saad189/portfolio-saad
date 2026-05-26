@@ -3,7 +3,15 @@
   <article class="glass-card">
     <header class="job-head">
       <div class="job-head-left">
-        <span class="company">{{ job.company }}</span>
+        <a *ngIf="job.companyUrl" class="company company-link" [href]="job.companyUrl" target="_blank" rel="noopener noreferrer">
+          {{ job.company }}
+          <svg class="ext-icon" width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 2H2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V7"/>
+            <polyline points="8 1 11 1 11 4"/>
+            <line x1="11" y1="1" x2="5.5" y2="6.5"/>
+          </svg>
+        </a>
+        <span *ngIf="!job.companyUrl" class="company">{{ job.company }}</span>
         <span class="role">{{ job.role }}</span>
       </div>
       <span class="pill pill--current" *ngIf="job.isCurrent">Current</span>

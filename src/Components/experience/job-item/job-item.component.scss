@@ -43,6 +43,31 @@
   color: var(--color-text-primary);
 }
 
+.company-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--color-accent-employment);
+
+    .ext-icon {
+      opacity: 1;
+      transform: translate(1px, -1px);
+    }
+  }
+}
+
+.ext-icon {
+  opacity: 0.4;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  flex-shrink: 0;
+  position: relative;
+  top: -1px;
+}
+
 .role {
   font-family: var(--font-sans);
   font-size: var(--text-sm);
