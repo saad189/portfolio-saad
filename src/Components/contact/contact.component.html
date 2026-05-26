@@ -4,7 +4,7 @@
       <h2>Let's build something.</h2>
       <p>Open to full-time roles and freelance projects.<br />Fastest response via email.</p>
       <div class="contact-actions">
-        <button class="btn btn-solid" (click)="copyEmail()">{{ email }}</button>
+        <a class="btn btn-solid" [href]="'mailto:' + email">{{ email }}</a>
         <a href="https://www.linkedin.com/in/saad189" target="_blank" rel="noopener" class="btn btn-ghost-indigo">LinkedIn ↗</a>
       </div>
       <div class="contact-socials">

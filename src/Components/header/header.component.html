@@ -6,14 +6,14 @@
       <ul class="nav-links">
         <li><a routerLink="/main" [fragment]="'about'" appFragmentLinkActive="about">About</a></li>
         <li><a routerLink="/main" [fragment]="'experience'" appFragmentLinkActive="experience">Experience</a></li>
+        <li><a routerLink="/main" [fragment]="'education'" appFragmentLinkActive="education">Education</a></li>
         <li><a routerLink="/main" [fragment]="'projects'" appFragmentLinkActive="projects">Projects</a></li>
         <li><a routerLink="/main" [fragment]="'credentials'" appFragmentLinkActive="credentials">Credentials</a></li>
       </ul>
     </nav>
 
     <div class="nav-actions">
-      <a routerLink="/main" [fragment]="'about'" class="btn btn-ghost-indigo">Hire me</a>
-      <a routerLink="/main" [fragment]="'contact'" class="btn btn-ghost-amber">Freelance</a>
+      <a routerLink="/main" [fragment]="'contact'" class="btn btn-ghost-indigo">Contact Me</a>
       <button class="btn btn-solid" (click)="openResume()">Résumé</button>
       <button class="hamburger" aria-label="Open menu" (click)="openDrawer.emit()">
         <span></span>
