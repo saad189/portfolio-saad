@@ -77,7 +77,7 @@ export const PROJECTS: Project[] = [
     stats: ['Algorithm Visualizer', 'Mini Games', 'Firebase Real-time'],
     techTags: ['Angular', 'TypeScript', 'Firebase', 'Angular Material'],
     links: [
-      { label: 'Live Site ↗', href: 'https://scientistsandengineers-243ca.web.app/dashboard' }
+      { label: 'Live Site ↗', href: 'https://scientistsandengineers.web.app' }
     ]
   }
 ];
