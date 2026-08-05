@@ -1,5 +1,8 @@
 <article class="glass-card edu-card" appReveal>
-  <a *ngIf="edu.university.link" class="institution-badge institution-badge-link" [href]="edu.university.link" target="_blank" rel="noopener noreferrer">{{ edu.shortName }}</a>
+  <a *ngIf="edu.university.link" class="institution-badge institution-badge-link" [class.has-logo]="edu.university.iconUrl" [href]="edu.university.link" target="_blank" rel="noopener noreferrer">
+    <img *ngIf="edu.university.iconUrl" class="institution-logo" [src]="edu.university.iconUrl" [alt]="edu.shortName + ' logo'" loading="lazy" />
+    <span *ngIf="!edu.university.iconUrl">{{ edu.shortName }}</span>
+  </a>
   <span *ngIf="!edu.university.link" class="institution-badge">{{ edu.shortName }}</span>
   <a *ngIf="edu.university.link" class="uni-name-link" [href]="edu.university.link" target="_blank" rel="noopener noreferrer">
     <h3>{{ edu.university.name }}</h3>

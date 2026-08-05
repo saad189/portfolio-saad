@@ -2,10 +2,27 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>PortfolioSaad</title>
+    <title>Saad Ahmed — Senior Full-Stack Engineer (Angular, Node.js, AWS)</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <meta name="author" content="Saad Ahmed" />
+    <meta
+      name="description"
+      content="Saad Ahmed — Full-Stack Engineer with 6+ years building products with Angular, TypeScript, Node.js, NestJS, .NET Core, React Native, AWS and Azure. Currently at Motive; previously CTO at Glotte."
+    />
+    <link rel="canonical" href="https://portfolio-saad.web.app/" />
+
+    <meta property="og:type" content="profile" />
+    <meta property="og:url" content="https://portfolio-saad.web.app/" />
+    <meta property="og:title" content="Saad Ahmed — Senior Full-Stack Engineer" />
+    <meta
+      property="og:description"
+      content="6+ years shipping full-stack systems — IoT maritime platforms, CRMs used by 4,000+ people, and mobile apps on both app stores. Angular · Node.js · NestJS · .NET Core · AWS."
+    />
+    <meta property="og:image" content="https://portfolio-saad.web.app/assets/profile_image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
@@ -22,8 +39,132 @@
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet"
     />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Saad Ahmed",
+        "jobTitle": "Senior Full-Stack Engineer",
+        "email": "mailto:saad18910@hotmail.com",
+        "url": "https://portfolio-saad.web.app/",
+        "image": "https://portfolio-saad.web.app/assets/profile_image.png",
+        "address": { "@type": "PostalAddress", "addressLocality": "Lahore", "addressCountry": "PK" },
+        "sameAs": [
+          "https://www.linkedin.com/in/saad189",
+          "https://github.com/saad189",
+          "https://leetcode.com/saad189"
+        ],
+        "worksFor": { "@type": "Organization", "name": "Motive", "url": "https://gomotive.com" },
+        "alumniOf": [
+          {
+            "@type": "CollegeOrUniversity",
+            "name": "Lahore University of Management Sciences (LUMS)",
+            "url": "https://lums.edu.pk"
+          },
+          {
+            "@type": "CollegeOrUniversity",
+            "name": "National University of Computer & Emerging Sciences (FAST)",
+            "url": "https://nu.edu.pk"
+          }
+        ],
+        "knowsAbout": [
+          "Angular", "TypeScript", "RxJS", "SCSS", "React Native",
+          "Node.js", "NestJS", ".NET Core", "C#", "Python",
+          "MySQL", "PostgreSQL", "Redis", "Elasticsearch",
+          "AWS", "Azure", "Docker", "CI/CD"
+        ]
+      }
+    </script>
   </head>
   <body class="mat-typography">
-    <app-root></app-root>
+    <!--
+      ponytail: static resume mirror. Angular wipes these children when AppComponent
+      bootstraps, so JS clients never see it — but ATS parsers, link-preview bots and
+      no-JS crawlers get the full text instead of an empty shell.
+      Keep in sync with src/shared/portfolio.data.ts (edited maybe twice a year).
+    -->
+    <app-root>
+      <div style="max-width:48rem;margin:0 auto;padding:2rem 1.25rem;font-family:system-ui,sans-serif;line-height:1.55">
+        <h1>Saad Ahmed</h1>
+        <p>
+          Senior Full-Stack Engineer · Lahore, Pakistan ·
+          <a href="mailto:saad18910@hotmail.com">saad18910@hotmail.com</a> ·
+          <a href="https://www.linkedin.com/in/saad189">LinkedIn</a> ·
+          <a href="https://github.com/saad189">GitHub</a> ·
+          <a href="assets/Resume_SaadAhmed.pdf">Resume (PDF)</a>
+        </p>
+        <p>
+          6+ years shipping full-stack systems — from IoT maritime platforms to mobile apps
+          serving thousands. Currently at Motive, previously CTO of Glotte. Open to full-time
+          senior/lead engineering roles and freelance product builds.
+        </p>
+
+        <h2>Experience</h2>
+        <h3>Software Engineer — Frontend, Motive (Jan 2026 — Present), Lahore, Pakistan</h3>
+        <p>
+          AI-based documentation analysis systems — tooling for how logistics companies manage
+          documentation. AI, Documentation, Full-Stack.
+        </p>
+        <h3>Lead Software Engineer / CTO, Glotte (May 2024 — Jan 2026), Doha, Qatar</h3>
+        <p>
+          Architected and built the core product from scratch — React Native / Expo mobile app,
+          NestJS + MySQL + Redis + Elasticsearch backend, AWS + Railway infrastructure. Launched on
+          the Apple App Store and Google Play with federated auth and a RevenueCat multi-tier
+          subscription system.
+        </p>
+        <h3>Software Engineer · Full Stack, Dubizzle Labs (May 2021 — Apr 2023), Lahore, Pakistan</h3>
+        <p>
+          Zameen's internal Salesforce CRM used by 4,000+ active users across 4 companies. Cut lead
+          submission time 50%, improved reporting/staff module load times 20%, led a refactor to
+          90%+ code coverage and 2× component performance. Angular, Node.js, Sequelize, MySQL,
+          Redis, AWS.
+        </p>
+        <h3>Software Engineer · Full Stack, Ciklum (Jun 2019 — Nov 2020), Islamabad, Pakistan</h3>
+        <p>
+          Location tracking and geographical-compliance features for a maritime IoT management
+          system. Agile/Scrum with transnational teams, client requirements analysis, report
+          extraction via Linux bash. Angular, .NET Core, PostGIS, TimeSeries SQL, Azure, Docker.
+        </p>
+
+        <h2>Skills</h2>
+        <p>
+          <strong>Frontend:</strong> Angular, TypeScript, SCSS, React Native, HTML/CSS, RxJS,
+          ng2-charts.<br />
+          <strong>Backend &amp; Data:</strong> Node.js, NestJS, .NET Core, C#, Python, MySQL,
+          PostgreSQL, Redis, Elasticsearch, Sequelize, TypeORM, JEST.<br />
+          <strong>Cloud &amp; DevOps:</strong> AWS (Cognito, S3), Azure, Docker, Git, Azure Boards,
+          Railway, CI/CD, Agile (Scrum, Kanban), Prompt Engineering.
+        </p>
+
+        <h2>Projects</h2>
+        <p>
+          <strong><a href="https://worthygoals.web.app">Worthy Goals — AI Accountability App</a></strong>:
+          personality-driven goal app pairing each goal with an AI mentor. React Native (Expo),
+          NestJS, PostgreSQL + pgvector, AWS Cognito, socket.io. Waitlist live, app pre-launch.<br />
+          <strong><a href="https://snevisionmedia.com">VisionMedia — SnE Organization Website</a></strong>:
+          Angular + Supabase site with a full admin panel for events, papers and projects.<br />
+          <strong>Lab Booking App</strong>: accessible lab scheduling system (Angular, ASP.NET Core,
+          C#, MySQL) built for users with visual impairments.<br />
+          <strong><a href="https://scientistsandengineers.web.app">Scientists &amp; Engineers Platform</a></strong>:
+          algorithm visualizers, mini games and a community hub on Angular + Firebase.
+        </p>
+
+        <h2>Education</h2>
+        <p>
+          <strong>MS — Technology Management &amp; Entrepreneurship</strong>, LUMS (Jul 2022 — Jun 2024).
+          Thesis: best practices in project management, documentation and compliance.<br />
+          <strong>BS — Computer Science</strong>, FAST / NUCES (Aug 2015 — Jun 2019). Bronze Medal for
+          academic excellence; Dean's List Spring '16 and '17.
+        </p>
+
+        <h2>Certifications</h2>
+        <p>
+          <a href="https://learn.microsoft.com/en-us/users/saadahmed-6949/credentials/5971717db08b6eef">Microsoft Certified: Azure Fundamentals</a>
+          (May 2020) · SQL for Beginners (Udemy) · C# Advanced Topics (Udemy) · Mastering LINQ with
+          C# and .NET (Udemy).
+        </p>
+      </div>
+    </app-root>
   </body>
 </html>

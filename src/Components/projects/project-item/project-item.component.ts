@@ -13,4 +13,7 @@ import { RevealDirective } from 'src/Directives/reveal.directive';
 export class ProjectItemComponent {
   @Input() project!: Project;
   @HostBinding('class.featured') get isFeatured() { return this.project?.isFeatured; }
+
+  /** First link (the live site) — what the logo and art click through to. */
+  get primaryLink(): string | undefined { return this.project?.links?.[0]?.href; }
 }

@@ -37,6 +37,7 @@ export interface Experience {
 export interface Job {
   company: string;
   companyUrl?: string;
+  logoUrl?: string;
   role: string;
   duration: string;
   tenure?: string;
@@ -59,6 +60,7 @@ export interface Project {
   links?: { label: string; href: string }[];
   isFeatured?: boolean;
   artImageUrl?: string;
+  logoUrl?: string;
 }
 
 export interface SkillCategory {

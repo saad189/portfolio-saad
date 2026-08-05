@@ -1,19 +1,19 @@
 <header class="site-header" [class.scrolled]="scrolled">
   <div class="container nav-inner">
-    <a routerLink="/main" class="logo">Saad Ahmed</a>
+    <a routerLink="/" class="logo">Saad Ahmed</a>
 
     <nav>
       <ul class="nav-links">
-        <li><a routerLink="/main" [fragment]="'about'" appFragmentLinkActive="about">About</a></li>
-        <li><a routerLink="/main" [fragment]="'experience'" appFragmentLinkActive="experience">Experience</a></li>
-        <li><a routerLink="/main" [fragment]="'education'" appFragmentLinkActive="education">Education</a></li>
-        <li><a routerLink="/main" [fragment]="'projects'" appFragmentLinkActive="projects">Projects</a></li>
-        <li><a routerLink="/main" [fragment]="'credentials'" appFragmentLinkActive="credentials">Credentials</a></li>
+        <li><a routerLink="/" [fragment]="'about'" appFragmentLinkActive="about">About</a></li>
+        <li><a routerLink="/" [fragment]="'experience'" appFragmentLinkActive="experience">Experience</a></li>
+        <li><a routerLink="/" [fragment]="'education'" appFragmentLinkActive="education">Education</a></li>
+        <li><a routerLink="/" [fragment]="'projects'" appFragmentLinkActive="projects">Projects</a></li>
+        <li><a routerLink="/" [fragment]="'credentials'" appFragmentLinkActive="credentials">Credentials</a></li>
       </ul>
     </nav>
 
     <div class="nav-actions">
-      <a routerLink="/main" [fragment]="'contact'" class="btn btn-ghost-indigo">Contact Me</a>
+      <a routerLink="/" [fragment]="'contact'" class="btn btn-ghost-indigo">Contact Me</a>
       <button class="btn btn-solid" (click)="openResume()">Résumé</button>
       <button class="hamburger" aria-label="Open menu" (click)="openDrawer.emit()">
         <span></span>

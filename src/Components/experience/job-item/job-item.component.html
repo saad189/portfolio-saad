@@ -2,6 +2,10 @@
   <span class="timeline-dot"></span>
   <article class="glass-card">
     <header class="job-head">
+      <a *ngIf="job.logoUrl && job.companyUrl" [href]="job.companyUrl" target="_blank" rel="noopener noreferrer" [attr.aria-label]="job.company + ' — open site'">
+        <img class="company-logo is-link" [src]="job.logoUrl" [alt]="job.company + ' logo'" loading="lazy" />
+      </a>
+      <img *ngIf="job.logoUrl && !job.companyUrl" class="company-logo" [src]="job.logoUrl" [alt]="job.company + ' logo'" loading="lazy" />
       <div class="job-head-left">
         <a *ngIf="job.companyUrl" class="company company-link" [href]="job.companyUrl" target="_blank" rel="noopener noreferrer">
           {{ job.company }}

@@ -4,10 +4,24 @@
   appReveal
 >
   <ng-container *ngIf="project.isFeatured">
-    <div class="project-art" [class.has-image]="project.artImageUrl">
+    <a
+      *ngIf="primaryLink; else artOnly"
+      class="project-art art-link"
+      [class.has-image]="project.artImageUrl"
+      [href]="primaryLink"
+      target="_blank"
+      rel="noopener noreferrer"
+      [attr.aria-label]="project.title + ' — open site'"
+    >
       <img *ngIf="project.artImageUrl" [src]="project.artImageUrl" [alt]="project.title + ' logo'" class="art-image" />
       <span *ngIf="!project.artImageUrl" class="art-label">Live Web Application</span>
-    </div>
+    </a>
+    <ng-template #artOnly>
+      <div class="project-art" [class.has-image]="project.artImageUrl">
+        <img *ngIf="project.artImageUrl" [src]="project.artImageUrl" [alt]="project.title + ' logo'" class="art-image" />
+        <span *ngIf="!project.artImageUrl" class="art-label">Live Web Application</span>
+      </div>
+    </ng-template>
     <div>
       <div class="project-tag-row">
         <span class="pill pill--featured">{{ project.tag }}</span>
@@ -31,6 +45,10 @@
       <span class="pill" [ngClass]="'pill--' + project.tagVariant">{{ project.tag }}</span>
     </div>
     <h3>
+      <a *ngIf="project.logoUrl && primaryLink" [href]="primaryLink" target="_blank" rel="noopener noreferrer" [attr.aria-label]="project.title + ' — open site'">
+        <img class="project-logo is-link" [src]="project.logoUrl" [alt]="project.title + ' logo'" loading="lazy" />
+      </a>
+      <img *ngIf="project.logoUrl && !primaryLink" class="project-logo" [src]="project.logoUrl" [alt]="project.title + ' logo'" loading="lazy" />
       {{ project.title }}
       <span class="subtitle" *ngIf="project.subtitle">{{ project.subtitle }}</span>
     </h3>

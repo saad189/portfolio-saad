@@ -3,9 +3,10 @@ import { RouterModule, Routes } from '@angular/router';
 import { DashboardComponent } from 'src/Components/dashboard/dashboard.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: 'main', pathMatch: 'full' },
-  { path: 'main', component: DashboardComponent },
-  { path: '**', redirectTo: 'main' }
+  { path: '', component: DashboardComponent },
+  // ponytail: kept so old /main links and bookmarks still land somewhere.
+  { path: 'main', redirectTo: '', pathMatch: 'full' },
+  { path: '**', redirectTo: '' }
 ];
 
 @NgModule({

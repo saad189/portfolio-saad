@@ -127,3 +127,36 @@ p {
   .project-art { min-height: 180px; }
 }
 
+
+.project-logo {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  object-fit: contain;
+  vertical-align: -6px;
+  margin-right: 0.5rem;
+  background: var(--color-surface-solid);
+  border: 1px solid var(--color-border);
+  padding: 3px;
+}
+
+.project-logo.is-link {
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-accent-employment-border);
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Featured art tile is the whole click target — keep the existing image hover animation.
+.project-art.art-link {
+  display: flex;
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 0.2s ease;
+
+  &:hover { border-color: var(--color-accent-employment-border); }
+}

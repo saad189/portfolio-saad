@@ -4,6 +4,7 @@ export const JOBS: Job[] = [
   {
     company: 'Motive',
     companyUrl: 'https://gomotive.com',
+    logoUrl: 'assets/logos/motive.png',
     role: 'Software Engineer - Frontend',
     duration: 'Jan 2026 — Present',
     location: 'Lahore, Pakistan',
@@ -14,6 +15,7 @@ export const JOBS: Job[] = [
   {
     company: 'Glotte',
     companyUrl: 'https://glotte.org',
+  //  logoUrl: 'assets/logos/glotte.ico',
     role: 'Lead Software Engineer / CTO',
     duration: 'May 2024 — Jan 2026',
     tenure: '1 yr 9 mos',
@@ -25,6 +27,7 @@ export const JOBS: Job[] = [
   {
     company: 'Dubizzle Labs',
     companyUrl: 'https://dubizzlelabs.com',
+    logoUrl: 'assets/logos/dubizzle-labs.png',
     role: 'Software Engineer · Full Stack',
     duration: 'May 2021 — Apr 2023',
     tenure: '2 yrs',
@@ -36,6 +39,7 @@ export const JOBS: Job[] = [
   {
     company: 'Ciklum',
     companyUrl: 'https://www.ciklum.com',
+    logoUrl: 'assets/logos/ciklum.png',
     role: 'Software Engineer · Full Stack',
     duration: 'Jun 2019 — Nov 2020',
     tenure: '1.5 yrs',
@@ -48,18 +52,29 @@ export const JOBS: Job[] = [
 
 export const PROJECTS: Project[] = [
   {
+    title: 'Worthy Goals — AI Accountability App',
+    description: 'A personality-driven goal app where every goal is assigned to an AI mentor who checks in, pushes, and responds in their own voice. React Native (Expo) app on a NestJS backend with PostgreSQL + pgvector for mentor memory, AWS Cognito auth, socket.io chat, and an eval harness that keeps each personality from drifting. Marketing site and waitlist are live; the app is in pre-launch.',
+    tag: 'Featured',
+    tagVariant: 'featured',
+    stats: ['Waitlist Live', 'AI Personality Runtime', 'iOS + Android'],
+    techTags: ['React Native', 'Expo', 'NestJS', 'PostgreSQL', 'pgvector', 'Redis', 'AWS Cognito', 'Angular'],
+    links: [{ label: 'Waitlist ↗', href: 'https://worthygoals.web.app' }],
+    isFeatured: true,
+    artImageUrl: 'assets/worthygoals-logo.png',
+    logoUrl: 'assets/worthygoals-logo.png'
+  },
+  {
     title: 'VisionMedia — SnE Organization Website',
     description: 'Built the official website for the Scientists & Engineers (SnE) organization. Fully dynamic content powered by Supabase — events, research papers, and projects are all managed in real-time through a full-featured admin panel, letting organization staff publish and update content without touching code.',
     tag: 'Live Product',
-    tagVariant: 'featured',
+    tagVariant: 'accent',
     stats: ['Live on Web', 'Full Admin Panel', 'Supabase-powered'],
     techTags: ['Angular', 'TypeScript', 'Supabase'],
     links: [
       { label: 'Live Site ↗', href: 'https://snevisionmedia.com' },
       { label: 'Admin ↗', href: 'https://snevisionmedia.com/admin/login' }
     ],
-    isFeatured: true,
-    artImageUrl: 'assets/media-logo.png'
+    logoUrl: 'assets/logos/snevisionmedia.png'
   },
   {
     title: 'Lab Booking App — Enhanced Accessibility',
@@ -78,7 +93,8 @@ export const PROJECTS: Project[] = [
     techTags: ['Angular', 'TypeScript', 'Firebase', 'Angular Material'],
     links: [
       { label: 'Live Site ↗', href: 'https://scientistsandengineers.web.app' }
-    ]
+    ],
+  //  logoUrl: 'assets/logos/sne-platform.png'
   }
 ];
 
@@ -114,7 +130,7 @@ export const EDUCATION: Education[] = [
     university: {
       name: 'Lahore University of Management Sciences',
       link: 'https://lums.edu.pk',
-      iconUrl: '',
+      iconUrl: 'assets/logos/lums.png',
       programUrl: 'https://lums.edu.pk/programmes/ms-technology-management-and-entrepreneurship'
     },
     shortName: 'LUMS',
@@ -128,7 +144,7 @@ export const EDUCATION: Education[] = [
     university: {
       name: 'National University of Computer & Emerging Sciences',
       link: 'https://nu.edu.pk',
-      iconUrl: '',
+      iconUrl: 'assets/logos/fast-nuces.jpg',
       programUrl: 'https://nu.edu.pk/Program/BS(CS)'
     },
     shortName: 'FAST',
@@ -145,7 +161,7 @@ export const CERTIFICATES: Certificate[] = [
   {
     name: 'Microsoft Certified: Azure Fundamentals',
     url: 'https://learn.microsoft.com/en-us/users/saadahmed-6949/credentials/5971717db08b6eef',
-    iconUrl: 'https://learn.microsoft.com/favicon.ico',
+    iconUrl: 'assets/logos/microsoft.ico',
     completionDate: 'May 2020',
     offeredOrg: 'Microsoft',
     description: 'Credential ID: 5971717DB08B6EEF',
@@ -154,21 +170,21 @@ export const CERTIFICATES: Certificate[] = [
   {
     name: 'SQL for Beginners — Learn SQL using MySQL & Database Design',
     url: 'https://www.udemy.com/certificate/UC-f2f9ad82-584a-4109-8d05-078021b60ef4/',
-    iconUrl: '',
+    iconUrl: 'assets/logos/udemy.png',
     completionDate: 'May 2020',
     offeredOrg: 'Udemy'
   },
   {
     name: 'C# Advanced Topics — Prepare for Technical Interviews',
     url: 'https://www.udemy.com/certificate/UC-e1fdbe40-faa6-4f9c-a126-edba24e77d13/',
-    iconUrl: '',
+    iconUrl: 'assets/logos/udemy.png',
     completionDate: 'May 2020',
     offeredOrg: 'Udemy'
   },
   {
     name: 'Mastering LINQ with C# and .NET',
     url: 'https://www.udemy.com/certificate/UC-1C3VVRGF/',
-    iconUrl: '',
+    iconUrl: 'assets/logos/udemy.png',
     completionDate: '2020',
     offeredOrg: 'Udemy'
   }

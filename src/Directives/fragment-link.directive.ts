@@ -16,7 +16,7 @@ import { ScrollSpyService } from '../shared/scroll-spy.service';
  *  2. The scroll-spy service that tracks which section is in view (scroll-based)
  *
  * Usage:
- *   <a routerLink="/main" [fragment]="'experience'" appFragmentLinkActive="experience">
+ *   <a routerLink="/" [fragment]="'experience'" appFragmentLinkActive="experience">
  */
 @Directive({
   selector: '[appFragmentLinkActive]',

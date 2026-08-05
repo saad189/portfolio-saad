@@ -29,6 +29,25 @@ article {
     background: var(--color-accent-employment);
     color: #fff;
   }
+
+  // With a real wordmark the indigo chip fights the logo — show the logo bare.
+  &.has-logo {
+    background: transparent;
+    padding: 0;
+
+    &:hover {
+      background: transparent;
+      opacity: 0.75;
+    }
+  }
+}
+
+.institution-logo {
+  height: 30px;
+  width: auto;
+  max-width: 190px;
+  object-fit: contain;
+  display: block;
 }
 
 .uni-name-link {
