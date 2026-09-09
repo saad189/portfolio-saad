@@ -9,9 +9,9 @@ export const JOBS: Job[] = [
     duration: 'Jan 2026 — Present',
     location: 'Lahore, Pakistan',
     description: [
-      'Build AI-driven document analysis features in the customer-facing web platform, carrying work from product discovery discussions through to production release.',
-      'Author, review and present Technical Design Documents for frontend initiatives, aligning product and engineering on scope before implementation and reducing late-stage rework.',
-      'Instrument frontend observability with Datadog and Pendo to measure whether shipped features worked, and run production incident response through Rootly.',
+      'Built AI-driven document analysis features in the customer-facing web platform, carrying work from product discovery discussions through to production release.',
+      'Authored, reviewed and presented Technical Design Documents for frontend initiatives, aligning product and engineering on scope before implementation and reducing late-stage rework.',
+      'Instrumented frontend observability with Datadog and Pendo to measure whether shipped features worked, and ran production incident response through Rootly.',
       'Established the AI-assisted development practices (Claude Code, Cursor) the frontend team now uses to ship faster without loosening code review or test coverage standards.'
     ],
     stats: ['Frontend observability', 'AI-assisted delivery'],
