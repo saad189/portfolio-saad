@@ -125,6 +125,27 @@
   line-height: 1.7;
   margin: 0 0 1.25rem;
   max-width: 70ch;
+  list-style: none;
+  padding: 0;
+
+  li {
+    position: relative;
+    padding-left: 1.1rem;
+
+    + li { margin-top: 0.5rem; }
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.62em;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--color-accent-employment-mid);
+      opacity: 0.55;
+    }
+  }
 }
 
 .job-stats {

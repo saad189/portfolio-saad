@@ -8,8 +8,14 @@ export const JOBS: Job[] = [
     role: 'Software Engineer - Frontend',
     duration: 'Jan 2026 — Present',
     location: 'Lahore, Pakistan',
-    description: 'Working on AI-based documentation analysis systems — improving tooling for how logistics companies manage documentation.',
-    techTags: ['AI', 'Documentation', 'Full-Stack'],
+    description: [
+      'Build AI-driven document analysis features in the customer-facing web platform, carrying work from product discovery discussions through to production release.',
+      'Author, review and present Technical Design Documents for frontend initiatives, aligning product and engineering on scope before implementation and reducing late-stage rework.',
+      'Instrument frontend observability with Datadog and Pendo to measure whether shipped features worked, and run production incident response through Rootly.',
+      'Established the AI-assisted development practices (Claude Code, Cursor) the frontend team now uses to ship faster without loosening code review or test coverage standards.'
+    ],
+    stats: ['Frontend observability', 'AI-assisted delivery'],
+    techTags: ['TypeScript', 'AI / LLM', 'Technical Design Docs', 'Datadog', 'Pendo', 'Rootly', 'Claude Code', 'Cursor'],
     isCurrent: true
   },
   {
@@ -20,21 +26,30 @@ export const JOBS: Job[] = [
     duration: 'May 2024 — Jan 2026',
     tenure: '1 yr 9 mos',
     location: 'Doha, Qatar',
-    description: 'Architected and built the core product from scratch — mobile app (React Native / Expo), backend (NestJS + MySQL + Redis + Elasticsearch), and cloud infrastructure (AWS + Railway). Led launch on Apple App Store and Google Play, including federated auth (Apple/Google Sign-In) and a RevenueCat subscription system with multi-tier plans.',
-    stats: ['App Store + Play Store', 'Built from 0'],
-    techTags: ['React Native', 'NestJS', 'MySQL', 'Redis', 'Elasticsearch', 'AWS', 'RevenueCat']
+    description: [
+      'Built and launched Hasanah, a consumer mobile product, as sole engineer — from architecture through to approved listings on both the Apple App Store and Google Play.',
+      'Designed and implemented the full stack: React Native (Expo) client with federated Apple and Google Sign-In, NestJS + TypeORM backend on MySQL, Redis caching and Elasticsearch content search.',
+      'Shipped a cross-platform RevenueCat subscription system — multi-tier plans, free trials and unified entitlements reconciled across Apple and Google, including grace periods, restores and cross-platform upgrades.',
+      'Ran cloud infrastructure across AWS (Cognito, S3) and Railway sized for reliability at low fixed cost, and owned the release process through store compliance and reviewer feedback to approval.'
+    ],
+    stats: ['App Store + Play Store', 'Built from 0', 'Sole engineer'],
+    techTags: ['React Native', 'Expo', 'NestJS', 'TypeORM', 'MySQL', 'Redis', 'Elasticsearch', 'AWS', 'Railway', 'RevenueCat']
   },
   {
     company: 'Dubizzle Labs',
     companyUrl: 'https://dubizzlelabs.com',
     logoUrl: 'assets/logos/dubizzle-labs.png',
     role: 'Software Engineer · Full Stack',
-    duration: 'May 2021 — Apr 2023',
-    tenure: '2 yrs',
+    duration: 'May 2021 — Jun 2023',
+    tenure: '2 yrs 2 mos',
     location: 'Lahore, Pakistan',
-    description: 'Worked on Salesforce — Zameen\'s internal CRM — used by 4,000+ active users across 4 companies. Improved the lead generation module (50% reduction in submission time), redesigned reporting and staff modules (20% load-time improvement), and led a codebase refactor achieving 90%+ code coverage and 2× component performance.',
+    description: [
+      'Built and improved Zameen\'s CRM, deployed across 4 companies and used by 4,000+ active users; rebuilt the lead generation module to cut lead submission time by 50%.',
+      'Led a refactor of legacy code into reusable, performant components — 2× component performance while holding 90%+ code coverage through unit testing and structured QA.',
+      'Redesigned the reporting and staff modules around aggregated data visualization (TypeScript, SCSS, RxJS, ng2-charts, Lodash), reducing load times by 20%.'
+    ],
     stats: ['4,000+ users', '50% faster lead flow', '2× perf gain', '90%+ coverage'],
-    techTags: ['Angular', 'Node.js', 'Sequelize', 'MySQL', 'Redis', 'AWS']
+    techTags: ['Angular', 'TypeScript', 'RxJS', 'ng2-charts', 'Node.js', 'Sequelize', 'MySQL', 'Redis', 'AWS']
   },
   {
     company: 'Ciklum',
@@ -44,8 +59,12 @@ export const JOBS: Job[] = [
     duration: 'Jun 2019 — Nov 2020',
     tenure: '1.5 yrs',
     location: 'Islamabad, Pakistan',
-    description: 'Built location tracking and geographical-compliance features for an IoT management system in the maritime industry. Worked with transnational teams using Agile / Scrum, interfaced with clients in requirements analysis, and developed report-extraction features using Linux bash scripting.',
-    techTags: ['Angular', '.NET Core', 'PostGIS', 'TimeSeries SQL', 'Azure', 'Docker'],
+    description: [
+      'Built location tracking and geographic compliance into an IoT management system deployed in the maritime industry for remote B2B vessel management.',
+      'Integrated microservices running on Linux-based Docker containers deployed to Azure, using PostGIS and time-series databases for geospatial and telemetry data.',
+      'Collaborated with trans-national teams on Agile sprints tracked in Azure Boards, interfaced directly with clients through requirements analysis and demos, and built report extraction against core system APIs.'
+    ],
+    techTags: ['Angular', '.NET Core', 'Microservices', 'PostGIS', 'TimeSeries SQL', 'Azure', 'Azure Boards', 'Docker'],
     isPast: true
   }
 ];
@@ -103,24 +122,26 @@ export const SKILL_CATEGORIES: SkillCategory[] = [
     label: 'Frontend',
     heading: 'Interfaces & experience',
     iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>`,
-    skills: ['Angular', 'TypeScript', 'SCSS', 'React Native', 'HTML / CSS', 'RxJS', 'ng2-charts']
+    skills: ['Angular', 'TypeScript', 'JavaScript', 'React', 'React Native (Expo)', 'SCSS', 'HTML / CSS', 'RxJS', 'ng2-charts']
   },
   {
     label: 'Backend & Data',
     heading: 'Systems & persistence',
     iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="6" rx="1.5"></rect><rect x="2" y="11" width="20" height="6" rx="1.5"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="14" x2="6.01" y2="14"></line><line x1="2" y1="19" x2="22" y2="19"></line></svg>`,
-    skills: ['Node.js', 'NestJS', '.NET Core', 'C#', 'Python', 'MySQL', 'PostgreSQL', 'Redis', 'Elasticsearch', 'Sequelize', 'TypeORM', 'JEST']
+    skills: ['Node.js', 'NestJS', '.NET Core', 'C#', 'Python', 'MySQL', 'PostgreSQL', 'MongoDB', 'Redis', 'Elasticsearch', 'Sequelize', 'TypeORM', 'Jest']
   },
   {
     label: 'Cloud & DevOps',
     heading: 'Infra & delivery',
     iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>`,
-    skills: ['AWS (Cognito, S3)', 'Azure', 'Docker', 'Git', 'Azure Boards', 'Railway', 'CI / CD', 'Agile (Scrum, Kanban)', 'Prompt Engineering']
+    skills: ['AWS (Cognito, S3)', 'Azure', 'Docker', 'Git', 'Railway', 'CI / CD', 'Datadog', 'Pendo', 'Rootly', 'Jira', 'Azure Boards', 'Agile (Scrum, Kanban)']
   }
 ];
 
 export const CURRENT_WORKING_WITH: string[] = [
   'AI-Driven Development',
+  'Claude Code & Cursor',
+  'Technical Design Docs',
   'LLM Integration',
   'Documentation Analysis'
 ];
@@ -164,7 +185,7 @@ export const CERTIFICATES: Certificate[] = [
     iconUrl: 'assets/logos/microsoft.ico',
     completionDate: 'May 2020',
     offeredOrg: 'Microsoft',
-    description: 'Credential ID: 5971717DB08B6EEF',
+    description: 'AZ-900 · Credential ID: 5971717DB08B6EEF',
     isVerified: true
   },
   {

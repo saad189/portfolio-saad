@@ -42,7 +42,7 @@ export interface Job {
   duration: string;
   tenure?: string;
   location: string;
-  description: string;
+  description: string[];
   stats?: string[];
   techTags: string[];
   isCurrent?: boolean;

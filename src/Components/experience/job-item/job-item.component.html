@@ -29,7 +29,9 @@
       <span class="sep"></span>
       <span>{{ job.location }}</span>
     </div>
-    <p class="job-description">{{ job.description }}</p>
+    <ul class="job-description">
+      <li *ngFor="let point of job.description">{{ point }}</li>
+    </ul>
     <div class="job-stats" *ngIf="job.stats && job.stats.length">
       <span class="pill pill--metric" *ngFor="let stat of job.stats"><strong>{{ stat }}</strong></span>
     </div>
