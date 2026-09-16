@@ -83,6 +83,14 @@ export const PROJECTS: Project[] = [
     logoUrl: 'assets/worthygoals-logo.png'
   },
   {
+    title: 'Mill Manager — Multi-Tenant Mill ERP',
+    description: 'A multi-tenant SaaS ERP for small-to-medium rice, flour and oil mills across Pakistan and South Asia. Nx monorepo with an Angular frontend and NestJS backend on PostgreSQL, with tenant isolation enforced at the database level through row-level security. Covers double-entry vouchers, inventory and stock movements, product and pack-size handling, processing runs, payroll and reporting, behind a seeded role-and-permission matrix with per-role rate-override limits. Self-hosted on-site with Docker and Caddy over a Cloudflare Tunnel.',
+    tag: 'Enterprise',
+    tagVariant: 'accent',
+    stats: ['Multi-Tenant SaaS', 'Row-Level Security', 'Pilot-Ready'],
+    techTags: ['Angular', 'NestJS', 'PostgreSQL', 'Nx', 'TypeScript', 'Docker', 'Caddy', 'Cloudflare Tunnel']
+  },
+  {
     title: 'VisionMedia — SnE Organization Website',
     description: 'Built the official website for the Scientists & Engineers (SnE) organization. Fully dynamic content powered by Supabase — events, research papers, and projects are all managed in real-time through a full-featured admin panel, letting organization staff publish and update content without touching code.',
     tag: 'Live Product',
