@@ -1,12 +1,16 @@
-import { Directive, ElementRef, OnInit, OnDestroy } from '@angular/core';
+import { Directive, ElementRef, OnInit, OnDestroy, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 @Directive({ selector: '[appReveal]', standalone: true })
 export class RevealDirective implements OnInit, OnDestroy {
   private observer!: IntersectionObserver;
+  private platformId = inject(PLATFORM_ID);
 
   constructor(private el: ElementRef) {}
 
   ngOnInit() {
+    // Prerendered HTML stays fully visible for crawlers / no-JS readers.
+    if (!isPlatformBrowser(this.platformId)) return;
     this.el.nativeElement.classList.add('reveal');
     this.observer = new IntersectionObserver(
       (entries) => {

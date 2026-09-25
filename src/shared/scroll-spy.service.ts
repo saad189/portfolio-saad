@@ -1,4 +1,5 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { BehaviorSubject } from 'rxjs';
 
 /**
@@ -21,6 +22,7 @@ export class ScrollSpyService implements OnDestroy {
   private visibleSections = new Set<string>();
 
   constructor() {
+    if (!isPlatformBrowser(inject(PLATFORM_ID))) return;
     this.observer = new IntersectionObserver(
       (entries) => this.onIntersect(entries),
       {
@@ -35,16 +37,18 @@ export class ScrollSpyService implements OnDestroy {
 
   /** Register a section element with its fragment id. */
   observe(id: string): void {
+    if (!this.observer) return;
     const el = document.getElementById(id);
-    if (!el || !this.observer) return;
+    if (!el) return;
     this.sectionMap.set(el, id);
     this.observer.observe(el);
   }
 
   /** Unregister a section (called on directive destroy). */
   unobserve(id: string): void {
+    if (!this.observer) return;
     const el = document.getElementById(id);
-    if (!el || !this.observer) return;
+    if (!el) return;
     this.observer.unobserve(el);
     this.sectionMap.delete(el);
     this.visibleSections.delete(id);
