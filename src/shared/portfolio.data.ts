@@ -12,9 +12,9 @@ export const JOBS: Job[] = [
       'Built AI-driven document analysis features in the customer-facing web platform, carrying work from product discovery discussions through to production release.',
       'Authored, reviewed and presented Technical Design Documents for frontend initiatives, aligning product and engineering on scope before implementation and reducing late-stage rework.',
       'Instrumented frontend observability with Datadog and Pendo to measure whether shipped features worked, and ran production incident response through Rootly.',
-      'Established the AI-assisted development practices (Claude Code, Cursor) the frontend team now uses to ship faster without loosening code review or test coverage standards.'
+      'Led and implemented test automation across API, browser and end-to-end suites, raising test coverage from 60% to 90%.'
     ],
-    stats: ['Frontend observability', 'AI-assisted delivery'],
+    stats: ['Frontend observability', '60% → 90% test coverage'],
     techTags: ['TypeScript', 'AI / LLM', 'Technical Design Docs', 'Datadog', 'Pendo', 'Rootly', 'Claude Code', 'Cursor'],
     isCurrent: true
   },
