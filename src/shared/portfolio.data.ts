@@ -9,13 +9,14 @@ export const JOBS: Job[] = [
     duration: 'Jan 2026 — Present',
     location: 'Lahore, Pakistan',
     description: [
-      'Built AI-driven document analysis features in the customer-facing web platform, carrying work from product discovery discussions through to production release.',
+      'Built AI-driven document analysis features in the customer-facing web platform, now used 10,000+ times per day across fleets in the US and Canada, carrying work from product discovery through to production release.',
       'Authored, reviewed and presented Technical Design Documents for frontend initiatives, aligning product and engineering on scope before implementation and reducing late-stage rework.',
-      'Instrumented frontend observability with Datadog and Pendo to measure whether shipped features worked, and ran production incident response through Rootly.',
-      'Led and implemented test automation across API, browser and end-to-end suites, raising test coverage from 60% to 90%.'
+      'Instrumented frontend observability with Datadog (dashboards, alerts, error tracking) and Pendo (product usage analytics), and ran production incident response through Rootly.',
+      'Led and implemented test automation across API, browser and end-to-end suites, raising test coverage from 60% to 90%.',
+      'Built an AI feature on Amazon Bedrock at an internal hackathon, integrating live model calls for real-time in-product responses, and demoed the prototype to the engineering organization.'
     ],
-    stats: ['Frontend observability', '60% → 90% test coverage'],
-    techTags: ['TypeScript', 'AI / LLM', 'Technical Design Docs', 'Datadog', 'Pendo', 'Rootly', 'Claude Code', 'Cursor'],
+    stats: ['10,000+ uses / day', '60% → 90% test coverage', 'Frontend observability'],
+    techTags: ['TypeScript', 'AI / LLM', 'Amazon Bedrock', 'Technical Design Docs', 'Datadog', 'Pendo', 'Rootly', 'Claude Code', 'Cursor'],
     isCurrent: true
   },
   {
@@ -30,7 +31,8 @@ export const JOBS: Job[] = [
       'Built and launched Hasanah, a consumer mobile product, as sole engineer — from architecture through to approved listings on both the Apple App Store and Google Play.',
       'Designed and implemented the full stack: React Native (Expo) client with federated Apple and Google Sign-In, NestJS + TypeORM backend on MySQL, Redis caching and Elasticsearch content search.',
       'Shipped a cross-platform RevenueCat subscription system — multi-tier plans, free trials and unified entitlements reconciled across Apple and Google, including grace periods, restores and cross-platform upgrades.',
-      'Ran cloud infrastructure across AWS (Cognito, S3) and Railway sized for reliability at low fixed cost, and owned the release process through store compliance and reviewer feedback to approval.'
+      'Designed API and data models for extensibility, supporting new content types without schema migrations, and ran cloud infrastructure across AWS (Cognito, S3) and Railway for reliability at controlled cost.',
+      'Owned the release process through Apple and Google store compliance and reviewer feedback to approval.'
     ],
     stats: ['App Store + Play Store', 'Built from 0', 'Sole engineer'],
     techTags: ['React Native', 'Expo', 'NestJS', 'TypeORM', 'MySQL', 'Redis', 'Elasticsearch', 'AWS', 'Railway', 'RevenueCat']
@@ -42,7 +44,7 @@ export const JOBS: Job[] = [
     role: 'Software Engineer · Full Stack',
     duration: 'May 2021 — Jun 2023',
     tenure: '2 yrs 2 mos',
-    location: 'Lahore, Pakistan',
+    location: 'Islamabad, Pakistan',
     description: [
       'Built and improved Zameen\'s CRM, deployed across 4 companies and used by 4,000+ active users; rebuilt the lead generation module to cut lead submission time by 50%.',
       'Led a refactor of legacy code into reusable, performant components — 2× component performance while holding 90%+ code coverage through unit testing and structured QA.',
@@ -142,7 +144,7 @@ export const SKILL_CATEGORIES: SkillCategory[] = [
     label: 'Cloud & DevOps',
     heading: 'Infra & delivery',
     iconSvg: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>`,
-    skills: ['AWS (Cognito, S3)', 'Azure', 'Docker', 'Git', 'Railway', 'CI / CD', 'Datadog', 'Pendo', 'Rootly', 'Jira', 'Azure Boards', 'Agile (Scrum, Kanban)']
+    skills: ['AWS (Bedrock, Cognito, S3)', 'Azure', 'Docker', 'Git', 'Railway', 'CI / CD', 'Datadog', 'Pendo', 'Rootly', 'Jira', 'Azure Boards', 'Agile (Scrum, Kanban)']
   }
 ];
 
@@ -164,7 +166,7 @@ export const EDUCATION: Education[] = [
     },
     shortName: 'LUMS',
     programName: 'MS — Technology Management & Entrepreneurship',
-    description: 'Best Practices in Project Management, Documentation & Compliance.',
+    description: 'Best Practices in Domains of Project Management, Documentation & Compliance.',
     startDate: 'Jul 2022',
     endDate: 'Jun 2024',
     courses: ['Operations Management', 'Data Analysis', 'Technology Entrepreneurship']
