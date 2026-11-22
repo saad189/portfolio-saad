@@ -4,7 +4,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { initTextures, initMaterials, M, LABELS, PICK, FREE } from './lib.js';
-const CUTS = [], OPTS = [], OPTS_OFF = [], UPPERS = [];
+const CUTS = [], OPTS = [], OPTS_OFF = [], UPPERS = [], FRONT_ORIG = [], FRONT_VAR = [];
 import * as context from './areas/context.js';
 import * as storage from './areas/storage.js';
 import * as rice from './areas/rice.js';
@@ -59,7 +59,7 @@ Object.values(M).forEach(m => { if (m && m.map) m.map.anisotropy = maxA; });
 context.build(scene); storage.build(scene); rice.build(scene); east.build(scene); flour.build(scene); front.build(scene);
 variants.build(scene);
 const flowG = flow.build(scene);
-scene.traverse(o => { if (o.userData.cut) CUTS.push(o); if (o.userData.option) OPTS.push(o); if (o.userData.optionOff) OPTS_OFF.push(o); if (o.userData.upper && !o.isCSS2DObject) UPPERS.push(o); });
+scene.traverse(o => { if (o.userData.cut) CUTS.push(o); if (o.userData.option) OPTS.push(o); if (o.userData.optionOff) OPTS_OFF.push(o); if (o.userData.upper && !o.isCSS2DObject) UPPERS.push(o); if (o.userData.frontOrig) FRONT_ORIG.push(o); if (o.userData.frontVar) FRONT_VAR.push(o); });
 
 // ---------- views ----------
 const VIEWS = {
@@ -67,8 +67,10 @@ const VIEWS = {
   top: { pos: [220, 1050, -293], tgt: [220, 0, -294] },
   gate: { pos: [232, 22, -660], tgt: [150, 10, -380] },
   front: { pos: [40, 120, -720], tgt: [110, 0, -500] },
-  staff: { pos: [175, 95, -520], tgt: [52, 14, -424] },
-  pump: { pos: [138, 98, -590], tgt: [50, 6, -468], cut: 0 },
+  staff: { pos: [175, 95, -520], tgt: [52, 14, -424], front: 0 },
+  holding: { pos: [236, 92, -575], tgt: [136, 10, -462], cut: 0, front: 0 },
+  holdingIn: { pos: [176, 13, -520], tgt: [138, 9, -452], cut: 0, front: 0 },
+  pump: { pos: [138, 98, -590], tgt: [50, 6, -468], cut: 0, front: 0 },
   rice: { pos: [300, 170, 120], tgt: [95, 10, -90] },
   saila: { pos: [140, 95, -40], tgt: [24, 32, -126], cut: true },
   hall: { pos: [150, 135, -20], tgt: [66, 0, -100], cut: true },
@@ -78,6 +80,9 @@ const VIEWS = {
   hqBack: { pos: [326, 66, -146], tgt: [258, 12, -214] },
   hqIn: { pos: [300, 95, -175], tgt: [250, 8, -230], cut: 1 },
   ops: { pos: [238, 100, -58], tgt: [158, 8, -142] },
+  backLane: { pos: [218, 80, 50], tgt: [146, 4, -14], cut: 0 },
+  weighbridge: { pos: [292, 92, 38], tgt: [196, 4, -58], cut: 0 },
+  frontStore: { pos: [252, 86, -548], tgt: [176, 8, -462], cut: 0, front: 0 },
   junction: { pos: [206, 175, -32], tgt: [208, 0, -142], cut: 0 },
   farm: { pos: [292, 175, -70], tgt: [330, 0, -192] },
   farmer: { pos: [492, 96, -108], tgt: [417, 2, -200] },
@@ -104,6 +109,7 @@ function goTo(name, instant = false) {
   const v = VIEWS[name]; if (!v) return;
   const p1 = new THREE.Vector3(...v.pos), t1 = new THREE.Vector3(...v.tgt);
   document.querySelectorAll('[data-view]').forEach(b => b.classList.toggle('on', b.dataset.view === name));
+  if (v.front !== undefined && v.front !== state.front) { state.front = v.front; applyFront(); }
   if (v.cut !== undefined) { const lv = v.cut === true ? Math.max(1, state.cut) : v.cut; if (lv !== state.cut) { state.cut = lv; applyCut(); } }
   if (instant) { camera.position.copy(p1); controls.target.copy(t1); controls.update(); return; }
   tween = { p0: camera.position.clone(), t0: controls.target.clone(), p1, t1, k: 0 };
@@ -111,7 +117,7 @@ function goTo(name, instant = false) {
 
 
 // ---------- toggles ----------
-const state = { labels: true, flow: false, free: true, status: false, cut: 0, options: true };
+const state = { labels: true, flow: false, free: true, status: false, cut: 0, options: true, front: 0 };
 const _lp = new THREE.Vector3(), _tg = new THREE.Vector3();
 let _fc = 0;
 function applyLabels() {
@@ -132,6 +138,21 @@ function applyCut() {
   applyLabels();
 }
 function applyOptions() { OPTS.forEach(o => { o.visible = state.options; }); OPTS_OFF.forEach(o => { o.visible = !state.options; }); applyLabels(); }
+// v18: what stands on the real front zone — 0 original (hybrid / today via Options), 1–3 the variations in place
+function applyFront() {
+  FRONT_ORIG.forEach(o => { o.visible = state.front === 0; });
+  FRONT_VAR.forEach(o => { o.visible = o.userData.frontVar === state.front; });
+  const b = document.getElementById('frontCycle');
+  if (b) { b.innerHTML = `Front zone: <b>${variants.FRONT_NAMES[state.front]}</b> ▸`; b.classList.toggle('on', state.front > 0); }
+  if (selBox && !visibleUp(selBox.object)) { scene.remove(selBox); selBox = null; info.hidden = true; }
+  applyLabels();
+}
+const visibleUp = (o) => { for (; o; o = o.parent) if (!o.visible) return false; return true; };
+document.getElementById('frontCycle').addEventListener('click', () => {
+  state.front = (state.front + 1) % variants.FRONT_NAMES.length; applyFront();
+  // if the front zone is out of view, fly there so the swap is seen
+  const t = controls.target; if (Math.hypot(t.x - 98, -t.z - 480) > 260 || camera.position.distanceTo(t) > 900) goTo('front');
+});
 function applyFree() { FREE.forEach(o => { if (!o.isCSS2DObject) o.visible = state.free; }); applyLabels(); }
 function applyStatus() {
   PICK.forEach(gr => {
@@ -202,9 +223,9 @@ css.domElement.addEventListener('pointerup', e => {
 function showCompare() {
   const C = variants.COMPARE, rows = [['Build cost', 'capex'], ['Built area', 'built'], ['Net return', 'net'], ['ROI', 'roi'], ['Payback', 'payback'], ['Effort', 'effort'], ['Main risk', 'risk']];
   info.innerHTML = `<button class="x" aria-label="Close">×</button><div class="st st-review">Front zone · 3 variations</div><h3>Compare the variations</h3>
-    <div class="kv"><span>Site</span>Each uses the same 22,400 sq ft ≈ 5 kanal (front zone minus the mill road + weighbridge)</div>
+    <div class="kv"><span>Site</span>Each uses the whole front zone, ≈28,200 sq ft ≈ 6.3 kanal (only the mill’s main road kept; the weighbridge is at the end of the main road since v20)</div>
     <table class="fin cmpt"><tr><th></th>${C.map(c => `<th>${c.short}</th>`).join('')}</tr>${rows.map(([l, k]) => `<tr><td>${l}</td>${C.map(c => `<td>${c.compare[k]}</td>`).join('')}</tr>`).join('')}</table>
-    <p class="fnote">All figures are planning estimates in PKR (Nov 2026 prices), land already owned (≈ Rs 3.8 cr at FBR value, not included). Click a variation in the 3D view for its breakdown.</p>`;
+    <p class="fnote">All figures are planning estimates in PKR (Nov 2026 prices), land already owned (≈ Rs 4.8 cr at FBR value, not included). Click a variation in the 3D view for its breakdown, or use “Front zone ▸” to see each one standing on the real site.</p>`;
   info.classList.add('wide', 'xwide'); info.hidden = false;
   info.querySelector('.x').onclick = () => { info.hidden = true; info.classList.remove('xwide'); };
 }
@@ -242,6 +263,7 @@ function frame() {
 }
 goTo('overview', true);
 applyOptions();
+applyFront();
 applyFree();
 frame();
 window.__ready = true;

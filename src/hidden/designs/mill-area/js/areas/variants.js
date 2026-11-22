@@ -1,8 +1,11 @@
 // v10 — three alternative designs for the front zone, shown side by side EAST of the compound along the same
 // Sargodha–Gujrat Road. The original front zone (front.js) is untouched.
-// v12: the weighbridge is assumed moved elsewhere, so each variation now uses the whole front zone x 0–195
+// v12: the weighbridge is assumed moved elsewhere (v20: to the end of the mill's main road), so each variation now uses the whole front zone x 0–195
 // (≈28,200 sq ft ≈ 6.3 kanal, ≈202 ft frontage); only the mill's main road (x 195–220) is kept. Moved further east,
 // clear of the compound's L.
+// v18: each variation is also built a second time ON the real front zone (shift 0, hidden until chosen), so the HUD can
+// cycle the front zone in place: original hybrid → 1 → 2 → 3. In place, the duplicate main road, gate pillars and walls are
+// skipped, and the wall to the mill road jogs round the gate guard room so it stays on the mill side.
 import * as THREE from 'three';
 import { ytop } from '../site.js';
 import { M, P, box, boxR, slab, segBox, cyl, block, label, tag, car, truck, person, trees, waterTank, acUnit, solarArray, strut, panel, railRect, shutter, mergeByMaterial, rng } from '../lib.js';
@@ -14,6 +17,7 @@ const SITE = [[0, 410], [195, 410], [195, ytop(195)], [0, 528]];
 const FACE_ROAD = Math.atan2(N[0], -N[1]);                              // rotation.y for a plane facing the road
 export const VARIANT_CENTERS = SHIFT.map(s => [98 + U[0] * s, 480 + U[1] * s]);
 export const COMPARE = [];
+export const FRONT_NAMES = ['Original (hybrid)', '1 · Petrol pump', '2 · Restaurant + motel', '3 · Market'];
 
 // ---------- local textures / materials ----------
 function tex(w, h, draw, repeat) {
@@ -71,12 +75,21 @@ const arrowGeo = (() => { const s = new THREE.Shape([[-1.2, -4], [1.2, -4], [1.2
 function arrow(parent, x, y, dir) { const a = new THREE.Mesh(arrowGeo, M.whitePaint); a.position.copy(P(x, y, 0.36)); a.rotation.y = dir; parent.add(a); }   // dir: 0 = north, +π/2 = west
 
 // ---------- common frame for one variation ----------
-function frame(scene, i, title) {
-  const g = new THREE.Group(); g.name = 'variant' + (i + 1); scene.add(g);
-  const s = SHIFT[i]; g.position.set(U[0] * s, 0, -(U[1] * s));
-  slab(g, [[0, 404], [226, 404], [226, ytop(226) + 1], [0, 527]], 0.12, M.soil, -0.08);
+function frame(scene, i, title, inPlace = false) {
+  const g = new THREE.Group(); g.name = 'variant' + (i + 1) + (inPlace ? 'InPlace' : ''); scene.add(g);
+  const s = inPlace ? 0 : SHIFT[i]; g.position.set(U[0] * s, 0, -(U[1] * s));
+  if (inPlace) g.userData.frontVar = i + 1;
+  if (!inPlace) slab(g, [[0, 404], [226, 404], [226, ytop(226) + 1], [0, 527]], 0.12, M.soil, -0.08);
   slab(g, SITE, 0.3, M.concrete);
   slab(g, [at(0, 0), at(202, 0), at(202, 18), at(0, 18)], 0.25, M.road, -0.05);          // apron to the road
+  if (inPlace) {
+    // real site: main road, gate, west + east walls already exist. Wall to the loop, and to the mill road with a jog round the guard room
+    segBox(g, [0, 410], [195, 410], 1.1, 9, M.brick);
+    segBox(g, [195, 410], [195, 557.5], 1.1, 9, M.brick); segBox(g, [195, 557.5], [182, 557.5], 1.1, 9, M.brick); segBox(g, [182, 557.5], [182, ytop(182) - 3], 1.1, 9, M.brick);
+    box(g, 182.5, 558, 194.5, ytop(182) - 2, 0.05, M.road, 0.33, false);                   // guard-room forecourt stays with the mill
+    label(g, title, 98, 480, 52, 'variant', 1);
+    return g;
+  }
   // only the mill's main road is kept (v12: the weighbridge moves elsewhere, its strip x 160–195 joins the variation)
   slab(g, [[195.5, 410], [219.5, 410], [219.5, 588.3], [195.5, ytop(195.5)]], 0.28, M.road);
   [[195, ytop(195)], [220, 588.5]].forEach(([x, y]) => box(g, x - 1.8, y - 1.8, x + 1.8, y + 1.8, 19, M.brick));
@@ -87,16 +100,17 @@ function frame(scene, i, title) {
   label(g, 'Mill main road (kept)', 207.5, 470, 6, 'road', 2);
   return g;
 }
-function card(g, info) { tag(g, null, info); COMPARE.push(info); }
+function card(g, info, inPlace) { tag(g, null, info); if (!inPlace) COMPARE.push(info); }
 
 export function build(scene) {
   mats();
-  v1(scene); v2(scene); v3(scene);
+  v1(scene); v2(scene); v3(scene);                       // side-by-side copies east of the compound
+  v1(scene, true); v2(scene, true); v3(scene, true);     // v18: in-place copies on the real front zone (cycled from the HUD)
 }
 
 // ======================= VARIATION 1: full petrol pump =======================
-function v1(scene) {
-  const g = frame(scene, 0, 'Variation 1 · Full petrol pump'), v = V;
+function v1(scene, inPlace = false) {
+  const g = frame(scene, 0, 'Variation 1 · Full petrol pump', inPlace), v = V;
   // --- back row (south): mosque, washrooms, mart + café, lube/tyre, car wash ---
   // mosque with green dome, minaret, wuzu area
   box(g, 2, 412, 32, 440, 14, v.mosque); box(g, 1.6, 411.6, 32.4, 440.4, 1.2, v.dome, 14);
@@ -157,21 +171,21 @@ function v1(scene) {
   person(g, 170, 430, 0.3, M.kurta); person(g, 186, 427, 0.3, M.kurta3);
   // underground tanks (manholes), price pylon, air/water point, frontage hedges + lights, arrows
   [[64, 455], [72, 455], [80, 455], [88, 455]].forEach(([x, y]) => cyl(g, x, y, 1.6, 0.12, M.steelDark, 0.3, 16));
-  const [px, py] = [180, 566]; box(g, px - .7, py - .7, px + .7, py + .7, 6, M.stoneDark); const pl = new THREE.Mesh(new THREE.BoxGeometry(7, 22, 1.2), [v.fuelGreen, v.fuelGreen, v.fuelGreen, v.fuelGreen, v.pylonPrice, v.pylonPrice]); pl.position.copy(P(px, py, 17)); pl.rotation.y = FACE_ROAD + Math.PI; pl.castShadow = true; g.add(pl);
+  const [px, py] = [inPlace ? 174 : 180, 566]; box(g, px - .7, py - .7, px + .7, py + .7, 6, M.stoneDark); const pl = new THREE.Mesh(new THREE.BoxGeometry(7, 22, 1.2), [v.fuelGreen, v.fuelGreen, v.fuelGreen, v.fuelGreen, v.pylonPrice, v.pylonPrice]); pl.position.copy(P(px, py, 17)); pl.rotation.y = FACE_ROAD + Math.PI; pl.castShadow = true; g.add(pl);
   box(g, 26, 516, 30, 520, 4.5, v.fuelYellow, 0.3);
   for (let t = 40; t < 128; t += 8) { const [x, y] = at(t, -3); box(g, x - 3, y - 1, x + 3, y + 1, 1.6, M.hedge, 0.3); }
   [[20, 530], [140, 560], [172, 520]].forEach(([x, y]) => { cyl(g, x, y, 0.3, 24, M.steel, 0, 8); box(g, x - 2, y - .5, x + 2, y + .5, 0.8, M.steelDark, 24); });
-  arrow(g, ...at(150, 6), -Math.PI / 2 - 0.27); arrow(g, ...at(16, 6), Math.PI / 2 - 0.27); arrow(g, ...at(190, 6), -Math.PI / 2 - 0.27); arrow(g, 177, 520, Math.PI);
+  arrow(g, ...at(150, 6), -Math.PI / 2 - 0.27); arrow(g, ...at(16, 6), Math.PI / 2 - 0.27); arrow(g, ...at(inPlace ? 178 : 190, 6), -Math.PI / 2 - 0.27); arrow(g, 177, 520, Math.PI);
   arrow(g, 90, 468, Math.PI / 2); arrow(g, 40, 468, Math.PI / 2);
   label(g, 'Mosque + wuzu', 17, 426, 26, '', 2); label(g, 'Mart · café · ATM', 76, 426, 20, '', 2); label(g, 'Lube + tyre', 116, 425, 20, '', 2); label(g, 'Car wash', 144, 424, 18, '', 2);
   label(g, 'EV charging (solar)', 17, 459, 16, '', 2); label(g, '8 dispensers', 76, 491, 25, '', 2); label(g, 'Diesel · trucks', 139, 488, 31, '', 2);
-  label(g, 'Entry', ...at(150, 9), 2, 'road', 2); label(g, 'Exit', ...at(16, 9), 2, 'road', 2); label(g, 'Truck entry', ...at(190, 9), 2, 'road', 2);
+  label(g, 'Entry', ...at(150, 9), 2, 'road', 2); label(g, 'Exit', ...at(16, 9), 2, 'road', 2); label(g, 'Truck entry', ...at(inPlace ? 178 : 190, 9), 2, 'road', 2);
   label(g, 'Truck stop · 4 bays', 178, 471, 14, '', 2); label(g, 'Truckers’ dhaba', 177.5, 418, 16, '', 2);
   mergeByMaterial(g);
   card(g, {
     name: 'Variation 1 · Full petrol pump', short: 'Petrol pump', status: 'review',
     size: 'Site 195 × 118–172 ft (≈202 ft road frontage)', area: '28,200 sq ft ≈ 6.3 kanal · ≈4,100 sq ft buildings + ≈5,300 sq ft canopies/shades',
-    notes: 'A full modern highway station on the whole front zone except the mill’s own main road (v12: the weighbridge is moved elsewhere and its strip becomes a truck stop: 4 truck parking bays, a truckers’ dhaba with charpais under a shade, washrooms, its own truck entry at the east end). Car forecourt (4 islands, 8 multi-product dispensers) under a lit canopy, separate 24 ft truck-diesel canopy with 2 high-flow dispensers, mosque with wuzu area, mart + café + ATM, lube + tyre bays, car wash, EV charging (2–3 DC chargers under a solar carport), air/water point, underground tanks, price pylon. Separate entry (east) and exit (west); a brick wall separates it from the mill. Branding left neutral (OMC not chosen).',
+    notes: 'A full modern highway station on the whole front zone except the mill’s own main road (v12: the weighbridge strip becomes a truck stop — v20 moved the weighbridge itself to the end of the mill’s main road: 4 truck parking bays, a truckers’ dhaba with charpais under a shade, washrooms, its own truck entry at the east end). Car forecourt (4 islands, 8 multi-product dispensers) under a lit canopy, separate 24 ft truck-diesel canopy with 2 high-flow dispensers, mosque with wuzu area, mart + café + ATM, lube + tyre bays, car wash, EV charging (2–3 DC chargers under a solar carport), air/water point, underground tanks, price pylon. Separate entry (east) and exit (west); a brick wall separates it from the mill. Branding left neutral (OMC not chosen).',
     finance: {
       rows: [
         ['Build cost', 'Rs 9.3–13 cr (≈ 7.5–10.5 cr if the OMC funds tanks, dispensers + branding)'],
@@ -189,12 +203,12 @@ function v1(scene) {
     },
     compare: { capex: 'Rs 9.3–13 cr', built: '≈4,100 sq ft + canopies', net: '≈ Rs 1.7 cr/yr (0.95–2.8)', roi: '≈ 15 % (7–25)', payback: '≈ 6.5 yrs', effort: 'Medium — dealer + staff of ≈25', risk: 'Fuel volume (traffic) and dealer-margin politics' },
     round: 12,
-  });
+  }, inPlace);
 }
 
 // ======================= VARIATION 2: karahi restaurant + motel =======================
-function v2(scene) {
-  const g = frame(scene, 1, 'Variation 2 · Karahi restaurant + motel'), v = V;
+function v2(scene, inPlace = false) {
+  const g = frame(scene, 1, 'Variation 2 · Karahi restaurant + motel', inPlace), v = V;
   // --- restaurant, 2 storeys: open karahi line behind the glass front, dining hall; family hall + roof terrace upstairs ---
   const R = { x1: 30, y1: 452, x2: 120, y2: 488 };
   box(g, R.x1, R.y1, R.x2, R.y2, 13, v.brickRed); box(g, R.x1 - .3, R.y1 - .3, R.x2 + .3, R.y2 + .3, 0.8, M.timber, 13);
@@ -260,12 +274,12 @@ function v2(scene) {
     },
     compare: { capex: 'Rs 11.4–14.4 cr', built: '≈14,100 sq ft', net: '≈ Rs 2.2 cr/yr (1.1–3.5)', roi: '≈ 17 % (8–28)', payback: '≈ 6 yrs', effort: 'High — run a restaurant + motel (or lease it)', risk: 'Operator quality and footfall' },
     round: 12,
-  });
+  }, inPlace);
 }
 
 // ======================= VARIATION 3: built market (shops for sale or rent) =======================
-function v3(scene) {
-  const g = frame(scene, 2, 'Variation 3 · Market of shops'), v = V;
+function v3(scene, inPlace = false) {
+  const g = frame(scene, 2, 'Variation 3 · Market of shops', inPlace), v = V;
   // two G+2 rows: Row A faces the road, Row B faces an inner courtyard; 11 shops per row on the ground floor
   const row = (y1, y2, faceY, label_) => {
     const H1 = 12, H2 = 10.5, top = H1 + 2 * H2;
@@ -319,5 +333,5 @@ function v3(scene) {
     },
     compare: { capex: 'Rs 14–18 cr', built: '≈31,500 sq ft (78 units)', net: 'Sell: ≈ 10–26 cr profit · Rent: ≈ 0.7–1.2 cr/yr', roi: 'Sell ≈ 15–25 %/yr · Rent ≈ 4–8 %', payback: 'Sell 3–5 yrs · Rent 12–25 yrs', effort: 'Low (rent) to medium (sales)', risk: 'Small-town demand / sell-out speed' },
     round: 12,
-  });
+  }, inPlace);
 }

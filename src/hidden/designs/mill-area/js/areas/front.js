@@ -4,7 +4,7 @@
 // (trolley holding area, visitor parking, sales + admin office beside the gate).
 import * as THREE from 'three';
 import { SITE, ytop } from '../site.js';
-import { M, P, box, boxR, slab, slabR, segBox, cyl, block, floorsBlock, ghost, label, tag, car, truck, tractor, person, trees, waterTank, acUnit, railRect, panel, stairFlight, partition, bed, counter, solarArray, shutter, mergeByMaterial } from '../lib.js';
+import { M, P, box, boxR, slab, slabR, segBox, cyl, block, floorsBlock, ghost, label, tag, car, truck, tractor, person, trees, waterTank, acUnit, railRect, panel, stairFlight, partition, bed, counter, solarArray, shutter, strut, worldBox, gableShed, mergeByMaterial } from '../lib.js';
 
 const U = [220 / 228.166, 60.5 / 228.166], N = [-U[1], U[0]];
 const at = (t, off = 0) => [U[0] * t + N[0] * off, 528 + U[1] * t + N[1] * off];   // t = ft along the frontage from the west corner
@@ -13,11 +13,12 @@ let _sf = null;
 const SHOPFRONT = () => { if (!_sf) { _sf = M.shutter.clone(); _sf.map = M.shutter.map.clone(); _sf.map.repeat.set(2.6, 6); _sf.map.needsUpdate = true; } return _sf; };
 
 export function build(scene) {
-  const g = new THREE.Group(); g.name = 'front'; scene.add(g);
+  const g0 = new THREE.Group(); g0.name = 'front'; scene.add(g0);
+  const g = new THREE.Group(); g.userData.frontOrig = true; g0.add(g);           // v18: the whole original front zone swaps out when a variation is shown in place
   today(g);
   hybrid(g);
   staffFlats(g);
-  return g;
+  return g0;
 }
 
 // ---------- v12: staff flats in the strip between the drying loop wall and the pump (x 0–111 × y 410–440) ----------
@@ -196,6 +197,8 @@ function hybrid(g) {
   slab(mf, [[PX, 410], [165, 410], [165, 515], [195, 515], [195, 522], [PX, 522]], 0.3, M.road);
   for (let x = 120; x < 165; x += 9) box(mf, x - .2, 418, x + .2, 505, 0.05, M.whitePaint, 0.3, false);   // trolley lanes
   [[124, 445], [124, 485], [133, 460], [142, 447], [142, 495], [151, 470]].forEach(([x, y]) => tractor(mf, x, y, 0, true, 0));
+  holdingRoof(mf);                                                                                       // v19: solar roof + store over the holding lanes
+  frontStore(mf);                                                                                        // v20: store on the old weighbridge bay
   slab(mf, [[PX, 522], [168, 522], [168, ytop(168) - 23.5], [PX, ytop(PX) - 23.5]], 0.3, M.asphalt);
   [[118, 529.5], [127, 529.5], [136, 529.5], [145, 529.5], [154, 529.5]].forEach(([x, y], i) => car(mf, x, y, 0, [0xffffff, 0x1f2a44, 0xb0b5ba, 0x7a1f1f, 0xd8d8d8][i]));
   const off = { x1: 168, y1: 523, x2: 193.5, y2: 548 };
@@ -203,11 +206,117 @@ function hybrid(g) {
   box(mf, 193.5, 530, 196, 541, 0.5, M.steelDark, 10);
   waterTank(mf, 172, 527, 11); acUnit(mf, 180, 545, 11); acUnit(mf, 186, 545, 11);
   trees(mf, [[116, 518, 0.45, 0], [140, 518, 0.45, 0], [162, 518, 0.45, 0]], 77);
-  tag(mf, { x1: PX, y1: 410, x2: 195, y2: 560 }, { name: 'Option: mill front', status: 'review', notes: 'Trolley holding area (≈6 lanes) so harvest trolleys queue inside instead of on the road, then roll onto the weighbridge from its north end; visitor parking; a single-storey sales counter + visitor reception beside the gate (the head office itself is in the east block, so this stays small). The old mill is demolished in this option.', round: 6 });
-  label(mf, 'Option: trolley holding area', 138, 462, 10, 'review', 1);
+  tag(mf, { x1: PX, y1: 410, x2: 195, y2: 560 }, { name: 'Option: mill front', status: 'review', notes: 'Trolley holding area so harvest trolleys queue inside instead of on the road, then leave by the north end and drive down the main road to the weighbridge, which v20 moved to its far end (v19: 4 lanes under an open-sided solar roof, with a store room and stock bay in the east lane — click the roof for its card); visitor parking; a single-storey sales counter + visitor reception beside the gate (the head office itself is in the east block, so this stays small). The old mill is demolished in this option.', round: 6 });
+  label(mf, 'Option: covered trolley holding · ≈100 kWp', 134, 470, 30, 'review', 1);
   label(mf, 'Sales counter + reception', 180.75, 535.5, 16, 'review', 2);
   label(mf, 'Visitor parking', 136, 532, 8, 'review', 2);
   mergeByMaterial(pp); mergeByMaterial(sh); mergeByMaterial(mf);
+}
+
+// ---------- v19: open-sided steel roof over the trolley holding area ----------
+// Portal frames every 23.5 ft spanning 52 ft clear (no columns between the lanes); one 5° slope falling south (18 ft low eave,
+// ≈26.6 ft at the north) so the whole roof faces the sun: 14 × 11 = 154 modules of 650 W ≈ 100 kWp, flush on the sheets with a
+// cleaning walkway. The east lane becomes a lockable store room + fenced stock bay for extra holding.
+export const HOLD_ROOF = { x1: 111.6, y1: 411, x2: 165.4, y2: 509, low: 18, slope: 5, cols: [112.5, 164.5], frames: [412.5, 436, 459.5, 483, 506.5], across: 14, rows: 11, wp: 650 };
+function holdingRoof(mf) {
+  const hr = new THREE.Group(); hr.name = 'holdingRoof'; mf.add(hr);
+  const R = HOLD_ROOF, a = R.slope * Math.PI / 180, H = (y) => R.low + (y - R.y1) * Math.tan(a), T = pumpTex();
+  const cut = (o) => { o.userData.cut = true; return o; };
+  // frames: columns on plinths, rafters, haunches, LED high-bays (stay visible in cut-away)
+  R.frames.forEach(y => {
+    const top = H(y) - 0.9, base = top - 1.8;
+    R.cols.forEach(x => { box(hr, x - .5, y - .4, x + .5, y + .4, base, M.steelDark, 0); box(hr, x - 1, y - 1, x + 1, y + 1, 0.8, M.slab, 0); });
+    box(hr, R.cols[0] - .5, y - .35, R.cols[1] + .5, y + .35, 1.8, M.steelDark, base);
+    strut(hr, [R.cols[0] + .4, y, base - 3.5], [R.cols[0] + 5, y, base + .2], 0.5, M.steelDark); strut(hr, [R.cols[1] - .4, y, base - 3.5], [R.cols[1] - 5, y, base + .2], 0.5, M.steelDark);
+    [125, 138.5, 152].forEach(x => box(hr, x - .9, y - .5, x + .9, y + .5, 0.3, T.led, base - 0.3));
+  });
+  R.cols.forEach(x => strut(hr, [x, R.frames[0], H(R.frames[0]) - 2.7], [x, R.frames[4], H(R.frames[4]) - 2.7], 0.8, M.steelDark));   // eave beams
+  R.cols.forEach(x => [[436, 459.5], [483, 506.5]].forEach(([y1, y2]) => { strut(hr, [x, y1, 1], [x, y2, H(y2) - 3], 0.25, M.steel); strut(hr, [x, y2, 1], [x, y1, H(y1) - 3], 0.25, M.steel); }));   // X-bracing
+  // roof: sheets, purlins, gutter + fascia and the panels, in one group tilted 5° (low edge south)
+  const L = (R.y2 - R.y1) / Math.cos(a), W = R.x2 - R.x1, cx = (R.x1 + R.x2) / 2, cy = (R.y1 + R.y2) / 2;
+  const rf = new THREE.Group(); rf.position.copy(P(cx, cy, H(cy))); rf.rotation.x = a; hr.add(rf);
+  const add = (geo, mat, px, py, pz) => { const m = new THREE.Mesh(geo, mat); m.position.set(px, py, pz); m.castShadow = true; m.receiveShadow = true; cut(m); rf.add(m); return m; };
+  add(worldBox(W, 0.25, L), M.roof, 0, 0, 0);
+  for (let x = -W / 2 + 2; x <= W / 2 - 1.9; x += 4.85) add(worldBox(0.35, 0.7, L - 0.6), M.steelDark, x, -0.48, 0);
+  add(worldBox(W + 0.4, 0.9, 0.9), M.steelDark, 0, -0.2, L / 2 + 0.35); add(worldBox(W + 0.4, 1.4, 0.3), M.steelDark, 0, 0.1, -L / 2 - 0.15);
+  const PW = 3.72, PL = 7.815, GAP = 0.066, WALK = 2.5, rowW = R.across * PW + (R.across - 1) * GAP;
+  const span = R.rows * PL + (R.rows - 1) * GAP + WALK, z0 = L / 2 - (L - span) / 2;
+  const pg = new THREE.BoxGeometry(PW - 0.04, 0.12, PL - 0.04), uv = pg.attributes.uv;
+  for (let k = 0; k < uv.count; k++) uv.setXY(k, uv.getX(k) * 6, uv.getY(k) * 3.3);
+  for (let r = 0; r < R.rows; r++) {
+    const zc = z0 - (r + 0.5) * PL - r * GAP - (r >= 6 ? WALK : 0);
+    for (let c = 0; c < R.across; c++) add(pg, M.solar, -rowW / 2 + PW / 2 + c * (PW + GAP), 0.32, zc);
+    add(new THREE.BoxGeometry(rowW, 0.12, 0.2), M.steel, 0, 0.2, zc + PL * 0.3); add(new THREE.BoxGeometry(rowW, 0.12, 0.2), M.steel, 0, 0.2, zc - PL * 0.3);   // mounting rails
+  }
+  // downpipes at the low (south) eave into the loop drain
+  R.cols.forEach(x => cyl(hr, x + (x < 140 ? 1 : -1), 411.3, 0.3, R.low, M.steelDark, 0, 8));
+  // extra holding in the east lane: lockable store room (south end) + fenced stock bay for bagged paddy / rice
+  block(hr, { x1: 156.6, y1: 411.6, x2: 164.4, y2: 436 }, 1, 11, M.plaster, { parapet: 0.6, roof: M.slab });
+  shutter(hr, 160.5, 436, 'N', 6, 8, false);
+  [[158, 415], [158, 421]].forEach(([x, y]) => box(hr, x, y, x + 5, y + 3.5, 3, M.whitePaint, 11.6));   // 2 × 50 kW inverters on the store roof (shaded)
+  panel(hr, [156.3, 437], [156.3, 464], 0.3, 7, M.railBlue); panel(hr, [156.3, 472], [156.3, 500], 0.3, 7, M.railBlue);
+  [437, 464, 472, 500].forEach(y => box(hr, 156.05, y - .2, 156.55, y + .2, 7.4, M.steelDark, 0.3));
+  const stack = (y1, y2, h, tarp) => { box(hr, 157.2, y1, 163.8, y2, 0.5, M.wood, 0.3); if (tarp) box(hr, 157.1, y1 - .1, 163.9, y2 + .1, h + 0.6, M.tarpGreen, 0.6); else box(hr, 157.4, y1 + .2, 163.6, y2 - .2, h, M.jute, 0.8); };
+  stack(440, 452, 9, false); stack(455, 466, 10, true); stack(474, 486, 8, false); stack(489, 499, 10, true);
+  // covered walkway along the west side, staff-flats door ↔ mill front
+  [113.2, 118.8].forEach(x => box(hr, x - .15, 412, x + .15, 509, 0.05, M.yellow, 0.32, false));
+  for (let y = 416; y < 507; y += 6) box(hr, 113.4, y, 118.6, y + 0.5, 0.05, M.whitePaint, 0.32, false);
+  person(hr, 116, 452, 0.3, M.kurta3);
+  const n = R.across * R.rows, kwp = (n * R.wp / 1000).toFixed(1);
+  tag(hr, { x1: R.x1, y1: R.y1, x2: R.x2, y2: R.y2 }, {
+    name: 'Option: covered trolley holding + solar roof', status: 'review', size: '≈54 × 98 ft roof, open sides, 18 ft (south) to ≈26.6 ft (north)',
+    area: `≈5,270 sq ft covered ≈ 23 marla · ${n} × ${R.wp} W ≈ ${kwp} kWp`,
+    notes: 'v19, in the original (hybrid) front zone. An open-sided steel roof over the trolley holding lanes, so queued trolleys, their paddy and the drivers stay dry in harvest rain and shaded in the October sun (rain-soaked paddy also weighs and tests wetter at the weighbridge). Portal frames every 23.5 ft span 52 ft clear, so there are no columns between the lanes. The roof is one 5° slope falling south: 18 ft at the low eave, ≈26.6 ft at the north, so loaded trolleys (≈12–13 ft) pass easily and the gutter drains into the loop drain. Because the whole roof faces south it carries solar flush on the sheets: 154 × 650 W modules (Longi Hi-MO X10 class) in 11 rows with a cleaning walkway, ≈100 kWp; the two inverters sit in the shade on the store room. Extra holding: the east lane becomes a lockable store room (≈8 × 24 ft: tarps, empty jute bags, spare trolley tyres, moisture meter, tools) and a fenced stock bay (≈8 × 62 ft) for bagged paddy or rice overflow, ≈50 t. Off-season, when no trolleys queue, the whole covered floor can hold ≈400–500 t of bagged paddy under tarps, or park the mills’ tractors and trolleys. Trade-off: 4 trolley lanes instead of 5 (≈8 tractor-trolleys queue at once). LED high-bays for night unloading; a covered walkway runs along the west side from the staff-flats door to the mill front. The staff flats (≈35 ft) shade the west edge of the roof late on winter afternoons — a small loss, included below.',
+    finance: {
+      rows: [
+        ['Capacity (as modelled)', `≈ ${kwp} kWp · ${n} × ${R.wp} W · 2 × 50 kW inverters`],
+        ['Energy per year', '≈ 125–135 MWh (≈ 1,250–1,350 kWh per kWp: 5° tilt, dust, a little shade from the staff flats)'],
+        ['Steel roof (frames, purlins, sheets, gutters, footings, LED lights)', 'Rs 0.8–1.2 cr (≈ Rs 1,500–2,300/sq ft)'],
+        ['— store room + stock-bay fence', 'Rs 5–8 lakh'],
+        ['Solar (flush-mounted, turnkey)', 'Rs 0.6–0.8 cr (≈ Rs 60–80/W; panels Rs 38–48/W)'],
+        ['Total', 'Rs 1.45–2.1 cr'],
+        ['Net per year (power used in the mill)', '≈ Rs 34–43 lakh (≈ Rs 28–33 saved per unit, minus washing)'],
+        ['Payback', 'Solar alone ≈ 1.5–2.5 yrs · with the roof ≈ 3.5–6 yrs'],
+        ['Compared with the paddy-store flat roof', 'That option (Rs 1.7–2.4 cr, ≈129 kWp) pays for a roof the store already has; this one also buys ≈5,270 sq ft of new covered space'],
+      ],
+      note: 'Planning estimates at Nov 2026 prices. The roof rate assumes a light PEB frame designed for the panel load (fabricated + erected steel ≈ Rs 350–420/kg; rebar is ≈ Rs 255–290/kg). Same power-saving basis as the paddy-store solar card: B2 off-peak Rs 22.83 + taxes; under net billing, surplus sent to the grid earns only ≈ Rs 8–11/unit, so the power should be used in the mills. If both solar options are built (≈230 kWp), check that the mills’ daytime load can take it. Only in the original front zone; the three variations remove the trolley holding area.',
+    },
+    round: 19,
+  });
+  label(hr, 'Store room', 160.5, 424, 13, '', 2); label(hr, 'Stock bay · bagged paddy', 160.5, 470, 12, '', 2); label(hr, 'Covered walkway', 116, 480, 2, '', 2);
+}
+
+// ---------- v20: store on the old weighbridge bay (x 165–195), original front zone only ----------
+// A plain clear-span PEB shed (white cladding, red trim like finished goods) so it can change use later.
+function frontStore(mf) {
+  const st = new THREE.Group(); st.name = 'frontStore'; mf.add(st);
+  const r = SITE.frontStore;
+  slab(st, [[165, 410], [195, 410], [195, 515], [165, 515]], 0.3, M.concrete);                           // old bay + loop corner, paved
+  gableShed(st, r, { eave: 20, rise: 3, wall: M.cladWhite, roof: M.roofWhite, trim: M.trimRed, cut: true, frames: 24 });
+  shutter(st, 180.5, r.y2, 'N', 12, 14, true, true);                                                       // onto the exit lane (north)
+  shutter(st, 180.5, r.y1, 'S', 12, 14, true, true);                                                       // onto the paved corner by the drying loop (south)
+  // inside today: bagged stock on pallets, drums, tarps, spare trolley tyres
+  const stack = (x1, y1, x2, y2, h) => { box(st, x1, y1, x2, y2, 0.5, M.pallet, 0.3); box(st, x1 + .2, y1 + .2, x2 - .2, y2 - .2, h, M.bags, 0.8); };
+  [[430, 440], [453, 463], [466, 474], [484, 494]].forEach(([y1, y2], i) => stack(182, y1, 191.5, y2, [9, 10.5, 7.5, 9][i]));
+  [[171, 430], [173.5, 430], [171, 432.5], [173.5, 432.5]].forEach(([x, y]) => cyl(st, x, y, 1, 3, M.steelBlue, 0.3, 12));
+  [433, 436].forEach(y => cyl(st, 177, y, 1.4, 2.8, M.tyre, 0.3, 14));
+  box(st, 170, 486, 176, 494, 1.2, M.tarp, 0.3);
+  pumpArrow(st, 186, 509, -Math.PI / 2); pumpArrow(st, 170, 509, -Math.PI / 2);                          // trolleys leave the holding area east to the main road
+  tag(st, r, {
+    name: 'Option: store (old weighbridge spot)', status: 'review', size: '25 × 72 ft, 20 ft eaves, clear span', area: '1,800 sq ft ≈ 8 marla',
+    notes: 'v20: the weighbridge moved to the end of the main road, so its bay is free. In the original layout a plain PEB store stands here, matching finished goods (white cladding, red trim): roller shutters at both ends — north onto the exit lane the trolleys use to reach the main road, south onto the paved corner by the drying loop (the west side backs onto the v19 stock bay, so it stays blank). Today it holds bagged stock, drums, tarps and spare trolley tyres (≈200 t of bags if filled). It is deliberately a simple clear-span shell on a strong floor so it can change use later: a workshop + spare-parts store, a garage for the mills’ tractors and trolleys, extra paddy or rice storage, a sales / dealer godown by the gate, or shops facing the road if the front plan changes. The east wall faces the main road and can take a shutter later. Not in the three variations (each uses this strip).',
+    finance: {
+      rows: [
+        ['Build cost', 'Rs 0.4–0.55 cr (≈ Rs 2,200–3,000/sq ft: PEB frame + cladding, brick plinth, floor slab, 2 roller shutters, lights)'],
+        ['Holds', '≈ 200 t of bagged paddy or rice, or ≈ 6 tractor-trolleys under cover'],
+        ['Paving the old bay', 'Rs 3–5 lakh (most of it is already concrete)'],
+      ],
+      note: 'Planning estimate at Nov 2026 prices. Storage pays back in avoided rent and spoilage rather than income, so no ROI is shown.',
+    },
+    round: 20,
+  });
+  label(st, 'Option: store (old weighbridge spot)', 180.5, 462, 26, 'review', 1);
+  mergeByMaterial(st);
 }
 
 // ---------- v15 pump helpers: signs, materials, arrows ----------
