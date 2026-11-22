@@ -2,7 +2,7 @@
 // Saila plant lives in saila.js. Buildings here have cut-away walls/roofs (toggle "Cut-away") to show what's inside.
 import * as THREE from 'three';
 import { SITE } from '../site.js';
-import { M, P, box, boxR, slab, slabR, trees, cyl, gableShed, shutter, block, freeZone, label, tag, truck, car, segBox, strut, hopper, person, waterTank, acUnit, mergeByMaterial, railRect } from '../lib.js';
+import { M, P, box, boxR, slab, slabR, trees, cyl, gableShed, shutter, block, freeZone, label, tag, truck, tractor, car, segBox, strut, hopper, person, waterTank, acUnit, mergeByMaterial, railRect } from '../lib.js';
 import * as saila from './saila.js';
 import * as offices from './offices.js';
 
@@ -45,82 +45,60 @@ export function build(scene) {
   cutLabel(b, 'Boiler shell', 15, 31, 14); cutLabel(b, 'Multicyclone', 38.75, 34.5, 22);
   mergeByMaterial(b);
 
-  // ---------- milling hall (new PEB, existing machinery moved back) ----------
-  const h = new THREE.Group(); h.name = 'hall'; g.add(h);
-  gableShed(h, R.hall, { eave: 32, rise: 6, wall: M.cladGrey, roof: M.roof, trim: M.trimGreen, cut: true, frames: 26 });
-  const hh = boxR(h, { x1: 45, y1: 138, x2: 55, y2: 150 }, 52, M.cladGreen); hh.userData.cut = true;   // elevator head house
-  box(h, 44.6, 137.6, 55.4, 150.4, 1, M.trimGreen, 52).userData.cut = true;
-  shutter(h, 93.2, 60, 'E', 14, 16, true, true);                                          // to finished goods
-  shutter(h, 68, 39, 'S', 12, 14, true, true);                                            // husk / service
-  shutter(h, 93.2, 135, 'E', 14, 16, true, true);                                         // maintenance
-  hallMachinery(h);
-  tag(h, R.hall, { name: 'Milling hall', status: 'relocated', notes: 'New PEB shed (portal frames every ≈26 ft, brick plinth, cladding, green louvres, elevator head house) for the existing machinery moved back from the front. Turn on Cut-away to see the line inside. The machine line-up shown is indicative (a standard parboiled-rice line); it will be matched to the real machines once their list or photos are in.', round: 2 });
-  label(h, 'Milling hall', 68.2, 82, 46, 'major', 1);
+  // ---------- v23: rice mill hall = milling hall + finished goods in ONE building (owner's call) ----------
+  // Ridge east–west, against the south wall with a one-truck back lane behind it; milling in the west part, packing + finished
+  // goods in the east part, docks on the east wall. The middle of the zone becomes an open yard up to the saila plant.
+  const h = new THREE.Group(); h.name = 'millHall'; g.add(h);
+  const MH = R.millHall;
+  gableShed(h, MH, { eave: 30, rise: 7, wall: M.cladGrey, roof: M.roof, trim: M.trimGreen, cut: true, frames: 24 });
+  const hh = boxR(h, { x1: 59.5, y1: 98, x2: 69.5, y2: 109 }, 46, M.cladGreen); hh.userData.cut = true;       // elevator head house over the intake
+  box(h, 59.1, 97.6, 69.9, 109.4, 1, M.trimGreen, 46).userData.cut = true;
+  [30, 50, 70, 90].forEach(y => shutter(h, MH.x2, y, 'E', 12, 14, true, true));                                 // 4 dispatch docks
+  [24, 36, 44, 56, 64, 76, 84, 96].forEach(y => box(h, MH.x2, y - 1, MH.x2 + 0.8, y + 1, 2.4, M.tyre, 1));        // dock bumpers
+  [19, 107].forEach(y => cyl(h, MH.x2 + 2, y, 0.6, 3.5, M.yellow, 0, 10));
+  shutter(h, 152, MH.y2, 'N', 12, 14, true, true);                                                              // finished goods ↔ yard
+  shutter(h, 92, MH.y2, 'N', 14, 16, true, true);                                                               // milling: maintenance ↔ yard
+  // dust partition between milling and finished goods, with an opening for the product line + forklifts
+  box(h, 127.8, 16.9, 128.4, 38, 16, M.cladGrey, 0.2); box(h, 127.8, 50, 128.4, 109.1, 16, M.cladGrey, 0.2);
+  millMachinery(h);
+  // packing line at the opening, then bag stacks on pallets (50 kg bags) with aisles to the four docks
+  box(h, 130, 40, 135, 44, 7, M.machine, 0.2); hopper(h, 132.5, 42, 7.2, 5, 4, 1, 1, 3, M.machineBlue);
+  box(h, 135, 41, 141, 43, 2.6, M.machineBlue, 0.2); box(h, 137, 39, 139, 40.5, 4.5, M.machine, 0.2);
+  const stack = (x1, y1, x2, y2, hgt) => { box(h, x1, y1, x2, y2, 0.5, M.pallet, 0.2); box(h, x1 + .2, y1 + .2, x2 - .2, y2 - .2, hgt, M.bags, 0.7); };
+  [[144, 152], [155, 163], [166, 174]].forEach(([x1, x2], i) => [[18.5, 24], [36, 44], [56, 64], [76, 84], [96, 107]].forEach(([y1, y2], j) => stack(x1, y1, x2, y2, [10.8, 9, 7.2, 10.8, 5.4, 9][(i + j) % 6])));
+  person(h, 136, 46); person(h, 160, 50);
+  // paddy from the saila tempering bins: enclosed belt gallery ≈28 ft up across the yard, one trestle
+  strut(h, [46.5, 157, 27.7], [59.5, 106, 27.2], 3, M.steelGreen);
+  [[52, 131.5], [54.4, 131.5]].forEach(([x, y]) => box(h, x - .4, y - .4, x + .4, y + .4, 26, M.steelGreen, 0.2));
+  strut(h, [52, 131.5, 2], [54.4, 131.5, 24], 0.3, M.steel); strut(h, [54.4, 131.5, 2], [52, 131.5, 24], 0.3, M.steel);
+  // husk: walled bay in the south-west corner, overhead belt across the west lane to the boiler
+  strut(h, [58.5, 44, 18], [33.5, 44, 13], 2, M.steelGreen);
+  tag(h, MH, { name: 'Rice mill hall (milling + finished goods, one building)', status: 'relocated', size: '120 × 94 ft · eaves 30 ft · ridge east–west', area: '≈11,280 sq ft (milling ≈6,580 + packing and finished goods ≈4,700)',
+    notes: 'v23, after the owner’s review: the milling hall and the finished-goods godown are now one building, turned east–west and set against the south wall with only a ≈15 ft one-way truck lane behind it. That frees the middle of the rice zone as an open yard right up to the saila plant’s east face. Paddy comes from the saila tempering bins along an overhead belt gallery (≈28 ft up, one trestle) into the intake elevator at the north-west corner. The milling line runs in three rows: north row west → east (destoner, pre-cleaner, huskers, husk aspirator, paddy separator), middle row back east → west (whiteners, polishers, grader), south row (colour sorters) to the product bins, then through an opening in the dust partition to the packing line and the finished-goods stacks in the east part. Four docks on the east wall load trucks side-on from the ≈17.5 ft apron (one-way southbound into the back lane); shutters on the north wall open onto the yard for tractors, small trucks and maintenance. Husk drops into a walled husk bay in the south-west corner and goes by an overhead belt across the west lane to the boiler; the MCC room sits beside it. ≈11,280 sq ft, about 5 % more than the two halls it replaces (6,500 + 4,200 sq ft), and one roof instead of two. Machine positions are indicative until the real machine list is in. Turn on Cut-away to see inside.', round: 23 });
+  label(h, 'Rice mill hall · milling + finished goods', 118, 63, 44, 'major', 1);
+  label(h, 'Belt gallery from the tempering bins', 53, 131.5, 31, '', 2); label(h, 'Husk belt to boiler', 45, 44, 20, '', 2);
+  cutLabel(h, 'Packing line', 134, 42, 12); cutLabel(h, 'Finished goods · bag stacks', 159, 60, 14);
   mergeByMaterial(h);
 
-  // ---------- husk store (new, open-sided) ----------
-  const k = new THREE.Group(); k.name = 'husk'; g.add(k);
-  const hr = R.husk;
-  box(k, hr.x1, hr.y1, hr.x2, hr.y1 + 0.9, 8, M.brick); box(k, hr.x1, hr.y1, hr.x1 + 0.9, hr.y2, 8, M.brick); box(k, hr.x2 - 0.9, hr.y1, hr.x2, hr.y2, 8, M.brick);
-  [[hr.x1 + .5, hr.y2 - .5], [hr.x2 - .5, hr.y2 - .5], [hr.x1 + .5, hr.y1 + .5], [hr.x2 - .5, hr.y1 + .5]].forEach(([x, y]) => box(k, x - .4, y - .4, x + .4, y + .4, 18, M.steelDark));
-  const roof = box(k, hr.x1 - 1, hr.y1 - 1, hr.x2 + 1, hr.y2 + 2, 0.4, M.roof, 18); roof.rotation.x = 0.06;
-  const pile = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), M.husk);
-  pile.scale.set(10, 9, 9); pile.position.copy(P(55.6, 26.5, 0)); pile.castShadow = true; pile.receiveShadow = true; k.add(pile);
-  strut(k, [55, 39, 18], [55, 31, 14], 2, M.steelGreen);                                  // husk conveyor from the hall
-  strut(k, [44, 24, 4], [33, 26, 8], 1.4, M.steelGreen, true);                            // screw feed to the boiler
-  tag(k, hr, { name: 'Husk store', status: 'new', notes: 'Open-sided store with brick walls on three sides. Husk from the milling hall arrives by conveyor; a screw feeds it to the boiler next door.', round: 2 });
-  label(k, 'Husk', 55.6, 26.5, 22, '', 2);
-
-  freeZone(g, R.service, 'Service / fire lane');
-  // ---------- two-way truck lanes between the buildings (v9) ----------
+  // ---------- v23: one-way truck loop round the rice mill hall + open yard ----------
+  // weighbridge (end of the main road) → back lane west → west lane north → open yard → strip in front of the rice office east →
+  // main road. Dispatch trucks enter the east apron from that strip, load at the docks and leave south into the back lane.
   const ln = new THREE.Group(); ln.name = 'lanes'; g.add(ln);
-  const dash = (a, b, horiz) => { const L = horiz ? b[0] - a[0] : b[1] - a[1]; for (let t = 4; t < L - 4; t += 14) { const x = horiz ? a[0] + t : a[0], y = horiz ? a[1] : a[1] + t; box(ln, horiz ? x : x - .25, horiz ? y - .25 : y, horiz ? x + 7 : x + .25, horiz ? y + .25 : y + 7, 0.05, M.whitePaint, 0.22, false); } };
-  dash([108.1, 2], [108.1, 124], false);            // west lane centre line (29.8 ft wide)
-  dash([125, 113], [193, 113], true);               // east–west lane centre line (26 ft wide)
-  dash([106.6, 128], [106.6, 167], false);          // link to the drying loop (26.8 ft wide)
-  [[R.laneW, '29.8 ft'], [R.laneEW, '26 ft'], [R.laneN, '26.8 ft']].forEach(([r, w]) => { box(ln, r.x1, r.y1, r.x1 + .35, r.y2, 0.05, M.yellow, 0.22, false); box(ln, r.x2 - .35, r.y1, r.x2, r.y2, 0.05, M.yellow, 0.22, false); });
-  truck(ln, 112, 112.5 - 6.5, -Math.PI / 2, true); truck(ln, 146, 113 + 6.5, Math.PI / 2, false);   // two trucks passing in the 26 ft lane
-  truck(ln, 101, 40, 0, true); truck(ln, 115.2, 70, Math.PI, false);                                   // and in the west lane
-  tag(ln, null, { name: 'Two-way truck lanes', status: 'infra', size: 'West 29.8 ft · east–west 26 ft · link 26.8 ft', notes: 'Every gap between rice-mill buildings is at least 26 ft, so two trucks (≈8.5 ft each) can pass with room to spare: west lane between the milling hall and finished goods, east–west lane between finished goods and the office (main road ↔ west lane), and a link from the west lane up to the drying loop. v19: a ≈15 ft back lane behind finished goods (godown shortened 11 ft). v20: it runs one-way westbound as the exit from the weighbridge at the end of the main road: trucks cross the bridge southbound, turn west behind the godown, go north up the west lane and east along the east–west lane back to the main road. Finished-goods trucks can leave the apron the same way.', round: 20 });
-  // v17: the space freed by shortening the rice office (x 174–195 × y 126–167) is left open and paved, so trucks can swing
-  // through the lane / main-road corner freely; a few bollards protect the office's east door
-  slab(ln, [[174, 126], [195, 126], [195, 167], [174, 167]], 0.27, M.road);
-  [[175.5, 132], [175.5, 144], [175.5, 150]].forEach(([x, y]) => cyl(ln, x, y, 0.35, 3, M.yellow, 0.27, 10));
-  truck(ln, 186, 118, -Math.PI / 4, true);                                                                          // truck taking the curve out of the lane
-  // v19: back lane behind finished goods (≈15 ft between the boundary wall and the godown plinth).
-  // v20: one-way westbound — the exit from the weighbridge at the end of the main road, round finished goods to the west lane.
-  box(ln, 123, 15.2, 173, 15.55, 0.05, M.yellow, 0.22, false);
+  slabR(ln, R.apron, 0.3, M.concrete);
+  box(ln, 43.2, 15.2, MH.x2, 15.55, 0.05, M.yellow, 0.22, false); box(ln, 57.6, 15.7, 57.95, MH.y2, 0.05, M.yellow, 0.22, false);
   const ash = new THREE.Shape([[-1.2, -4], [1.2, -4], [1.2, 0], [3, 0], [0, 4.5], [-3, 0], [-1.2, 0]].map(([a, b]) => new THREE.Vector2(a, b)));
   const ag = new THREE.ShapeGeometry(ash); ag.rotateX(-Math.PI / 2);
-  [[165, 8], [135, 8], [110, 14, 0]].forEach(([x, y, r = Math.PI / 2]) => { const a = new THREE.Mesh(ag, M.whitePaint); a.position.copy(P(x, y, 0.23)); a.rotation.y = r; ln.add(a); });
-  truck(ln, 150, 8, Math.PI / 2, true);
-  label(ln, 'Back lane · one-way ≈15 ft', 140, 8, 3, 'road', 2);
-  label(ln, 'Two-way lane · 26 ft', 150, 113, 3, 'road', 2); label(ln, 'Two-way lane · 29.8 ft', 108, 90, 3, 'road', 2); label(ln, 'Link to drying loop', 106.6, 150, 3, 'road', 2);
-
-  // ---------- finished goods + packing (new PEB) ----------
-  const f = new THREE.Group(); f.name = 'fg'; g.add(f);
-  gableShed(f, R.fg, { eave: 26, rise: 5, wall: M.cladWhite, roof: M.roofWhite, trim: M.trimRed, cut: true, frames: 24 });
-  [40, 75].forEach(y => shutter(f, 123, y, 'W', 14, 16, true, true));
-  [28, 50, 70, 90].forEach(y => shutter(f, 173, y, 'E', 12, 14, true, true));          // v19: docks re-spaced on the shorter wall
-  box(f, 173, 19, 180, 97, 4, M.slab);
-  segBox(f, [180, 19], [180, 97], 0.25, 3.5, M.rail, 4);
-  [23, 33, 44, 56, 66, 76, 86, 94].forEach(y => box(f, 180, y - 1, 180.8, y + 1, 2.4, M.tyre, 1));
-  [21, 95].forEach(y => cyl(f, 182, y, 0.6, 3.5, M.yellow, 0, 10));
-  // packing line by the west door: bagging scale, stitcher, belt
-  box(f, 126, 34, 131, 38, 7, M.machine, 0.2); hopper(f, 128.5, 36, 7.2, 5, 4, 1, 1, 3, M.machineBlue);
-  box(f, 131, 35, 137, 37, 2.6, M.machineBlue, 0.2);
-  box(f, 133, 33, 135, 34.5, 4.5, M.machine, 0.2);
-  // bag stacks on pallets (50 kg bags), aisles to the docks
-  const stack = (x1, y1, x2, y2, hgt) => { box(f, x1, y1, x2, y2, 0.5, M.pallet, 0.2); box(f, x1 + .2, y1 + .2, x2 - .2, y2 - .2, hgt, M.bags, 0.7); };
-  [[138, 146], [149, 157], [160, 168]].forEach(([x1, x2], i) => [[20, 31], [34, 45], [52, 63], [66, 77], [82, 94]].forEach(([y1, y2], j) => stack(x1, y1, x2, y2, [10.8, 9, 7.2, 10.8, 5.4, 9][(i + j) % 6])));
-  person(f, 132, 40); person(f, 158, 40);
-  tag(f, R.fg, { name: 'Finished goods + packing', status: 'new', size: '50 × 84 ft', area: '4,200 sq ft', notes: 'v9: extended north from 70 to 95 ft; v19: the south end is cut back 11 ft (to 84 ft, −550 sq ft) so a truck can pass behind it on a ≈15 ft back lane from the west lane to the apron and main road. Still +20% on the original 70 ft. White PEB warehouse with red trim. Rice comes in through two west doors from the milling hall, is bagged on the packing line, stacked on pallets (≈15 blocks of 50 kg bags) and shipped from four raised docks on the east side. The 22 ft apron suits side-loading with trucks parked parallel to the dock; backing in square to the dock would need about 45 ft.', round: 19 });
-  label(f, 'Finished goods', 148, 58, 34, 'major', 1);
-  cutLabel(f, 'Packing line', 130, 36, 12); cutLabel(f, 'Bag stacks', 153, 48, 14);
-  mergeByMaterial(f);
-  slabR(g, R.apron, 0.35, M.concrete);
-  label(g, 'Loading apron', 186, 18, 1, '', 2);
-  truck(g, 185.5, 40, 0, false); person(g, 179, 46, 4);
+  [[170, 8, Math.PI / 2], [128, 8, Math.PI / 2], [86, 8, Math.PI / 2], [50.6, 34, 0], [50.6, 84, 0], [132, 118, -Math.PI / 2], [176, 118, -Math.PI / 2], [186.8, 100, Math.PI], [186.8, 24, Math.PI]]
+    .forEach(([x, y, r]) => { const a = new THREE.Mesh(ag, M.whitePaint); a.position.copy(P(x, y, 0.36)); a.rotation.y = r; ln.add(a); });
+  truck(ln, 110, 8, Math.PI / 2, true); truck(ln, 50.6, 62, 0, false); truck(ln, 152, 118, -Math.PI / 2, true); truck(ln, 186.8, 62, Math.PI, true);
+  tractor(ln, 70, 142, Math.PI / 2, true, 0); person(ln, 48, 120, 0.2, M.kurta2);
+  tag(ln, null, { name: 'Truck circulation (one-way loop)', status: 'infra', size: 'Back lane ≈15 ft · west lane ≈15 ft · office strip 16 ft · east apron ≈17.5 ft', notes: 'v23: with the rice mill hall against the south wall, trucks go round it one way. From the weighbridge at the end of the main road: west along the back lane behind the hall, north up the west lane (between the boiler and the hall), into the open yard, then east along the strip in front of the rice office back to the main road. Dispatch trucks turn off that strip into the east apron, load at the four docks and carry on south into the back lane. Each lane takes one truck at a time; the open yard is where trucks and tractor-trolleys wait or turn. The old two-way lanes (west lane, east–west lane, link to the drying loop) are gone: the yard now opens straight onto the drying loop’s south side.', round: 23 });
+  label(ln, 'Back lane · one-way ≈15 ft', 140, 8, 3, 'road', 2); label(ln, 'West lane · one-way', 50.6, 50, 3, 'road', 2);
+  label(ln, 'One-way to the main road', 160, 118, 3, 'road', 2); label(ln, 'Dock apron', 186.8, 82, 3, 'road', 2);
+  freeZone(g, { x1: 60, y1: 113, x2: 117, y2: 166 }, 'Open yard · access to the saila plant');
+  // v17: the space freed by shortening the rice office (x 174–195 × y 126–167) is left open and paved; bollards protect the office's east door
+  slab(ln, [[174, 126], [195, 126], [195, 167], [174, 167]], 0.27, M.road);
+  [[175.5, 132], [175.5, 144], [175.5, 150]].forEach(([x, y]) => cyl(ln, x, y, 0.35, 3, M.yellow, 0.27, 10));
 
   // ---------- rice mill operations office (v7, offices.js) ----------
   offices.buildOps(g);
@@ -128,40 +106,38 @@ export function build(scene) {
   return g;
 }
 
-// Indicative parboiled-rice milling line, north (paddy in from the tempering bins) to south (rice out to finished goods).
-function hallMachinery(h) {
+// v23: indicative parboiled-rice milling line in the west part of the rice mill hall, in three rows (north row west → east,
+// middle row east → west, south row to the product bins by the packing opening).
+function millMachinery(h) {
   const m = new THREE.Group(); m.name = 'machinery'; h.add(m);
   const Z = 0.2;
   const leg4 = (x1, y1, x2, y2, hgt, mat = M.machineBlue) => [[x1, y1], [x2, y1], [x1, y2], [x2, y2]].forEach(([x, y]) => box(m, x - .25, y - .25, x + .25, y + .25, hgt, mat, Z));
   const elev = (x, y, hgt = 27) => { box(m, x - .9, y - 1.3, x + .9, y + 1.3, hgt, M.machineGreen, Z); box(m, x - 1.2, y - 1.8, x + 1.2, y + 1.8, 2.4, M.machineGreen, Z + hgt); };
-  // intake from the tempering bins (gallery enters at the north-west)
-  elev(47, 157, 26);
-  // destoner + pre-cleaner
-  box(m, 52, 152, 60, 160, 1.2, M.machineBlue, Z); box(m, 52.5, 152.5, 59.5, 159.5, 4, M.machine, Z + 1.2); hopper(m, 56, 156, Z + 5.2, 5, 5, 1, 1, 2.5, M.machine);
-  box(m, 63, 153, 69, 159, 6, M.machine, Z);
-  // rubber-roll huskers + husk aspirator (pipe takes husk to the husk store)
-  [[50, 129], [57, 129]].forEach(([x, y]) => { box(m, x, y, x + 5, y + 4.5, 6, M.machine, Z); hopper(m, x + 2.5, y + 2.25, Z + 6, 3.5, 3.5, 1, 1, 2.5, M.machine); cyl(m, x + 5.6, y + 2.25, 0.9, 1.6, M.motor, Z + 1); });
-  box(m, 65, 128.5, 72, 134, 8, M.machineGreen, Z);
-  strut(m, [69, 131, 8], [69, 131, 27], 1.4, M.steel, true); strut(m, [69, 131, 27], [69, 44, 27], 1.4, M.steel, true); strut(m, [69, 44, 27], [56, 41, 22], 1.4, M.steel, true);
-  // paddy separator (tray type)
-  leg4(48, 110, 61, 118, 3); box(m, 48, 110, 61, 118, 4.5, M.machine, Z + 3); box(m, 49, 111, 60, 117, 0.6, M.machineBlue, Z + 7.5);
-  // whiteners (vertical) x3
-  [50, 58, 66].forEach(x => { box(m, x - 2, 95, x + 2, 101, 3, M.machineBlue, Z); cyl(m, x, 98, 1.5, 6.5, M.machine, Z + 3); hopper(m, x, 98, Z + 9.5, 2.4, 2.4, 0.8, 0.8, 1.6, M.machine); cyl(m, x + 2.6, 98, 0.9, 2, M.motor, Z + 1); });
-  // silky polishers x2
-  [[50, 80], [60, 80]].forEach(([x, y]) => { box(m, x, y, x + 5, y + 5, 3, M.machineBlue, Z); cyl(m, x + 2.5, y + 2.5, 1.4, 5.5, M.machine, Z + 3); });
-  // grader / rotary sifter
-  leg4(48, 64, 58, 72, 3); box(m, 48, 64, 58, 72, 3.5, M.machine, Z + 3); hopper(m, 53, 68, Z + 6.5, 4, 4, 1, 1, 2, M.machine);
-  // colour sorters x2
-  [[63, 64], [72, 64]].forEach(([x, y]) => { box(m, x, y, x + 6, y + 4.5, 7, M.whitePaint, Z); box(m, x + 0.5, y - 0.05, x + 5.5, y + 0.1, 2.5, M.glass, Z + 3.5); hopper(m, x + 3, y + 2.25, Z + 7, 5, 3.5, 1.2, 1.2, 2.2, M.whitePaint); });
-  // product bins on legs + bagging by the east door
-  [[76, 44], [83, 44], [76, 51], [83, 51]].forEach(([x, y]) => { leg4(x, y, x + 6, y + 6, 8); hopper(m, x + 3, y + 3, Z + 5, 6, 6, 1, 1, 3, M.cream); box(m, x, y, x + 6, y + 6, 6, M.machineGreen, Z + 8); });
-  box(m, 86, 58, 91, 63, 6, M.machine, Z);
-  // bucket elevators between stages, overhead conveyor along the west side
-  [[46, 122], [46, 106], [46, 90], [46, 75], [62, 58]].forEach(([x, y]) => elev(x, y));
-  box(m, 45.8, 52, 47.6, 161, 1.6, M.machineGreen, Z + 27.6);
-  // MCC / electrical room in the south-west corner
-  box(m, 44, 40, 56, 50, 10, M.plaster, Z); box(m, 43.8, 39.8, 56.2, 50.2, 0.6, M.slab, Z + 10);
-  person(m, 62, 120, Z); person(m, 80, 70, Z);
-  [['Intake elevator', 47, 157, 30], ['Destoner', 56, 156, 10], ['Huskers', 56, 131, 10], ['Husk aspirator', 68.5, 131, 10], ['Paddy separator', 54.5, 114, 10], ['Whiteners', 58, 98, 12], ['Polishers', 57.5, 82.5, 10], ['Grader', 53, 68, 10], ['Colour sorters', 70, 66, 10], ['Product bins + bagging', 83, 51, 16], ['MCC room', 50, 45, 12]]
+  elev(62, 104, 26);                                                                                             // intake (gallery from the saila bins)
+  // north row: destoner + pre-cleaner, rubber-roll huskers, husk aspirator, paddy separator
+  box(m, 66, 98, 74, 106, 1.2, M.machineBlue, Z); box(m, 66.5, 98.5, 73.5, 105.5, 4, M.machine, Z + 1.2); hopper(m, 70, 102, Z + 5.2, 5, 5, 1, 1, 2.5, M.machine);
+  box(m, 77, 99, 83, 105, 6, M.machine, Z);
+  [[86, 99.5], [93, 99.5]].forEach(([x, y]) => { box(m, x, y, x + 5, y + 4.5, 6, M.machine, Z); hopper(m, x + 2.5, y + 2.25, Z + 6, 3.5, 3.5, 1, 1, 2.5, M.machine); cyl(m, x + 5.6, y + 2.25, 0.9, 1.6, M.motor, Z + 1); });
+  box(m, 101, 98.5, 108, 104, 8, M.machineGreen, Z);
+  strut(m, [104.5, 101, 8], [104.5, 101, 26], 1.4, M.steel, true); strut(m, [104.5, 101, 26], [72, 101, 26], 1.4, M.steel, true);
+  strut(m, [72, 101, 26], [72, 46, 26], 1.4, M.steel, true); strut(m, [72, 46, 26], [70, 42, 15], 1.4, M.steel, true);   // husk pipe to the husk bay
+  leg4(111, 95, 124, 103, 3); box(m, 111, 95, 124, 103, 4.5, M.machine, Z + 3); box(m, 112, 96, 123, 102, 0.6, M.machineBlue, Z + 7.5);
+  // middle row: whiteners x3, silky polishers x2, grader
+  [118, 110, 102].forEach(x => { box(m, x - 2, 76, x + 2, 82, 3, M.machineBlue, Z); cyl(m, x, 79, 1.5, 6.5, M.machine, Z + 3); hopper(m, x, 79, Z + 9.5, 2.4, 2.4, 0.8, 0.8, 1.6, M.machine); cyl(m, x + 2.6, 79, 0.9, 2, M.motor, Z + 1); });
+  [[88, 76.5], [80, 76.5]].forEach(([x, y]) => { box(m, x, y, x + 5, y + 5, 3, M.machineBlue, Z); cyl(m, x + 2.5, y + 2.5, 1.4, 5.5, M.machine, Z + 3); });
+  leg4(64, 75, 74, 83, 3); box(m, 64, 75, 74, 83, 3.5, M.machine, Z + 3); hopper(m, 69, 79, Z + 6.5, 4, 4, 1, 1, 2, M.machine);
+  // south row: colour sorters x2, then product bins on legs by the packing opening
+  [[82, 56], [91, 56]].forEach(([x, y]) => { box(m, x, y, x + 6, y + 4.5, 7, M.whitePaint, Z); box(m, x + 0.5, y - 0.05, x + 5.5, y + 0.1, 2.5, M.glass, Z + 3.5); hopper(m, x + 3, y + 2.25, Z + 7, 5, 3.5, 1.2, 1.2, 2.2, M.whitePaint); });
+  [[108, 40], [115, 40], [108, 47], [115, 47]].forEach(([x, y]) => { leg4(x, y, x + 6, y + 6, 8); hopper(m, x + 3, y + 3, Z + 5, 6, 6, 1, 1, 3, M.cream); box(m, x, y, x + 6, y + 6, 6, M.machineGreen, Z + 8); });
+  // bucket elevators between the rows + overhead conveyor along the north wall
+  [[126, 96], [98, 86], [77, 86], [62, 70], [100, 58]].forEach(([x, y]) => elev(x, y));
+  box(m, 70, 106.6, 127, 108.4, 1.6, M.machineGreen, Z + 27.6);
+  // husk bay (south-west corner, 12 ft walls, open top) + MCC room
+  box(m, 59, 49.4, 77, 50.2, 12, M.brick, Z); box(m, 76.2, 28, 77, 50.2, 12, M.brick, Z); box(m, 59, 27.6, 77, 28.4, 12, M.brick, Z);
+  const pile = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), M.husk);
+  pile.scale.set(7.5, 6.5, 9.5); pile.position.copy(P(67.5, 39, Z)); pile.castShadow = true; pile.receiveShadow = true; m.add(pile);
+  box(m, 59, 17, 72, 26, 10, M.plaster, Z); box(m, 58.8, 16.8, 72.2, 26.2, 0.6, M.slab, Z + 10);
+  person(m, 96, 90, Z); person(m, 100, 66, Z);
+  [['Intake elevator', 62, 104, 30], ['Destoner', 70, 102, 10], ['Huskers', 91, 102, 10], ['Husk aspirator', 104.5, 101, 10], ['Paddy separator', 117.5, 99, 10], ['Whiteners', 110, 79, 12], ['Polishers', 86, 79, 10], ['Grader', 69, 79, 10], ['Colour sorters', 88, 58, 10], ['Product bins', 115, 47, 16], ['Husk bay', 67.5, 39, 14], ['MCC room', 65.5, 21.5, 12]]
     .forEach(([t, x, y, z]) => cutLabel(h, t, x, y, z));
 }

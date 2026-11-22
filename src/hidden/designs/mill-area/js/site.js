@@ -22,19 +22,20 @@ export const SITE = {
     saila:   { x1: 0, y1: 84.5, x2: 43.2, y2: 169 },
     sailaFree: { x1: 0, y1: 50, x2: 43.2, y2: 84.5 },
     boiler:  { x1: 0, y1: 15, x2: 43.2, y2: 50 },
-    hall:    { x1: 43.2, y1: 39, x2: 93.2, y2: 169 },
-    husk:    { x1: 43.2, y1: 14, x2: 68, y2: 39 },
-    service: { x1: 68, y1: 0, x2: 93.2, y2: 39 },
-    reserve: { x1: 93.2, y1: 104, x2: 150, y2: 169 },
-    yard: [ {x1:93.2,y1:0,x2:123,y2:104}, {x1:123,y1:75,x2:195,y2:104}, {x1:150,y1:104,x2:195,y2:119} ],
-    fg:      { x1: 123, y1: 16, x2: 173, y2: 100 },            // v9: extended north (was y 5–75); v19: south end cut back 11 ft for a truck lane behind it
-    apron:   { x1: 173, y1: 5, x2: 195, y2: 100 },
+    // v23 (owner): milling hall + finished goods are ONE building, ridge east–west, set against the south wall with one truck lane
+    // behind it, so the middle of the rice zone is an open yard up to the saila plant. Old: hall x 43.2–93.2 × y 39–169,
+    // finished goods x 123–173 × y 16–100, husk store x 43.2–68 × y 14–39, service lane x 68–93.2 × y 0–39.
+    millHall: { x1: 58, y1: 16, x2: 178, y2: 110 },
+    millZone: { x1: 58, y1: 16, x2: 128, y2: 110 },
+    fgZone:   { x1: 128, y1: 16, x2: 178, y2: 110 },
+    huskBay:  { x1: 59, y1: 28, x2: 77, y2: 50 },
+    apron:    { x1: 178, y1: 16, x2: 195.5, y2: 110 },          // east docks, one-way southbound into the back lane
+    laneS:    { x1: 43.2, y1: 0.55, x2: 195, y2: 15.7 },        // back lane, one-way westbound (weighbridge exit)
+    laneW:    { x1: 43.2, y1: 0, x2: 58, y2: 110 },             // west lane, one-way northbound
+    laneOffice: { x1: 120, y1: 110, x2: 195, y2: 126 },         // strip in front of the rice office, one-way eastbound to the main road
+    yard:     { x1: 43.2, y1: 110, x2: 195, y2: 169 },          // open yard (the rice office stands in its north-east part)
     offices: { x1: 150, y1: 119, x2: 195, y2: 169 },          // plot
     opsOffice: { x1: 120, y1: 126, x2: 174, y2: 167 },        // building (v16: east 17 ft removed so the lane/main-road corner can be rounded)
-    laneW:  { x1: 93.2, y1: 0, x2: 123, y2: 126 },              // two-way truck lanes between buildings (v9)
-    laneEW: { x1: 123, y1: 100, x2: 195, y2: 126 },
-    laneN:  { x1: 93.2, y1: 126, x2: 120, y2: 169 },
-    laneS:  { x1: 123, y1: 0.55, x2: 173, y2: 15.7 },             // v19: back lane behind finished goods (wall face to plinth ≈15 ft)
   },
   east: {
     parking: { x1: 220, y1: 262, x2: 280, y2: 280.5 },

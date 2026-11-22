@@ -112,7 +112,7 @@ export function build(parent) {
   bins(23, 41, 26);                                                                        // lower block (east, front in the photos)
   strut(g, [24.5, 146, 58], [15, 156, 36.5], 1.2, M.steel, true);                          // dryer -> tall bins (inclined conveyor)
   strut(g, [22.6, 157, 35], [27, 157, 26.5], 1.0, M.steel, true);                          // tall -> low bins
-  box(g, 38, 155.8, 47, 158.2, 2.4, M.steelGreen, 26.5);                                   // gallery to the milling hall
+  box(g, 38, 155.8, 47, 158.2, 2.4, M.steelGreen, 26.5);                                   // gallery to the milling hall (v23: continues as the belt gallery to the rice mill hall)
   strut(g, [42, 157, PAD], [42, 157, 26.5], 0.5, M.steelGreen);
 
   // ---------- intake: proposed conveyor from the paddy store's south door ----------
@@ -123,7 +123,7 @@ export function build(parent) {
   box(ic, 40.9, 93, 42.7, 160.5, 1.8, M.steelGreen, 11.1);                                 // level run along the plot edge
   for (let y = 98; y < 160; y += 14) { box(ic, 40.9, y - .3, 41.3, y + .3, 11.1 - PAD, M.steelDark, PAD); box(ic, 42.3, y - .3, 42.7, y + .3, 11.1 - PAD, M.steelDark, PAD); }
   strut(ic, [41.8, 93.5, 11.5], [39.6, 91.5, 4], 1.2, M.steelGreen);                       // drop into the short elevator boot
-  tag(ic, null, { name: 'Intake conveyor (proposed)', status: 'new', size: '≈95 ft belt, enclosed', notes: 'In the photos the plant takes paddy in at its south end (short elevator + pre-cleaner). Once the milling hall closes the east side, tractors can no longer reach that end. Proposed fix: an intake hopper just inside the paddy store’s south end and an enclosed belt along the plot edge into the short elevator.', round: 2 });
+  tag(ic, null, { name: 'Intake conveyor (proposed)', status: 'new', size: '≈95 ft belt, enclosed', notes: 'In the photos the plant takes paddy in at its south end (short elevator + pre-cleaner). The belt (an intake hopper just inside the paddy store’s south end and an enclosed belt along the plot edge into the short elevator) was proposed because the old milling hall closed the east side. Since v23 the hall sits against the south wall and the east side is an open yard, so tractors and trucks can reach the intake directly again — the belt is now optional.', round: 2 });
 
   // people for scale (≈5.9 ft)
   person(g, 36.5, 97.5, PAD); person(g, 40, 128, PAD);
