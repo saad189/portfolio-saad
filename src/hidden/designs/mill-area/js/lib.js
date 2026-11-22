@@ -710,15 +710,15 @@ export function mergeByMaterial(group) {
     if (!g.attributes.uv) g.setAttribute('uv', new THREE.Float32BufferAttribute(new Float32Array(g.attributes.position.count * 2), 2));
     if (!g.attributes.normal) g.computeVertexNormals();
     g.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld));
-    let cut = !!o.userData.cut, upper = !!o.userData.upper;
-    for (let p = o.parent; p && p !== group.parent; p = p.parent) { cut = cut || !!p.userData.cut; upper = upper || !!p.userData.upper; }
-    const key = o.material.uuid + (o.castShadow ? 'c' : 'n') + (cut ? 'x' : '') + (upper ? 'u' : '');
-    if (!buckets.has(key)) buckets.set(key, { mat: o.material, cast: o.castShadow, cut, upper, geos: [] });
+    let cut = !!o.userData.cut, upper = !!o.userData.upper, upper2 = !!o.userData.upper2;     // upper2 (v21): 2nd floor and above of a G+2 building
+    for (let p = o.parent; p && p !== group.parent; p = p.parent) { cut = cut || !!p.userData.cut; upper = upper || !!p.userData.upper; upper2 = upper2 || !!p.userData.upper2; }
+    const key = o.material.uuid + (o.castShadow ? 'c' : 'n') + (cut ? 'x' : '') + (upper ? 'u' : '') + (upper2 ? '2' : '');
+    if (!buckets.has(key)) buckets.set(key, { mat: o.material, cast: o.castShadow, cut, upper, upper2, geos: [] });
     buckets.get(key).geos.push(g); done.push(o);
   });
   done.forEach(o => o.parent.remove(o));
   for (const b of buckets.values()) {
-    const m = new THREE.Mesh(mergeGeometries(b.geos), b.mat); m.castShadow = b.cast; m.receiveShadow = true; m.userData.cut = b.cut; m.userData.upper = b.upper; group.add(m);
+    const m = new THREE.Mesh(mergeGeometries(b.geos), b.mat); m.castShadow = b.cast; m.receiveShadow = true; m.userData.cut = b.cut; m.userData.upper = b.upper; m.userData.upper2 = b.upper2; group.add(m);
   }
   const empties = []; group.traverse(o => { if (o !== group && o.isGroup && o.children.length === 0) empties.push(o); });
   empties.forEach(o => o.parent.remove(o));

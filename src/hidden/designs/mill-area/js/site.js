@@ -14,7 +14,7 @@ export const SITE = {
     weighCabin: { x1: 196.5, y1: 51, x2: 202.5, y2: 65 },
   },
   front: { poly: [[0,410],[195,410],[195,ytop(195)],[0,528]] },
-  frontStore: { x1: 168, y1: 426, x2: 193, y2: 498 },           // v20: store on the old weighbridge bay (original front zone only)
+  frontStore: { x1: 168, y1: 412, x2: 193, y2: 508 },           // v20: store on the old weighbridge bay (original front zone only); v21: as long as the trolley holding area
   storage:  { x1: 0, y1: 169, x2: 43.2, y2: 410 },
   dryingYard: { x1: 59, y1: 185, x2: 195, y2: 394 },        // v18: runs east to the main road (the loop's unused east leg is paved in)
   rice: {

@@ -22,64 +22,116 @@ export function build(scene) {
 }
 
 // ---------- v12: staff flats in the strip between the drying loop wall and the pump (x 0–111 × y 410–440) ----------
-// G + 2: ground floor 8 bachelor rooms for mill labour, 1st + 2nd floor 4 family flats each; open gallery on the north,
-// stair core at the east end opening onto the mill front. Shown with Options (the old mill stands here today).
+// G + 2, open gallery on the north, stair core at the east end opening onto the mill front. Shown with Options (the old mill
+// stands here today). v21: ground = mosque room, shared bathrooms + wuzu, kitchen + eating area, 4 bachelor rooms;
+// 1st floor = 7 staff rooms + shared bathrooms; 2nd floor = 4 family flats (own bath + kitchen).
 export const STAFF_FLATS = { plot: { x1: 0, y1: 410, x2: 111, y2: 440 }, rooms: { x1: 1.5, y1: 412, x2: 100.5, y2: 432 }, core: { x1: 100.5, y1: 412, x2: 110, y2: 437.5 } };
 function staffFlats(g) {
   const sf = new THREE.Group(); sf.name = 'staffFlats'; sf.userData.option = true; g.add(sf);
   const F = STAFF_FLATS, R = F.rooms, C = F.core, FH = 10.5, FL = 3, up = (o) => { o.userData.upper = true; return o; }, cut = (o) => { o.userData.cut = true; return o; };
   slab(sf, [[0.6, 410.6], [111, 410.6], [111, 439.4], [0.6, 439.4]], 0.3, M.slab);
-  floorsBlock(sf, R, FL, FH, M.beige, { parapet: 3, colSpacing: 12.4, sides: { N: M.plaster }, bands: M.plaster });
-  floorsBlock(sf, C, FL, FH, M.plaster, { parapet: 3, colSpacing: 9 });
+  const up2 = (o) => { o.userData.upper = true; o.userData.upper2 = true; return o; };
+  [floorsBlock(sf, R, FL, FH, M.beige, { parapet: 3, colSpacing: 12.4, sides: { N: M.plaster }, bands: M.plaster }),
+   floorsBlock(sf, C, FL, FH, M.plaster, { parapet: 3, colSpacing: 9 })].forEach(fb => fb.children.forEach(m => { if (m.userData.upper && m.position.y > 1.9 * FH) m.userData.upper2 = true; }));
   box(sf, C.x1, C.y1 + 4, C.x2, C.y1 + 16, 8, M.plaster, FL * FH).userData.cut = true;                      // stair head room on the roof
   // open gallery (north): floor slabs, columns, railings, roof
   for (let f = 0; f < FL; f++) {
-    const z = f * FH, sl = box(sf, R.x1, R.y2, R.x2, 437.5, 0.6, M.slab, f ? z : 0.3); if (f) up(sl);
-    for (let x = R.x1 + 0.4; x <= R.x2; x += 12.4) { const c = box(sf, x - .4, 436.7, x + .4, 437.5, FH, M.plaster, z); if (f) up(c); }
-    if (f) { const r = panel(sf, [R.x1, 437.3], [R.x2, 437.3], z + 0.6, 3.4, M.railBlue); if (r) up(r); }
+    const U = f === 2 ? up2 : f ? up : (o) => o;
+    const z = f * FH, sl = box(sf, R.x1, R.y2, R.x2, 437.5, 0.6, M.slab, f ? z : 0.3); U(sl);
+    for (let x = R.x1 + 0.4; x <= R.x2; x += 12.4) { const c = box(sf, x - .4, 436.7, x + .4, 437.5, FH, M.plaster, z); U(c); }
+    if (f) { const r = panel(sf, [R.x1, 437.3], [R.x2, 437.3], z + 0.6, 3.4, M.railBlue); if (r) U(r); }
     // unit doors + small gallery windows; south windows come from the facade texture
-    for (let k = 0; k < 8; k++) { const x = R.x1 + 12.4 * k + 2; const d = cut(box(sf, x, R.y2 - .1, x + 3, R.y2 + .2, 7, M.timber, z + 0.6)); if (f) up(d); const w = cut(box(sf, x + 5.5, R.y2 - .1, x + 9, R.y2 + .2, 3, M.glass, z + 4)); if (f) up(w); }
+    for (let k = 0; k < 8; k++) { const x = R.x1 + 12.375 * k + 2; const d = cut(box(sf, x, R.y2 - .1, x + 3, R.y2 + .2, 7, M.timber, z + 0.6)); U(d); const w = cut(box(sf, x + 5.5, R.y2 - .1, x + 9, R.y2 + .2, 3, M.glass, z + 4)); U(w); }
   }
   cut(box(sf, R.x1 - .3, R.y2, R.x2 + .3, 437.8, 0.8, M.slab, FL * FH - 0.8));
   box(sf, C.x2 - .1, 418, C.x2 + .2, 426, 7.5, M.timber, 0.3).userData.cut = true;                            // entrance door (east)
   box(sf, C.x2, 416.5, C.x2 + 3, 427.5, 0.4, M.steelDark, 8.5);                                              // canopy
-  for (let f = 0; f < FL; f++) { const z = f * FH, g2 = new THREE.Group(); if (f) g2.userData.upper = true; sf.add(g2);
+  for (let f = 0; f < FL; f++) { const z = f * FH, g2 = new THREE.Group(); if (f) g2.userData.upper = true; if (f === 2) g2.userData.upper2 = true; sf.add(g2);
     stairFlight(g2, [103.2, 414.5, z + 0.3], [103.2, 427, z + FH / 2], 3.6, M.steelDark); stairFlight(g2, [107.4, 427, z + FH / 2], [107.4, 414.5, z + FH], 3.6, M.steelDark); }
-  // interiors (cut-away): ground floor = 8 bachelor rooms with 3–4 beds + attached bath; top floor = 4 family flats
-  for (let k = 0; k < 8; k++) {
-    const x0 = R.x1 + 12.4 * k; if (k) partition(sf, [x0, R.y1 + .8], [x0, R.y2 - .2], 0.6);
-    partition(sf, [x0 + 0.4, R.y1 + 6], [x0 + 5.5, R.y1 + 6], 0.6);                                            // bath
-    bed(sf, x0 + 6.2, R.y1 + 1, x0 + 11.6, R.y1 + 4, 0.6); bed(sf, x0 + 6.2, R.y1 + 8, x0 + 11.6, R.y1 + 11, 0.6); bed(sf, x0 + 1, R.y1 + 13.5, x0 + 6.4, R.y1 + 16.5, 0.6);
-    box(sf, x0 + 8.5, R.y2 - 3, x0 + 11.6, R.y2 - 1, 5, M.steelBlue, 0.6);                                      // steel locker
+  // ---- interiors (cut-away: top floor → middle floor → ground floor) ----
+  const BW = (R.x2 - R.x1) / 8, bx = (k) => R.x1 + BW * k, z0 = 0.6, z1 = FH + 0.8, zt = (FL - 1) * FH + 0.8, T = pumpTex();
+  const g0 = new THREE.Group(); sf.add(g0);
+  const g1 = new THREE.Group(); g1.userData.upper = true; sf.add(g1);
+  const top = new THREE.Group(); top.userData.upper = true; top.userData.upper2 = true; sf.add(top);
+  const cl = (text, x, y, z, flag) => { const l = label(sf, text, x, y, z, 'cut', 1); l.userData.cutOnly = true; l.userData[flag] = true; return l; };
+  // shared bathroom block in one bay: WCs along the south wall, showers in the middle, basins (+ wuzu bench on the ground floor) by the door
+  const bathBlock = (grp, x0, z, nWC, wuzu) => {
+    const w = BW / nWC;
+    partition(grp, [x0 + 0.2, 419], [x0 + BW - 0.2, 419], z, 7.5);
+    for (let i = 1; i < nWC; i++) partition(grp, [x0 + i * w, R.y1 + .8], [x0 + i * w, 419], z, 7.5);
+    for (let i = 0; i < nWC; i++) { const cx = x0 + (i + 0.5) * w; box(grp, cx - .7, R.y1 + 1.3, cx + .7, R.y1 + 3.3, 1.3, M.whitePaint, z); box(grp, cx - .6, R.y1 + 0.9, cx + .6, R.y1 + 1.3, 2.4, M.whitePaint, z); }
+    partition(grp, [x0 + BW / 2, 419], [x0 + BW / 2, 424.6], z, 7.5);
+    [x0 + BW / 4, x0 + 3 * BW / 4].forEach(cx => { box(grp, cx - 1.6, 419.6, cx + 1.6, 423.8, 0.15, M.tile, z, false); cyl(grp, cx, 420, 0.12, 6.6, M.steel, z, 6); box(grp, cx - .5, 419.8, cx + .5, 420.5, 0.2, M.steel, z + 6.6); });
+    counter(grp, x0 + BW - 1.8, 425.6, x0 + BW - 0.4, 431, z, 2.8, M.slab);
+    [427, 429.6].forEach(y => box(grp, x0 + BW - 1.6, y - .5, x0 + BW - 0.6, y + .5, 0.25, M.whitePaint, z + 2.8));
+    if (wuzu) { box(grp, x0 + 0.6, 425.8, x0 + 6.8, 427, 1.1, M.stoneDark, z); box(grp, x0 + 0.6, 427.4, x0 + 6.8, 427.8, 0.3, M.steel, z + 2.8); for (let x = x0 + 1.2; x < x0 + 6.6; x += 1.3) cyl(grp, x, 427.6, 0.08, 0.6, M.steel, z + 2.5, 6); }
+  };
+  // ground floor: mosque room (bays 0–1), shared bathrooms + wuzu (bay 2), kitchen + eating area (bay 3), 4 bachelor rooms (bays 4–7)
+  [2, 3, 4, 5, 6, 7].forEach(k => partition(g0, [bx(k), R.y1 + .8], [bx(k), R.y2 - .2], z0));
+  box(g0, R.x1 + 0.8, 419.4, R.x1 + 1.5, 424.6, 8.2, T.dome, z0);                                              // mihrab on the qibla (west) wall
+  box(g0, R.x1 + 1.5, 425.6, R.x1 + 4.4, 428.4, 3, M.wood, z0); box(g0, R.x1 + 1.5, 425.6, R.x1 + 2.6, 428.4, 1.4, M.wood, z0 + 3);   // minbar
+  for (let i = 0; i < 6; i++) box(g0, R.x1 + 3.4 + i * 3.5, R.y1 + 1.4, R.x1 + 6.2 + i * 3.5, R.y2 - 1.6, 0.08, SFM().rug, z0, false);   // prayer-rug rows, facing west
+  box(g0, bx(2) - 2.4, R.y2 - 1.8, bx(2) - 0.5, R.y2 - 0.5, 4.5, M.wood, z0);                                  // Quran shelf
+  person(g0, R.x1 + 9, 420, z0, M.kurta3);
+  bathBlock(g0, bx(2), z0, 3, true);
+  const k3 = bx(3);                                                                                               // kitchen + eating area
+  counter(g0, k3 + 0.6, R.y1 + 1, k3 + BW - 0.6, R.y1 + 3.3, z0, 3, M.slab);
+  box(g0, k3 + 1.4, R.y1 + 1.3, k3 + 5, R.y1 + 3, 0.4, M.darkMetal, z0 + 3); [k3 + 2.3, k3 + 4.1].forEach(x => cyl(g0, x, R.y1 + 2.15, 0.75, 1.2, M.stainless, z0 + 3.4, 14));   // stove + degchis
+  box(g0, k3 + 1.1, R.y1 + 0.9, k3 + 5.3, R.y1 + 3.2, 1.2, M.stainless, z0 + 6.8);                               // exhaust hood
+  box(g0, k3 + 6.8, R.y1 + 1.3, k3 + 9.2, R.y1 + 3, 0.5, M.steel, z0 + 2.6);                                      // sink
+  [R.y1 + 5, R.y1 + 6.6].forEach(y => cyl(g0, k3 + BW - 1.4, y, 0.6, 3.2, M.trimRed, z0, 10));                  // gas cylinders
+  box(g0, k3 + 0.8, R.y1 + 4.6, k3 + 3.2, R.y1 + 7, 6, M.whitePaint, z0);                                         // fridge
+  box(g0, k3 + 2.5, 423.5, k3 + 9.8, 426.3, 0.2, M.wood, z0 + 2.4); box(g0, k3 + 2.8, 423.8, k3 + 9.5, 426, 2.4, M.darkMetal, z0);   // eating table
+  [422.6, 427.2].forEach(y => box(g0, k3 + 2.5, y - .5, k3 + 9.8, y + .5, 1.5, M.wood, z0));                    // benches
+  for (let k = 4; k < 8; k++) {                                                                                   // bachelor rooms: 4 beds + lockers
+    const x0 = bx(k);
+    [[R.y1 + 1, R.y1 + 4], [R.y1 + 7.5, R.y1 + 10.5]].forEach(([y1, y2]) => { bed(g0, x0 + 0.8, y1, x0 + 5.9, y2, z0); bed(g0, x0 + 6.5, y1, x0 + 11.6, y2, z0); });
+    box(g0, x0 + 7, R.y2 - 2.6, x0 + 11.6, R.y2 - 1, 5.5, M.steelBlue, z0);
   }
-  const zt = (FL - 1) * FH + 0.8, top = new THREE.Group(); top.userData.upper = true; sf.add(top);
+  cl('Mosque room · ≈40–50', bx(1), 422, z0 + 4, 'groundOnly'); cl('Bathrooms + wuzu', bx(2) + BW / 2, 422, z0 + 4, 'groundOnly');
+  cl('Kitchen + eating', bx(3) + BW / 2, 422, z0 + 4, 'groundOnly'); cl('Bachelor rooms · 16 beds', bx(6), 422, z0 + 4, 'groundOnly');
+  // 1st floor: 7 staff rooms (bays 0–6) + shared bathrooms next to the stair (bay 7)
+  for (let k = 1; k < 8; k++) partition(g1, [bx(k), R.y1 + .8], [bx(k), R.y2 - .2], z1);
+  for (let k = 0; k < 7; k++) {
+    const x0 = bx(k);
+    bed(g1, x0 + 0.8, R.y1 + 1, x0 + 5.9, R.y1 + 4, z1); bed(g1, x0 + 6.5, R.y1 + 1, x0 + 11.6, R.y1 + 4, z1);
+    box(g1, x0 + 1, R.y1 + 9, x0 + 4.4, R.y1 + 11.4, 2.5, M.wood, z1); box(g1, x0 + 7, R.y2 - 2.6, x0 + 11.6, R.y2 - 1, 5.5, M.steelBlue, z1);
+  }
+  bathBlock(g1, bx(7), z1, 2, false);
+  cl('Staff rooms · 7 × 2 beds', bx(3.5), 422, z1 + 4, 'firstOnly'); cl('Bathrooms', bx(7) + BW / 2, 422, z1 + 4, 'firstOnly');
+  // 2nd floor: 4 family flats — two rooms, kitchen, own bath
   for (let k = 0; k < 4; k++) {
-    const x0 = R.x1 + 24.75 * k, xm = x0 + 12.4; if (k) partition(top, [x0, R.y1 + .8], [x0, R.y2 - .2], zt);
+    const x0 = R.x1 + 24.75 * k, xm = x0 + 12.375; if (k) partition(top, [x0, R.y1 + .8], [x0, R.y2 - .2], zt);
     partition(top, [xm, R.y1 + .8], [xm, R.y2 - 6], zt); partition(top, [x0 + 0.3, R.y2 - 7], [x0 + 6, R.y2 - 7], zt); partition(top, [x0 + 6, R.y2 - 7], [x0 + 6, R.y2 - .3], zt);
     bed(top, x0 + 1.2, R.y1 + 1.2, x0 + 6.4, R.y1 + 7.6, zt); bed(top, xm + 1.2, R.y1 + 1.2, xm + 6.4, R.y1 + 4.4, zt); bed(top, xm + 6.8, R.y1 + 1.2, xm + 11.6, R.y1 + 4.4, zt);
     counter(top, xm + 1, R.y2 - 2.4, xm + 9, R.y2 - 0.6, zt, 3, M.slab);                                         // kitchen counter
     box(top, x0 + 7, R.y1 + 11, x0 + 11, R.y1 + 13, 2.4, M.wood, zt);                                            // table
+    box(top, x0 + 0.9, R.y2 - 6.4, x0 + 2.3, R.y2 - 4.6, 1.3, M.whitePaint, zt); box(top, x0 + 3, R.y2 - 6.5, x0 + 5.6, R.y2 - 4, 0.15, M.tile, zt, false);   // bath: WC + shower tray
   }
+  cl('Family flats · 4 (own bath + kitchen)', 50, 422, zt + 4, 'upper2');
+  // mosque sign over its doors on the gallery
+  const ms = pumpSign(sf, T.masjid, 12, 1.6, bx(1), R.y2 + 0.45, 8.3, Math.PI); ms.userData.cut = true;
   // roof: tanks, solar, people outside
-  [10, 35, 60, 85].forEach(x => waterTank(sf, x, 416, FL * FH));
-  solarArray(sf, 50, 424, FL * FH + 2, 88, 10, 0.2, 0);
+  const roofG = new THREE.Group(); roofG.userData.cut = true; sf.add(roofG);                                  // v21: hidden in cut-away so the floors show
+  [10, 35, 60, 85].forEach(x => waterTank(roofG, x, 416, FL * FH));
+  solarArray(roofG, 50, 424, FL * FH + 2, 88, 10, 0.2, 0);
   person(sf, 112.5, 422, 0.3, M.kurta); person(sf, 40, 435, 0.6, M.kurta2);
   tag(sf, F.plot, {
     name: 'Staff flats (proposed)', status: 'new', size: 'Plot 111 × 30 ft · building ≈108.5 × 25.5 ft, G + 2',
     area: 'Plot 3,330 sq ft ≈ 14.8 marla · ≈8,300 sq ft built',
-    notes: 'v12, in the strip between the drying loop’s wall and the petrol-pump option. Ground floor: 8 bachelor rooms for mill labour (≈12 × 20 ft each with an attached bath, 3–4 beds) ≈ 24–32 beds. 1st and 2nd floors: 4 family flats each (≈25 × 20 ft: two rooms, kitchen and bath) = 8 family flats. Open gallery along the north side; one stair at the east end opening onto the mill front, so residents never pass through the pump. Roof tanks and solar. Points to check: (1) the south side faces the drying loop and the yard, so expect harvest dust and tractor noise — keep the south windows small, high and screened; (2) v15 moved the pump’s underground tanks to the north-west corner by the road (≈65 ft away) and put the pump’s buildings between the forecourt and the flats; petrol-pump licensing (Explosives Department NOC) sets minimum distances to homes, so confirm the clearance; (3) foundations can be sized for a 3rd floor (4 more family flats). Use Cut-away: once for the top floor (family flats), twice for the ground floor (bachelor rooms).',
+    notes: 'v12, in the strip between the drying loop’s wall and the petrol-pump option; v21 layout. Ground floor: a mosque room (2 bays, ≈25 × 20 ft, ≈40–50 people; mihrab on the west/qibla wall, minbar, prayer-rug rows, sign over the doors), a shared bathroom block next to it (3 WCs, 2 showers, basins and a wuzu bench with taps), a kitchen with an eating area (stove + hood, sink, fridge, gas cylinders, table for ≈10) and 4 bachelor rooms (4 beds each = 16; bunks would make 24). 1st floor: 7 staff rooms (2 beds each = 14, for supervisors, drivers and operators) sharing one bathroom block by the stair (2 WCs, 2 showers, basins). 2nd floor: 4 family flats (≈25 × 20 ft: two rooms, kitchen and their own bath). Open gallery along the north side; one stair at the east end opening onto the mill front, so residents never pass through the pump. Roof tanks and solar. Points to check: (1) the south side faces the drying loop and the yard, so expect harvest dust and tractor noise — keep the south windows small, high and screened; (2) v15 moved the pump’s underground tanks to the north-west corner by the road (≈65 ft away) and put the pump’s buildings between the forecourt and the flats; petrol-pump licensing (Explosives Department NOC) sets minimum distances to homes, so confirm the clearance; (3) foundations can be sized for a 3rd floor (4 more family flats). Cut-away: once for the 2nd floor (family flats), twice for the 1st floor (staff rooms + bathrooms), three times for the ground floor (mosque, bathrooms, kitchen, bachelor rooms).',
     finance: {
       rows: [
-        ['Units', '8 family flats + 8 bachelor rooms (≈24–32 beds)'],
+        ['Units', 'Ground: mosque room, shared bathrooms + wuzu, kitchen + eating area, 4 bachelor rooms (16 beds) · 1st: 7 staff rooms (14 beds) + shared bathrooms · 2nd: 4 family flats'],
         ['Built area', '≈8,300 sq ft (3 floors × ≈2,760 incl. gallery + stair)'],
         ['Build cost', 'Rs 3.5–4.5 cr (≈ Rs 4,000–5,000/sq ft, basic finish, plus tanks, solar, sewer)'],
-        ['— per family flat', '≈ Rs 30–38 lakh'],
-        ['— per bachelor room', '≈ Rs 14–18 lakh'],
+        ['— per family flat (2nd floor)', '≈ Rs 30–38 lakh'],
+        ['— per bed (rooms on ground + 1st)', '≈ Rs 6–8 lakh, mosque room, kitchen and bathrooms included'],
         ['With a 3rd floor later', '+4 family flats ≈ Rs 1.2–1.5 cr'],
       ],
-      note: 'Planning estimate at Nov 2026 rates; land already owned. Staff housing pays back in retention and in house-rent allowance saved rather than rent, so no ROI is shown.',
+      note: 'Planning estimate at Nov 2026 rates; land already owned. The shell and cost are unchanged from v12: shared bathrooms are cheaper than the 8 attached baths they replace, and the mosque and kitchen fit-out takes up the difference. Staff housing pays back in retention and in house-rent allowance saved rather than rent, so no ROI is shown.',
     },
-    round: 12,
+    round: 21,
   });
   label(sf, 'Staff flats · G+2', 50, 424, 38, '', 1);
   mergeByMaterial(sf);
@@ -297,27 +349,31 @@ function frontStore(mf) {
   shutter(st, 180.5, r.y1, 'S', 12, 14, true, true);                                                       // onto the paved corner by the drying loop (south)
   // inside today: bagged stock on pallets, drums, tarps, spare trolley tyres
   const stack = (x1, y1, x2, y2, h) => { box(st, x1, y1, x2, y2, 0.5, M.pallet, 0.3); box(st, x1 + .2, y1 + .2, x2 - .2, y2 - .2, h, M.bags, 0.8); };
-  [[430, 440], [453, 463], [466, 474], [484, 494]].forEach(([y1, y2], i) => stack(182, y1, 191.5, y2, [9, 10.5, 7.5, 9][i]));
-  [[171, 430], [173.5, 430], [171, 432.5], [173.5, 432.5]].forEach(([x, y]) => cyl(st, x, y, 1, 3, M.steelBlue, 0.3, 12));
-  [433, 436].forEach(y => cyl(st, 177, y, 1.4, 2.8, M.tyre, 0.3, 14));
-  box(st, 170, 486, 176, 494, 1.2, M.tarp, 0.3);
-  pumpArrow(st, 186, 509, -Math.PI / 2); pumpArrow(st, 170, 509, -Math.PI / 2);                          // trolleys leave the holding area east to the main road
+  [[420, 431], [435, 446], [452, 463], [467, 478], [484, 495]].forEach(([y1, y2], i) => stack(182, y1, 191.5, y2, [9, 10.5, 7.5, 9, 10.5][i]));
+  [[171, 420], [173.5, 420], [171, 422.5], [173.5, 422.5]].forEach(([x, y]) => cyl(st, x, y, 1, 3, M.steelBlue, 0.3, 12));
+  [423, 426].forEach(y => cyl(st, 177, y, 1.4, 2.8, M.tyre, 0.3, 14));
+  box(st, 170, 494, 176, 502, 1.2, M.tarp, 0.3);
+  pumpArrow(st, 186, 515, -Math.PI / 2); pumpArrow(st, 170, 515, -Math.PI / 2);                          // trolleys leave the holding area east to the main road
   tag(st, r, {
-    name: 'Option: store (old weighbridge spot)', status: 'review', size: '25 × 72 ft, 20 ft eaves, clear span', area: '1,800 sq ft ≈ 8 marla',
-    notes: 'v20: the weighbridge moved to the end of the main road, so its bay is free. In the original layout a plain PEB store stands here, matching finished goods (white cladding, red trim): roller shutters at both ends — north onto the exit lane the trolleys use to reach the main road, south onto the paved corner by the drying loop (the west side backs onto the v19 stock bay, so it stays blank). Today it holds bagged stock, drums, tarps and spare trolley tyres (≈200 t of bags if filled). It is deliberately a simple clear-span shell on a strong floor so it can change use later: a workshop + spare-parts store, a garage for the mills’ tractors and trolleys, extra paddy or rice storage, a sales / dealer godown by the gate, or shops facing the road if the front plan changes. The east wall faces the main road and can take a shutter later. Not in the three variations (each uses this strip).',
+    name: 'Option: store (old weighbridge spot)', status: 'review', size: '25 × 96 ft, 20 ft eaves, clear span', area: '2,400 sq ft ≈ 10.7 marla',
+    notes: 'v20: the weighbridge moved to the end of the main road, so its bay is free. In the original layout a plain PEB store stands here, matching finished goods (white cladding, red trim): roller shutters at both ends — north onto the exit lane the trolleys use to reach the main road, south onto the paved corner by the drying loop (the west side backs onto the v19 stock bay, so it stays blank). v21: lengthened to run the full length of the trolley holding area (y 412–508). Today it holds bagged stock, drums, tarps and spare trolley tyres (≈280 t of bags if filled). The trolleys’ exit lane north of it is now ≈14 ft wide (y 508–522), enough for one tractor-trolley at a time. It is deliberately a simple clear-span shell on a strong floor so it can change use later: a workshop + spare-parts store, a garage for the mills’ tractors and trolleys, extra paddy or rice storage, a sales / dealer godown by the gate, or shops facing the road if the front plan changes. The east wall faces the main road and can take a shutter later. Not in the three variations (each uses this strip).',
     finance: {
       rows: [
-        ['Build cost', 'Rs 0.4–0.55 cr (≈ Rs 2,200–3,000/sq ft: PEB frame + cladding, brick plinth, floor slab, 2 roller shutters, lights)'],
-        ['Holds', '≈ 200 t of bagged paddy or rice, or ≈ 6 tractor-trolleys under cover'],
+        ['Build cost', 'Rs 0.55–0.7 cr (≈ Rs 2,200–3,000/sq ft: PEB frame + cladding, brick plinth, floor slab, 2 roller shutters, lights)'],
+        ['Holds', '≈ 280 t of bagged paddy or rice, or ≈ 8 tractor-trolleys under cover'],
         ['Paving the old bay', 'Rs 3–5 lakh (most of it is already concrete)'],
       ],
       note: 'Planning estimate at Nov 2026 prices. Storage pays back in avoided rent and spoilage rather than income, so no ROI is shown.',
     },
-    round: 20,
+    round: 21,
   });
-  label(st, 'Option: store (old weighbridge spot)', 180.5, 462, 26, 'review', 1);
+  label(st, 'Option: store (old weighbridge spot)', 180.5, 460, 26, 'review', 1);
   mergeByMaterial(st);
 }
+
+// ---------- v21 staff-flats material ----------
+let _sfm = null;
+function SFM() { if (!_sfm) _sfm = { rug: new THREE.MeshStandardMaterial({ color: 0x2f6b45, roughness: 0.95 }) }; return _sfm; }
 
 // ---------- v15 pump helpers: signs, materials, arrows ----------
 let _pt = null;
@@ -333,6 +389,7 @@ function pumpTex() {
     fascia: std({ map: band('FUEL STATION  ·  24/7  ·  HI-SPEED DIESEL  ·  MART  ·  TYRE', '#0f7a4a', '#ffffff', 52, 2048, 96) }),
     mart: std({ map: band('MART  ·  CAFÉ  ·  ATM', '#f2c230', '#0f3d27', 64), emissive: 0x332200 }),
     tyre: std({ map: band('TYRE  ·  PUNCTURE  ·  OIL CHANGE', '#1d2329', '#f2c230', 56) }),
+    masjid: std({ map: band('MASJID', '#1f6b45', '#ffffff', 64), emissive: 0x0a2a18 }),
     pylon: std({ emissive: 0x222222, map: tex(256, 512, (x, w, h) => {
       x.fillStyle = '#0f7a4a'; x.fillRect(0, 0, w, h); x.fillStyle = '#f2c230'; x.fillRect(0, 0, w, 90);
       x.fillStyle = '#0f3d27'; x.font = 'bold 54px sans-serif'; x.textAlign = 'center'; x.fillText('FUEL', w / 2, 64);
