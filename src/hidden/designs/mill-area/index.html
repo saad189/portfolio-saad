@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Mill Compound 3D</title>
+<link rel="icon" href="data:,">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<style>
+  :root { --ink:#1d2329; --mut:#5b6670; --card:rgba(255,255,255,.92); --line:rgba(20,30,40,.12); --acc:#c2410c; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; overflow:hidden; font:13px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; color:var(--ink); background:#cfdde8; }
+  #view { position:fixed; inset:0; }
+  #view canvas { display:block; }
+  .css2d { position:absolute; inset:0; }
+  .panel { position:absolute; background:var(--card); border:1px solid var(--line); border-radius:12px; box-shadow:0 6px 24px rgba(20,30,40,.12); backdrop-filter:blur(6px); }
+  #hud { top:14px; left:14px; padding:12px 14px; width:268px; z-index:5; max-height:calc(100vh - 28px); overflow:auto; }
+  #hud h1 { font-size:15px; margin:0; letter-spacing:.2px; }
+  #hud .sub { color:var(--mut); font-size:12px; margin:2px 0 10px; }
+  .grp { font-size:10.5px; text-transform:uppercase; letter-spacing:.7px; color:var(--mut); margin:8px 0 5px; }
+  .btns { display:flex; flex-wrap:wrap; gap:5px; }
+  button { font:inherit; font-size:12px; border:1px solid var(--line); background:#fff; color:var(--ink); padding:5px 9px; border-radius:7px; cursor:pointer; }
+  button:hover { border-color:#9aa6b0; }
+  button.on { background:var(--ink); color:#fff; border-color:var(--ink); }
+  #hint { bottom:14px; left:50%; transform:translateX(-50%); padding:6px 12px; color:var(--mut); font-size:12px; white-space:nowrap; z-index:5; }
+  #info { top:14px; right:14px; width:300px; padding:14px 16px; z-index:6; }
+  #info h3 { margin:4px 0 8px; font-size:16px; }
+  #info p { margin:8px 0 0; color:#36414a; }
+  #info .kv { display:flex; gap:8px; font-size:12.5px; } #info .kv span { width:40px; color:var(--mut); }
+  #info .rd { margin-top:10px; font-size:11.5px; color:var(--mut); border-top:1px solid var(--line); padding-top:8px; }
+  #info .x { position:absolute; top:8px; right:8px; border:none; background:none; font-size:18px; padding:2px 7px; color:var(--mut); }
+  .st { display:inline-block; font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.6px; padding:2px 7px; border-radius:99px; background:#e8ecef; }
+  .st-new { background:#fde4cc; color:#9a3d06; } .st-existing { background:#dde6ee; color:#2d4a63; } .st-relocated { background:#f6ebc2; color:#7a5d00; }
+  .st-review { background:#e7e1f6; color:#4b3b8f; } .st-free { background:#d5f1e1; color:#17643b; } .st-infra { background:#ece9e3; color:#5b5346; }
+  .legend { bottom:14px; left:14px; padding:10px 12px; font-size:12px; z-index:5; min-width:170px; }
+  .legend div { display:flex; align-items:center; gap:7px; margin:3px 0; }
+  .legend i { width:14px; height:10px; border-radius:2px; display:inline-block; }
+  .legend b { font-size:10.5px; text-transform:uppercase; letter-spacing:.7px; color:var(--mut); font-weight:600; }
+  #compass { bottom:14px; right:14px; width:64px; height:64px; border-radius:50%; z-index:5; display:grid; place-items:center; }
+  #needle { width:40px; height:40px; position:relative; transition:transform .05s linear; }
+  #needle:before { content:""; position:absolute; left:50%; top:2px; transform:translateX(-50%); border:7px solid transparent; border-bottom:17px solid var(--acc); border-top:0; }
+  #needle:after { content:""; position:absolute; left:50%; bottom:2px; transform:translateX(-50%); border:7px solid transparent; border-top:17px solid #9aa6b0; border-bottom:0; }
+  #needle span { position:absolute; top:-15px; left:50%; transform:translateX(-50%); font-weight:700; font-size:11px; color:var(--acc); }
+  .lbl { pointer-events:none; background:rgba(255,255,255,.9); color:var(--ink); border:1px solid rgba(20,30,40,.15); padding:2px 7px; border-radius:6px; font-size:11.5px; white-space:nowrap; box-shadow:0 1px 4px rgba(0,0,0,.12); }
+  .lbl.major { font-weight:650; font-size:12.5px; padding:3px 9px; }
+  .lbl.road { background:rgba(40,44,50,.78); color:#fff; border-color:transparent; font-size:11px; }
+  .lbl.free { background:rgba(213,241,225,.92); color:#17643b; border-color:rgba(23,100,59,.3); }
+  .lbl.cut { background:rgba(255,248,230,.95); color:#7a4a00; border-color:rgba(122,74,0,.3); font-size:11px; }
+  .lbl.variant { background:#1d2329; color:#fff; font-weight:700; font-size:13px; padding:4px 10px; border-color:transparent; }
+  #info.wide { width:400px; max-height:calc(100vh - 28px); overflow:auto; } #info.xwide { width:min(720px, calc(100vw - 320px)); }
+  table.fin { width:100%; border-collapse:collapse; margin-top:10px; font-size:12px; }
+  table.fin td, table.fin th { border-top:1px solid var(--line); padding:5px 4px; vertical-align:top; text-align:left; }
+  table.fin td:first-child { color:var(--mut); width:42%; } table.fin tr.sub td { font-size:11.5px; color:#6b757e; padding-top:2px; padding-bottom:2px; border-top:none; }
+  table.fin tr.hi td { font-weight:650; color:var(--ink); } table.fin tr.hi td:first-child { color:var(--ink); }
+  table.cmpt td:first-child { width:16%; } table.cmpt th { font-size:12px; }
+  .fnote { font-size:11.5px; color:var(--mut); } #info button.cmp { margin-top:6px; }
+  .lbl.review { background:rgba(231,225,246,.94); color:#4b3b8f; border-color:rgba(75,59,143,.3); }
+  #loading { position:fixed; inset:0; display:grid; place-items:center; color:var(--mut); font-size:14px; z-index:10; pointer-events:none; }
+  @media (max-width: 700px) { #hud { width:calc(100% - 28px); } #info { top:auto; bottom:90px; left:14px; right:14px; width:auto; } .legend { display:none; } #hint { display:none; } }
+</style>
+</head>
+<body>
+<div id="view"></div>
+<div id="loading">Building the compound…</div>
+
+<div id="hud" class="panel">
+  <h1>Mill Compound — 3D</h1>
+  <div class="sub">v17 · open paved corner by the rice mill office · site plan v7 · 1 unit = 1 ft</div>
+  <div class="grp">Views</div>
+  <div class="btns">
+    <button data-view="overview" class="on">Overview</button>
+    <button data-view="top">Top</button>
+    <button data-view="gate">From the road</button>
+    <button data-view="front">Front zone</button>
+    <button data-view="pump">Petrol pump (option)</button>
+    <button data-view="staff">Staff flats</button>
+    <button data-view="rice">Rice mill</button>
+    <button data-view="saila">Saila plant</button>
+    <button data-view="hall">Inside the hall</button>
+    <button data-view="drying">Store + drying</button>
+    <button data-view="storeRoof">Store roof solar</button>
+    <button data-view="flour">Flour mill</button>
+    <button data-view="flourIn">Inside flour mill</button>
+    <button data-view="hq">Office + flats (one building)</button>
+    <button data-view="hqBack">Lawn + backyard</button>
+    <button data-view="hqIn">Inside offices</button>
+    <button data-view="ops">Rice mill office</button>
+    <button data-view="junction">Road junctions (curves)</button>
+    <button data-view="farm">Organic farm</button>
+    <button data-view="farmer">Farmer + livestock</button>
+    <button data-view="underSolar">Under the solar shed</button>
+    <button data-view="underSolarTop">Solar shed from above</button>
+    <button data-view="east">East block</button>
+  </div>
+  <div class="grp">Front zone variations</div>
+  <div class="btns">
+    <button data-view="variants">All three</button>
+    <button data-view="var1">1 · Petrol pump</button>
+    <button data-view="var2">2 · Restaurant + motel</button>
+    <button data-view="var3">3 · Market</button>
+    <button id="compareBtn">Compare</button>
+  </div>
+  <div class="grp">Show</div>
+  <div class="btns">
+    <button data-toggle="labels">Labels</button>
+    <button data-toggle="flow">Material flow</button>
+    <button data-toggle="free">Kept free</button>
+    <button data-toggle="cut">Cut-away</button>
+    <button data-toggle="options">Options</button>
+    <button data-toggle="status">Colour by status</button>
+  </div>
+</div>
+
+<div id="info" class="panel" hidden></div>
+
+<div class="legend panel" id="statusLegend" hidden>
+  <b>Status</b>
+  <div><i style="background:#8ea3b5"></i>Existing</div>
+  <div><i style="background:#e58a3a"></i>New build</div>
+  <div><i style="background:#c9a227"></i>New shed, existing machinery</div>
+  <div><i style="background:#a392d6"></i>Under review / option</div>
+  <div><i style="background:#c8c4bc"></i>Roads / infrastructure</div>
+</div>
+<div class="legend panel" id="flowLegend" hidden style="left:auto; right:92px;"><b>Material flow</b></div>
+
+<div id="hint" class="panel">Drag to orbit · right-drag to pan · scroll to zoom · click a building for details</div>
+<div id="compass" class="panel"><div id="needle"><span>N</span></div></div>
+
+<script type="module">
+  import './js/main.js';
+  document.getElementById('loading').remove();
+</script>
+</body>
+</html>
