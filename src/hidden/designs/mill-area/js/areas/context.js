@@ -1,4 +1,4 @@
-// Context: farmland, Sargodha–Gujrat Road, boundary wall + gate, compound ground, internal roads, weighbridge.
+// Context: farmland, Sargodha–Gujrat Road, boundary wall + gate, compound ground, internal roads, weighbridge (v20: end of the main road).
 import * as THREE from 'three';
 import { SITE, ytop } from '../site.js';
 import { M, P, box, boxR, slab, slabR, segBox, label, tag, trees, truck, car, rectPts, roundRectPts, rng, cyl, hopper } from '../lib.js';
@@ -34,7 +34,8 @@ export function build(scene) {
   const B = SITE.boundary, segs = [];
   for (let i = 0; i < B.length; i++) segs.push([B[i], B[(i + 1) % B.length]]);
   // frontage wall (today) — replaced by the pump forecourt and shop row in the front-zone option
-  const fw = new THREE.Group(); fw.name = 'frontageWall'; fw.userData.optionOff = true; wallG.add(fw);
+  const fwWrap = new THREE.Group(); fwWrap.userData.frontOrig = true; wallG.add(fwWrap);                     // v18: hidden when a front-zone variation stands in place
+  const fw = new THREE.Group(); fw.name = 'frontageWall'; fw.userData.optionOff = true; fwWrap.add(fw);
   segs.forEach(([a, b]) => {
     if (a[0] === 220 && a[1] === 588.5) { segBox(fw, [0, 528], gA, 1.1, 9, M.brick); return; }
     segBox(wallG, a, b, 1.1, 9, M.brick);
@@ -76,35 +77,40 @@ export function build(scene) {
   slabR(roads, SITE.roads.branch, 0.25, M.road);
   // drying loop ring (16 ft) around the yard
   const o = SITE.roads.loopOuter, iy = SITE.dryingYard;
-  slab(roads, rectPts(o), 0.22, M.road, 0, [roundRectPts(iy, YARD_R).reverse()]);                   // v15: yard corners rounded (R 24 ft) so trucks turn easily
+  slab(roads, rectPts(o), 0.22, M.road, 0, [roundRectPts({ ...iy, x2: Math.min(iy.x2, o.x2 - 0.05) }, YARD_R).reverse()]);   // v15: yard corners rounded (R 24 ft); v18: yard reaches the main road, so the loop has no east leg
   // one-way arrows painted on the loop
   const arrowShape = new THREE.Shape([[-1.2, -4], [1.2, -4], [1.2, 0], [3, 0], [0, 4.5], [-3, 0], [-1.2, 0]].map(([a, b]) => new THREE.Vector2(a, b)));
   const ag = new THREE.ShapeGeometry(arrowShape); ag.rotateX(-Math.PI / 2);
   const arrows = [[150, 402, 'W'], [90, 402, 'W'], [51, 340, 'S'], [51, 250, 'S'], [100, 177, 'E'], [160, 177, 'E']];
   arrows.forEach(([x, y, d]) => { const a = new THREE.Mesh(ag, M.whitePaint); a.position.copy(P(x, y, 0.27)); a.rotation.y = { N: 0, W: Math.PI / 2, S: Math.PI, E: -Math.PI / 2 }[d]; roads.add(a); });
-  tag(roads, null, { name: 'Internal roads', status: 'infra', size: 'Main 24 ft · branch 24 ft · drying loop 16 ft', notes: 'Main road x 195–220 from the gate to the south wall, two-way. Branch road to the flour mill at y 110–134. Drying loop runs one-way: in at the top right, west along the top, south down the shed side, east along the bottom.', round: 3 });
+  tag(roads, null, { name: 'Internal roads', status: 'infra', size: 'Main 24 ft · branch 24 ft · drying loop 16 ft', notes: 'Main road x 195–220 from the gate to the south wall, two-way; v20: its south end (y 20–96) is the weighbridge bay. Branch road to the flour mill at y 110–134. Drying loop runs one-way: in at the top right, west along the top, south down the shed side, east along the bottom. v18: its unused east leg is paved into the drying yard, so the loop is open to the main road on that side.', round: 18 });
   label(roads, 'Main road · 24 ft', 207.5, 360, 1, 'road', 2);
   label(roads, 'Branch road', 245, 122, 1, 'road', 2);
   label(roads, 'Drying loop · one-way 16 ft', 115, 402, 1, 'road', 2);
 
-  // weighbridge bay + platform + cabin
+  // ---- v20: weighbridge at the south end of the main road (between finished goods and the flour mill), shared by every front-zone layout.
+  // Pit-type platform nearly flush with the road; trucks cross it southbound, then turn west into the one-way back lane behind finished
+  // goods, north up the west lane and east along the east–west lane back to the main road.
   const wb = new THREE.Group(); wb.name = 'weighbridge'; g.add(wb);
-  slabR(wb, SITE.roads.weighBay, 0.25, M.concrete);
-  const pf = SITE.roads.weighbridge;
-  boxR(wb, pf, 0.9, M.steel, 0, false);
-  box(wb, pf.x1 - 0.6, pf.y1, pf.x1, pf.y2, 1.0, M.yellow); box(wb, pf.x2, pf.y1, pf.x2 + 0.6, pf.y2, 1.0, M.yellow);
-  for (let y = pf.y1; y <= pf.y2; y += 10) box(wb, pf.x1 + 0.2, y - 0.15, pf.x2 - 0.2, y + 0.15, 0.95, M.steelDark, 0, false);
-  const cab = { x1: 165.5, y1: 468, x2: 172.5, y2: 482 };
-  const c = new THREE.Mesh(new THREE.BoxGeometry(7, 10, 14), [M.cabin, M.cabin, M.slab, M.slab, M.cabin, M.cabin]);
-  c.position.copy(P(169, 475, 5)); c.castShadow = true; wb.add(c);
-  box(wb, cab.x1 - 1, cab.y1 - 1, cab.x2 + 1, cab.y2 + 1, 0.5, M.trimRed, 10);
-  tag(wb, SITE.roads.weighBay, { name: 'Weighbridge bay', status: 'existing', notes: 'Platform 11 × 60 ft at x 175–186 × y 445–505, operator cabin on the west side. Every truck is weighed in and out.', round: 6 });
-  label(wb, 'Weighbridge', 180.5, 475, 4, '', 2);
-  truck(wb, 180.5, 482, 0, true);
+  const pf = SITE.roads.weighbridge, cab = SITE.roads.weighCabin, bay = SITE.roads.weighBay;
+  slabR(wb, bay, 0.28, M.concrete);
+  boxR(wb, pf, 0.4, M.steel, 0, false);
+  box(wb, pf.x1 - 0.6, pf.y1, pf.x1, pf.y2, 0.8, M.yellow); box(wb, pf.x2, pf.y1, pf.x2 + 0.6, pf.y2, 0.8, M.yellow);          // guide kerbs
+  for (let y = pf.y1; y <= pf.y2; y += 10) box(wb, pf.x1 + 0.2, y - 0.15, pf.x2 - 0.2, y + 0.15, 0.45, M.steelDark, 0, false);
+  for (let i = 0; i < 6; i++) box(wb, pf.x1 + i * 1.83, pf.y2 + 1.5, pf.x1 + (i + 1) * 1.83, pf.y2 + 2.1, 0.06, i % 2 ? M.whitePaint : M.trimRed, 0.28, false);   // stop line
+  const c = new THREE.Mesh(new THREE.BoxGeometry(cab.x2 - cab.x1, 10, cab.y2 - cab.y1), [M.cabin, M.cabin, M.slab, M.slab, M.cabin, M.cabin]);
+  c.position.copy(P((cab.x1 + cab.x2) / 2, (cab.y1 + cab.y2) / 2, 5.28)); c.castShadow = true; wb.add(c);
+  box(wb, cab.x1 - 1, cab.y1 - 1, cab.x2 + 1, cab.y2 + 1, 0.5, M.trimRed, 10.28);
+  box(wb, 195.6, 93, 197, 94.4, 4, M.yellow, 0.28); for (let i = 0; i < 6; i++) box(wb, 197 + i * 3, 93.4, 200 + i * 3, 93.9, 0.4, i % 2 ? M.whitePaint : M.trimRed, 3.6);   // boom barrier at the entry
+  cyl(wb, 217.5, 94, 0.25, 9, M.steel, 0.28, 8); box(wb, 216.9, 93.7, 218.1, 94.3, 2.4, M.steelDark, 9.3);                           // traffic light
+  [[209.5, 97, Math.PI], [209.5, 22, Math.PI], [196, 10, Math.PI / 2]].forEach(([x, y, r]) => { const ar = new THREE.Mesh(ag, M.whitePaint); ar.position.copy(P(x, y, 0.31)); ar.rotation.y = r; wb.add(ar); });
+  truck(wb, 209.5, 60, Math.PI, true);
+  tag(wb, bay, { name: 'Weighbridge (moved to the end of the main road)', status: 'relocated', size: 'Platform 11 × 60 ft · bay 24 × 76 ft', notes: 'v20: moved from the front zone to the south end of the main road, between the finished-goods godown and the flour mill, so it stays put whatever the front zone becomes (hybrid or any variation). Pit-type platform almost flush with the road, yellow guide kerbs, boom barrier and traffic light at the entry, operator cabin on the west side with a window onto the platform. Traffic is one-way: trucks and trolleys cross southbound, then turn west into the back lane behind finished goods, north up the west lane and east along the east–west lane back to the main road — so nobody reverses. The rice office’s despatch + weighbridge clerks are now ≈60 ft away. Trade-offs: harvest trolleys drive the length of the main road to weigh and back up to the drying loop (the front holding area still buffers them), and a truck waiting for the bridge stands at the east–west lane mouth, so release trolleys from the holding area one at a time. Empty trucks weigh again on the way out.', round: 20 });
+  label(wb, 'Weighbridge', 209.5, 58, 4, 'major', 1);
 
   // ---- trees: boundary rows + outside shelter belts (shisham / eucalyptus) ----
   const r = rng(21), list = [];
-  for (let t = -400; t < 1500; t += 26) { const [x, y] = at(t, 66 + r() * 6); list.push([x, y, 1.0, r() < 0.5 ? 1 : 0]); }
+  for (let t = -400; t < 1500; t += 26) { const [x, y] = at(t, 66 + r() * 6), k = r() < 0.5 ? 1 : 0; if (t > -70 && t < 245) continue; list.push([x, y, 1.0, k]); }   // v18: no tree line across the road in front of the mill
   for (let y = -60; y < 520; y += 30) list.push([-40 - r() * 8, y, 1.1, 1]);
   for (let x = -40; x < 480; x += 32) list.push([x, -40 - r() * 8, 1, r() < 0.6 ? 1 : 0]);
   for (let y = -40; y < 300; y += 30) list.push([480 + r() * 8, y, 1, 0]);

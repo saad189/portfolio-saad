@@ -76,7 +76,7 @@ function buildYard(g) {
 
   const Z = 0.4;
   // 1) thin spread layers being sun-dried (four bays), raked
-  [[68, 196, 118, 280], [124, 196, 170, 262], [68, 292, 100, 383], [140, 300, 170, 383]].forEach(([x1, y1, x2, y2]) => boxR(d, { x1, y1, x2, y2 }, 0.22, M.paddy, Z, false));
+  [[68, 196, 118, 280], [124, 196, 186, 262], [68, 292, 100, 383], [140, 300, 186, 383]].forEach(([x1, y1, x2, y2]) => boxR(d, { x1, y1, x2, y2 }, 0.22, M.paddy, Z, false));
   // 2) windrows being raked up for collection
   const wg = new THREE.CylinderGeometry(1.6, 1.6, 30, 12, 1, false, 0, Math.PI); wg.rotateX(Math.PI / 2); wg.rotateZ(Math.PI / 2);
   for (let i = 0; i < 5; i++) { const w = new THREE.Mesh(wg, M.paddy); w.scale.y = 0.6; w.position.copy(P(104 + i * 6, 345, Z)); w.castShadow = true; w.receiveShadow = true; d.add(w); }
@@ -97,7 +97,7 @@ function buildYard(g) {
   [[y.x1 + 9, y.y1 + 9], [y.x2 - 9, y.y1 + 9], [y.x1 + 9, y.y2 - 9], [y.x2 - 9, y.y2 - 9], [y.x1 + 2.5, (y.y1 + y.y2) / 2], [y.x2 - 2.5, (y.y1 + y.y2) / 2]].forEach(([px, py]) => {
     cyl(d, px, py, 0.35, 28, M.steel, 0, 8); box(d, px - 1.5, py - .5, px + 1.5, py + .5, 1, M.steelDark, 28);
   });
-  tag(d, y, { name: 'Drying yard', status: 'existing', size: '120 × 209 ft (corners rounded, R 24 ft)', area: '≈24,590 sq ft', notes: 'Full-size paved floor inside the one-way loop, with a kerb and grated drains at the edges. v15: the four corners are rounded (24 ft radius) so trucks and tractor-trolleys on the 16 ft loop can take the corners without cutting the kerb; the yard gives up ≈490 sq ft. Shown mid-day: paddy spread thin in four bays and raked, windrows being pulled up, heaps collected (two under tarps for the night), a tractor-trolley tipping a fresh load from the loop, and a bagging point with a platform scale by the store doors. At ~2 in depth the floor holds roughly 100–120 t of wet paddy per spreading (guess; depends on depth and turning).', round: 15 });
+  tag(d, y, { name: 'Drying yard', status: 'existing', size: '136 × 209 ft (corners rounded, R 24 ft)', area: '≈27,930 sq ft (+≈3,340 sq ft in v18)', notes: 'Full-size paved floor inside the one-way loop, with a kerb and grated drains at the edges. v18: the yard now runs east right up to the main road. The loop’s east leg (16 ft) was never used — trucks come in at the top right, go west along the top, south down the shed side and leave east along the bottom — so it is paved into the yard and the two eastern bays are 16 ft longer. The rounded corners (24 ft radius, v15) now sit on the main road, so they double as wide turning mouths into the top of the loop and out of the bottom. Only the kerb and drain separate the yard from main-road traffic; a line of bollards there would stop vehicles cutting across the paddy. Shown mid-day: paddy spread thin in four bays and raked, windrows being pulled up, heaps collected (two under tarps for the night), a tractor-trolley tipping a fresh load from the loop, and a bagging point with a platform scale by the store doors. At ~2 in depth the floor holds roughly 115–135 t of wet paddy per spreading (guess; depends on depth and turning).', round: 18 });
   label(d, 'Drying yard', (y.x1 + y.x2) / 2, (y.y1 + y.y2) / 2, 8, 'major', 1);
   label(d, 'Bagging point', 66, 252, 7, '', 2);
   mergeByMaterial(d);

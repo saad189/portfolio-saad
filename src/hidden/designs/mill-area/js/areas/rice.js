@@ -81,34 +81,42 @@ export function build(scene) {
   [[R.laneW, '29.8 ft'], [R.laneEW, '26 ft'], [R.laneN, '26.8 ft']].forEach(([r, w]) => { box(ln, r.x1, r.y1, r.x1 + .35, r.y2, 0.05, M.yellow, 0.22, false); box(ln, r.x2 - .35, r.y1, r.x2, r.y2, 0.05, M.yellow, 0.22, false); });
   truck(ln, 112, 112.5 - 6.5, -Math.PI / 2, true); truck(ln, 146, 113 + 6.5, Math.PI / 2, false);   // two trucks passing in the 26 ft lane
   truck(ln, 101, 40, 0, true); truck(ln, 115.2, 70, Math.PI, false);                                   // and in the west lane
-  tag(ln, null, { name: 'Two-way truck lanes', status: 'infra', size: 'West 29.8 ft · east–west 26 ft · link 26.8 ft', notes: 'Every gap between rice-mill buildings is at least 26 ft, so two trucks (≈8.5 ft each) can pass with room to spare: west lane between the milling hall and finished goods, east–west lane between finished goods and the office (main road ↔ west lane), and a link from the west lane up to the drying loop.', round: 9 });
+  tag(ln, null, { name: 'Two-way truck lanes', status: 'infra', size: 'West 29.8 ft · east–west 26 ft · link 26.8 ft', notes: 'Every gap between rice-mill buildings is at least 26 ft, so two trucks (≈8.5 ft each) can pass with room to spare: west lane between the milling hall and finished goods, east–west lane between finished goods and the office (main road ↔ west lane), and a link from the west lane up to the drying loop. v19: a ≈15 ft back lane behind finished goods (godown shortened 11 ft). v20: it runs one-way westbound as the exit from the weighbridge at the end of the main road: trucks cross the bridge southbound, turn west behind the godown, go north up the west lane and east along the east–west lane back to the main road. Finished-goods trucks can leave the apron the same way.', round: 20 });
   // v17: the space freed by shortening the rice office (x 174–195 × y 126–167) is left open and paved, so trucks can swing
   // through the lane / main-road corner freely; a few bollards protect the office's east door
   slab(ln, [[174, 126], [195, 126], [195, 167], [174, 167]], 0.27, M.road);
   [[175.5, 132], [175.5, 144], [175.5, 150]].forEach(([x, y]) => cyl(ln, x, y, 0.35, 3, M.yellow, 0.27, 10));
   truck(ln, 186, 118, -Math.PI / 4, true);                                                                          // truck taking the curve out of the lane
+  // v19: back lane behind finished goods (≈15 ft between the boundary wall and the godown plinth).
+  // v20: one-way westbound — the exit from the weighbridge at the end of the main road, round finished goods to the west lane.
+  box(ln, 123, 15.2, 173, 15.55, 0.05, M.yellow, 0.22, false);
+  const ash = new THREE.Shape([[-1.2, -4], [1.2, -4], [1.2, 0], [3, 0], [0, 4.5], [-3, 0], [-1.2, 0]].map(([a, b]) => new THREE.Vector2(a, b)));
+  const ag = new THREE.ShapeGeometry(ash); ag.rotateX(-Math.PI / 2);
+  [[165, 8], [135, 8], [110, 14, 0]].forEach(([x, y, r = Math.PI / 2]) => { const a = new THREE.Mesh(ag, M.whitePaint); a.position.copy(P(x, y, 0.23)); a.rotation.y = r; ln.add(a); });
+  truck(ln, 150, 8, Math.PI / 2, true);
+  label(ln, 'Back lane · one-way ≈15 ft', 140, 8, 3, 'road', 2);
   label(ln, 'Two-way lane · 26 ft', 150, 113, 3, 'road', 2); label(ln, 'Two-way lane · 29.8 ft', 108, 90, 3, 'road', 2); label(ln, 'Link to drying loop', 106.6, 150, 3, 'road', 2);
 
   // ---------- finished goods + packing (new PEB) ----------
   const f = new THREE.Group(); f.name = 'fg'; g.add(f);
   gableShed(f, R.fg, { eave: 26, rise: 5, wall: M.cladWhite, roof: M.roofWhite, trim: M.trimRed, cut: true, frames: 24 });
   [40, 75].forEach(y => shutter(f, 123, y, 'W', 14, 16, true, true));
-  [18, 40, 62, 84].forEach(y => shutter(f, 173, y, 'E', 12, 14, true, true));
-  box(f, 173, 8, 180, 97, 4, M.slab);
-  segBox(f, [180, 8], [180, 97], 0.25, 3.5, M.rail, 4);
-  [12, 24, 34, 46, 56, 68, 78, 90].forEach(y => box(f, 180, y - 1, 180.8, y + 1, 2.4, M.tyre, 1));
-  [10, 95].forEach(y => cyl(f, 182, y, 0.6, 3.5, M.yellow, 0, 10));
+  [28, 50, 70, 90].forEach(y => shutter(f, 173, y, 'E', 12, 14, true, true));          // v19: docks re-spaced on the shorter wall
+  box(f, 173, 19, 180, 97, 4, M.slab);
+  segBox(f, [180, 19], [180, 97], 0.25, 3.5, M.rail, 4);
+  [23, 33, 44, 56, 66, 76, 86, 94].forEach(y => box(f, 180, y - 1, 180.8, y + 1, 2.4, M.tyre, 1));
+  [21, 95].forEach(y => cyl(f, 182, y, 0.6, 3.5, M.yellow, 0, 10));
   // packing line by the west door: bagging scale, stitcher, belt
   box(f, 126, 34, 131, 38, 7, M.machine, 0.2); hopper(f, 128.5, 36, 7.2, 5, 4, 1, 1, 3, M.machineBlue);
   box(f, 131, 35, 137, 37, 2.6, M.machineBlue, 0.2);
   box(f, 133, 33, 135, 34.5, 4.5, M.machine, 0.2);
   // bag stacks on pallets (50 kg bags), aisles to the docks
   const stack = (x1, y1, x2, y2, hgt) => { box(f, x1, y1, x2, y2, 0.5, M.pallet, 0.2); box(f, x1 + .2, y1 + .2, x2 - .2, y2 - .2, hgt, M.bags, 0.7); };
-  [[138, 146], [149, 157], [160, 168]].forEach(([x1, x2], i) => [[10, 22], [25, 37], [43, 55], [58, 70], [80, 92]].forEach(([y1, y2], j) => stack(x1, y1, x2, y2, [10.8, 9, 7.2, 10.8, 5.4, 9][(i + j) % 6])));
+  [[138, 146], [149, 157], [160, 168]].forEach(([x1, x2], i) => [[20, 31], [34, 45], [52, 63], [66, 77], [82, 94]].forEach(([y1, y2], j) => stack(x1, y1, x2, y2, [10.8, 9, 7.2, 10.8, 5.4, 9][(i + j) % 6])));
   person(f, 132, 40); person(f, 158, 40);
-  tag(f, R.fg, { name: 'Finished goods + packing', status: 'new', size: '50 × 95 ft', area: '4,750 sq ft', notes: 'v9: extended north from 70 to 95 ft (+36%). White PEB warehouse with red trim. Rice comes in through two west doors from the milling hall, is bagged on the packing line, stacked on pallets (≈15 blocks of 50 kg bags) and shipped from four raised docks on the east side. The 22 ft apron suits side-loading with trucks parked parallel to the dock; backing in square to the dock would need about 45 ft.', round: 2 });
-  label(f, 'Finished goods', 148, 52, 34, 'major', 1);
-  cutLabel(f, 'Packing line', 130, 36, 12); cutLabel(f, 'Bag stacks', 153, 40, 14);
+  tag(f, R.fg, { name: 'Finished goods + packing', status: 'new', size: '50 × 84 ft', area: '4,200 sq ft', notes: 'v9: extended north from 70 to 95 ft; v19: the south end is cut back 11 ft (to 84 ft, −550 sq ft) so a truck can pass behind it on a ≈15 ft back lane from the west lane to the apron and main road. Still +20% on the original 70 ft. White PEB warehouse with red trim. Rice comes in through two west doors from the milling hall, is bagged on the packing line, stacked on pallets (≈15 blocks of 50 kg bags) and shipped from four raised docks on the east side. The 22 ft apron suits side-loading with trucks parked parallel to the dock; backing in square to the dock would need about 45 ft.', round: 19 });
+  label(f, 'Finished goods', 148, 58, 34, 'major', 1);
+  cutLabel(f, 'Packing line', 130, 36, 12); cutLabel(f, 'Bag stacks', 153, 48, 14);
   mergeByMaterial(f);
   slabR(g, R.apron, 0.35, M.concrete);
   label(g, 'Loading apron', 186, 18, 1, '', 2);
