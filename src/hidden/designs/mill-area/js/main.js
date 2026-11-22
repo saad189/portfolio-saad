@@ -4,7 +4,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { initTextures, initMaterials, M, LABELS, PICK, FREE } from './lib.js';
-const CUTS = [], OPTS = [], OPTS_OFF = [], UPPERS = [], FRONT_ORIG = [], FRONT_VAR = [];
+const CUTS = [], OPTS = [], OPTS_OFF = [], UPPERS = [], UPPERS2 = [], FRONT_ORIG = [], FRONT_VAR = [];
 import * as context from './areas/context.js';
 import * as storage from './areas/storage.js';
 import * as rice from './areas/rice.js';
@@ -59,7 +59,7 @@ Object.values(M).forEach(m => { if (m && m.map) m.map.anisotropy = maxA; });
 context.build(scene); storage.build(scene); rice.build(scene); east.build(scene); flour.build(scene); front.build(scene);
 variants.build(scene);
 const flowG = flow.build(scene);
-scene.traverse(o => { if (o.userData.cut) CUTS.push(o); if (o.userData.option) OPTS.push(o); if (o.userData.optionOff) OPTS_OFF.push(o); if (o.userData.upper && !o.isCSS2DObject) UPPERS.push(o); if (o.userData.frontOrig) FRONT_ORIG.push(o); if (o.userData.frontVar) FRONT_VAR.push(o); });
+scene.traverse(o => { if (o.userData.cut) CUTS.push(o); if (o.userData.option) OPTS.push(o); if (o.userData.optionOff) OPTS_OFF.push(o); if (o.userData.upper && !o.isCSS2DObject) UPPERS.push(o); if (o.userData.upper2 && !o.isCSS2DObject) UPPERS2.push(o); if (o.userData.frontOrig) FRONT_ORIG.push(o); if (o.userData.frontVar) FRONT_VAR.push(o); });
 
 // ---------- views ----------
 const VIEWS = {
@@ -68,6 +68,7 @@ const VIEWS = {
   gate: { pos: [232, 22, -660], tgt: [150, 10, -380] },
   front: { pos: [40, 120, -720], tgt: [110, 0, -500] },
   staff: { pos: [175, 95, -520], tgt: [52, 14, -424], front: 0 },
+  staffIn: { pos: [58, 92, -478], tgt: [50, 0, -421], cut: 3, front: 0 },
   holding: { pos: [236, 92, -575], tgt: [136, 10, -462], cut: 0, front: 0 },
   holdingIn: { pos: [176, 13, -520], tgt: [138, 9, -452], cut: 0, front: 0 },
   pump: { pos: [138, 98, -590], tgt: [50, 6, -468], cut: 0, front: 0 },
@@ -126,15 +127,16 @@ function applyLabels() {
     const isFree = FREE.includes(l);
     let shown = true; for (let p = l.parent; p; p = p.parent) if (!p.visible) { shown = false; break; }
     const near = !l.userData.cutOnly || l.getWorldPosition(_lp).setY(0).distanceTo(_tg.copy(controls.target).setY(0)) < 190;
-    const cutOk = !l.userData.cutOnly || (state.cut > 0 && near && !(l.userData.groundOnly && state.cut !== 2) && !(l.userData.upper && state.cut === 2));
+    const u = l.userData, cutOk = !u.cutOnly || (state.cut > 0 && near && !(u.groundOnly && state.cut !== 3) && !(u.upper && state.cut === 3) && !(u.upper2 && state.cut >= 2) && !(u.firstOnly && state.cut !== 2));
     l.visible = shown && state.labels && !(l.userData.tier === 2 && far) && (!isFree || state.free) && cutOk;
   });
 }
 function applyCut() {
   CUTS.forEach(o => { o.visible = state.cut === 0; });
-  UPPERS.forEach(o => { o.visible = state.cut < 2; });
+  UPPERS.forEach(o => { o.visible = state.cut < 3; });
+  UPPERS2.forEach(o => { o.visible = state.cut < 2; });          // v21: the middle step hides the 2nd floor of G+2 buildings (staff flats)
   const b = document.querySelector('[data-toggle=cut]');
-  if (b) { b.classList.toggle('on', state.cut > 0); b.textContent = ['Cut-away', 'Cut-away: top floor', 'Cut-away: ground floor'][state.cut]; }
+  if (b) { b.classList.toggle('on', state.cut > 0); b.textContent = ['Cut-away', 'Cut-away: top floor', 'Cut-away: middle floor', 'Cut-away: ground floor'][state.cut]; }
   applyLabels();
 }
 function applyOptions() { OPTS.forEach(o => { o.visible = state.options; }); OPTS_OFF.forEach(o => { o.visible = !state.options; }); applyLabels(); }
@@ -169,7 +171,7 @@ document.querySelectorAll('[data-toggle]').forEach(b => {
   b.classList.toggle('on', !!state[b.dataset.toggle]);
   b.addEventListener('click', () => {
     const k = b.dataset.toggle;
-    if (k === 'cut') { state.cut = (state.cut + 1) % 3; applyCut(); return; }
+    if (k === 'cut') { state.cut = (state.cut + 1) % 4; applyCut(); return; }
     state[k] = !state[k]; b.classList.toggle('on', state[k]);
     if (k === 'labels') applyLabels();
     if (k === 'flow') { flowG.visible = state.flow; document.getElementById('flowLegend').hidden = !state.flow; }
@@ -231,6 +233,30 @@ function showCompare() {
 }
 document.getElementById('compareBtn').addEventListener('click', () => { goTo('variants'); showCompare(); });
 
+// ---------- keyboard (v21): W/A/S/D move over the ground, Q/E rotate round the view centre, Shift = faster ----------
+const keys = new Set();
+const typing = (e) => { const t = e.target; return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable); };
+window.addEventListener('keydown', e => {
+  if (typing(e) || e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (k === 'shift') { keys.add('shift'); return; }
+  if (k.length === 1 && 'wasdqe'.includes(k)) { keys.add(k); tween = null; e.preventDefault(); }
+});
+window.addEventListener('keyup', e => { keys.delete(e.key.toLowerCase()); if (e.key === 'Shift') keys.delete('shift'); });
+window.addEventListener('blur', () => keys.clear());
+const _kf = new THREE.Vector3(), _kr = new THREE.Vector3(), _km = new THREE.Vector3(), _ko = new THREE.Vector3();
+function keyMove(dt) {
+  if (!keys.size || (keys.size === 1 && keys.has('shift'))) return;
+  const dist = camera.position.distanceTo(controls.target), fast = keys.has('shift') ? 2.5 : 1;
+  camera.getWorldDirection(_kf); _kf.y = 0; if (_kf.lengthSq() < 1e-6) _kf.set(0, 0, -1); _kf.normalize();
+  _kr.crossVectors(_kf, camera.up).normalize();
+  _km.set(0, 0, 0);
+  if (keys.has('w')) _km.add(_kf); if (keys.has('s')) _km.sub(_kf); if (keys.has('d')) _km.add(_kr); if (keys.has('a')) _km.sub(_kr);
+  if (_km.lengthSq() > 0) { _km.normalize().multiplyScalar(Math.max(40, dist * 0.8) * fast * dt); camera.position.add(_km); controls.target.add(_km); }
+  const rot = (keys.has('e') ? 1 : 0) - (keys.has('q') ? 1 : 0);   // v22: Q/E swapped at Saad's request
+  if (rot) { _ko.copy(camera.position).sub(controls.target).applyAxisAngle(camera.up, rot * 1.3 * fast * dt); camera.position.copy(controls.target).add(_ko); }
+}
+
 // ---------- compass ----------
 const needle = document.getElementById('needle');
 
@@ -251,6 +277,7 @@ function frame() {
     camera.position.lerpVectors(tween.p0, tween.p1, e); controls.target.lerpVectors(tween.t0, tween.t1, e);
     if (tween.k >= 1) tween = null;
   }
+  keyMove(dt);
   controls.update();
   if (state.flow) flow.tick(dt);
   const far = camera.position.distanceTo(controls.target) > 720 || camera.position.y < 70;
