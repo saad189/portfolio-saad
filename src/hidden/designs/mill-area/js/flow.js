@@ -38,26 +38,27 @@ export function build(scene) {
   const g = new THREE.Group(); g.name = 'flow'; scene.add(g);
   // v20: the weighbridge is at the south end of the main road. Every truck crosses it southbound, then loops back one-way:
   // west along the back lane behind finished goods, north up the west lane, east along the east–west lane, north on the main road.
-  const WEIGH_LOOP = [[213, 100], [209.5, 92], [209.5, 26], [200, 12], [180, 8], [123, 8], [102, 18], [101, 106], [112, 119], [190, 119]];
+  // v23: the loop now goes round the one rice mill hall: back lane → west lane (by the boiler) → open yard → strip in front of the office
+  const WEIGH_LOOP = [[213, 100], [209.5, 92], [209.5, 26], [200, 12], [180, 8], [62, 8], [50.6, 18], [50.6, 110], [64, 118], [190, 118]];
   // inbound paddy truck: gate -> south on the main road -> weighbridge -> loop back -> north on the main road -> drying loop -> paddy store door
   add(g, polyCurve([[207.5, 610], [213, 580], ...WEIGH_LOOP, [201, 130], [201, 390], [190, 402], [51, 402], [51, 300], [44, 300]], 2.2), COL.paddy, 1.1, 22, 0.09);
   // outbound rice truck: apron -> east–west lane -> south onto the weighbridge -> loop back -> north on the main road -> gate
-  add(g, polyCurve([[186, 40], [186, 96], [198, 106], ...WEIGH_LOOP.slice(1), [201, 130], [201, 560], [203, 590], [205, 612]], 2.2), COL.rice, 1.1, 20, 0.09);
+  add(g, polyCurve([[186.8, 62], [186.8, 22], [176, 8], [62, 8], [50.6, 18], [50.6, 110], [64, 118], [190, 118], [206, 106], ...WEIGH_LOOP.slice(1), [201, 130], [201, 560], [203, 590], [205, 612]], 2.2), COL.rice, 1.1, 26, 0.09);
   // process path: store -> intake conveyor -> elevators/pre-cleaner -> tower -> dryer -> tempering bins -> milling hall -> finished goods
   add(g, polyCurve([[37, 172], [41.8, 160], [41.8, 94], [39.5, 92]], 14), COL.paddy, 0.8, 5);
   add(g, arc([38.5, 91.5], [22, 106], 50, 61, 76), COL.paddy, 0.8, 3);    // intake -> top bin
   add(g, arc([24, 118], [22, 138], 44, 62, 68), COL.paddy, 0.8, 3);       // tower -> dryer
   add(g, arc([22, 145], [14, 157], 61, 38, 64), COL.paddy, 0.8, 3);       // dryer -> tempering bins
-  add(g, polyCurve([[39, 157], [47, 157]], 30), COL.paddy, 0.8, 2);        // bins -> hall
-  add(g, arc([48, 152], [84, 56], 30, 20, 40), COL.rice, 0.8, 5);         // through the milling line
-  add(g, arc([90, 60], [126, 40], 16, 14, 30), COL.rice, 0.8, 3);         // hall -> finished goods
-  add(g, arc([165, 40], [186, 40], 14, 10, 22), COL.rice, 0.8, 3);        // FG -> truck
-  add(g, arc([68, 44], [56, 30], 27, 20, 32), COL.husk, 0.7, 3);          // hall -> husk store
-  add(g, arc([46, 24], [20, 40], 10, 12, 20), COL.husk, 0.7, 3);          // husk -> boiler
+  add(g, line3([[39, 157, 30], [46.5, 157, 30], [59.5, 106, 29.5], [62, 104, 27]]), COL.paddy, 0.8, 4);   // bins -> belt gallery -> rice mill hall (v23)
+  add(g, polyCurve([[66, 102], [122, 99], [122, 79], [66, 79], [64, 70], [96, 58], [111, 50]], 14), COL.rice, 0.8, 9);   // through the milling line (3 rows)
+  add(g, arc([118, 44], [136, 42], 14, 9, 20), COL.rice, 0.8, 2);         // product bins -> packing
+  add(g, arc([160, 60], [186.8, 62], 12, 9, 20), COL.rice, 0.8, 3);      // finished goods -> dock -> truck
+  add(g, arc([104.5, 101], [68, 40], 27, 14, 32), COL.husk, 0.7, 4);      // aspirator -> husk bay
+  add(g, arc([60, 44], [24, 44], 16, 12, 22), COL.husk, 0.7, 3);          // husk bay -> boiler (overhead belt)
   add(g, polyCurve([[20, 46], [20, 100]], 15.5), COL.steam, 0.7, 5);      // steam main -> saila
   // flour mill (one building): bagged wheat unloaded on the north apron -> intake pit -> elevator -> cleaning floor;
   // flour by pneumatic line to the packing hall -> dispatch from the west strip -> weighbridge (end of the main road) -> loop back -> gate
-  add(g, polyCurve([[207.5, 610], [213, 580], ...WEIGH_LOOP.slice(0, -1), [226, 124], [300, 124], [318, 105], [330, 104.5]], 2.2), COL.wheat, 1.1, 18, 0.09);
+  add(g, polyCurve([[207.5, 610], [213, 580], ...WEIGH_LOOP.slice(0, -1), [190, 118], [226, 124], [300, 124], [318, 105], [330, 104.5]], 2.2), COL.wheat, 1.1, 22, 0.09);
   add(g, arc([340, 99], [356, 92], 6, 4, 10), COL.wheat, 0.8, 2);
   add(g, arc([356, 92], [366, 80], 4, 62, 84), COL.wheat, 0.8, 3);
   add(g, line3([[372, 52, 60], [372, 52, 8], [362, 40, 31], [296, 40, 31], [290, 36, 8]]), COL.flour, 0.8, 6);
