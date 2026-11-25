@@ -29,9 +29,24 @@
   button:hover { border-color:#9aa6b0; }
   button.on { background:var(--ink); color:#fff; border-color:var(--ink); }
   #hint { bottom:14px; left:50%; transform:translateX(-50%); padding:6px 12px; color:var(--mut); font-size:12px; white-space:nowrap; z-index:5; }
-  #info { top:14px; right:14px; width:300px; padding:14px 16px; z-index:6; }
-  #info h3 { margin:4px 0 8px; font-size:16px; }
+  #info { top:14px; right:14px; width:340px; padding:14px 16px 16px; z-index:6; max-height:calc(100vh - 28px); overflow:auto; line-height:1.45; }
+  #info h3 { margin:8px 0 10px; font-size:16.5px; line-height:1.25; padding-right:18px; }
   #info p { margin:8px 0 0; color:#36414a; }
+  #info .ihead { display:flex; align-items:center; gap:6px; padding-right:24px; }
+  #info .rdchip { font-size:10.5px; font-weight:600; letter-spacing:.4px; color:var(--mut); border:1px solid var(--line); border-radius:99px; padding:1px 7px; margin-left:auto; }
+  #info .facts { display:grid; grid-template-columns:1fr; gap:6px; margin:0 0 10px; }
+  #info .fact { background:#f3f5f7; border-radius:8px; padding:6px 9px; font-size:12.5px; color:var(--ink); }
+  #info .fact span { display:block; font-size:9.5px; font-weight:650; text-transform:uppercase; letter-spacing:.7px; color:var(--mut); margin-bottom:1px; }
+  #info p.lead { font-size:13px; color:#26313a; margin:0 0 8px; }
+  #info ul.pts { margin:0; padding:0; list-style:none; font-size:12.5px; color:#36414a; }
+  #info ul.pts > li { position:relative; padding:4px 0 4px 14px; border-top:1px dashed #e3e7eb; }
+  #info ul.pts > li:first-child { border-top:none; }
+  #info ul.pts > li:before { content:""; position:absolute; left:2px; top:11px; width:5px; height:5px; border-radius:50%; background:var(--acc); opacity:.75; }
+  #info ul.pts b { color:var(--ink); font-weight:650; }
+  #info ol { margin:4px 0 0; padding-left:18px; } #info ol li { margin:2px 0; }
+  #info .vb { display:inline-block; font-size:10px; font-weight:700; color:#4b3b8f; background:#ece7f8; border-radius:5px; padding:0 5px; margin-right:5px; vertical-align:1px; }
+  #info .sec { margin:14px 0 2px; font-size:10.5px; font-weight:650; text-transform:uppercase; letter-spacing:.7px; color:var(--mut); }
+  #info .fnote { margin-top:8px; background:#fbf7ea; border:1px solid #efe4bf; border-radius:8px; padding:7px 9px; color:#6b5a26; }
   #info .kv { display:flex; gap:8px; font-size:12.5px; } #info .kv span { width:40px; color:var(--mut); }
   #info .rd { margin-top:10px; font-size:11.5px; color:var(--mut); border-top:1px solid var(--line); padding-top:8px; }
   #info .x { position:absolute; top:8px; right:8px; border:none; background:none; font-size:18px; padding:2px 7px; color:var(--mut); }
@@ -53,11 +68,11 @@
   .lbl.free { background:rgba(213,241,225,.92); color:#17643b; border-color:rgba(23,100,59,.3); }
   .lbl.cut { background:rgba(255,248,230,.95); color:#7a4a00; border-color:rgba(122,74,0,.3); font-size:11px; }
   .lbl.variant { background:#1d2329; color:#fff; font-weight:700; font-size:13px; padding:4px 10px; border-color:transparent; }
-  #info.wide { width:400px; max-height:calc(100vh - 28px); overflow:auto; } #info.xwide { width:min(720px, calc(100vw - 320px)); }
-  table.fin { width:100%; border-collapse:collapse; margin-top:10px; font-size:12px; }
+  #info.wide { width:420px; } #info.wide .facts { grid-template-columns:1fr 1fr; } #info.xwide { width:min(720px, calc(100vw - 320px)); }
+  table.fin { width:100%; border-collapse:collapse; margin-top:4px; font-size:12px; }
   table.fin td, table.fin th { border-top:1px solid var(--line); padding:5px 4px; vertical-align:top; text-align:left; }
-  table.fin td:first-child { color:var(--mut); width:42%; } table.fin tr.sub td { font-size:11.5px; color:#6b757e; padding-top:2px; padding-bottom:2px; border-top:none; }
-  table.fin tr.hi td { font-weight:650; color:var(--ink); } table.fin tr.hi td:first-child { color:var(--ink); }
+  table.fin td:first-child { color:var(--mut); width:42%; } table.fin tr.sub td { font-size:11.5px; color:#6b757e; padding-top:2px; padding-bottom:2px; border-top:none; } table.fin tr.sub td:first-child { padding-left:14px; }
+  table.fin tr.hi td { font-weight:650; color:var(--ink); background:#f3f6f4; } table.fin tr.hi td:first-child { color:var(--ink); }
   table.cmpt td:first-child { width:16%; } table.cmpt th { font-size:12px; }
   .fnote { font-size:11.5px; color:var(--mut); } #info button.cmp { margin-top:6px; }
   .lbl.review { background:rgba(231,225,246,.94); color:#4b3b8f; border-color:rgba(75,59,143,.3); }
@@ -71,7 +86,7 @@
 
 <div id="hud" class="panel">
   <h1>Mill Compound — 3D</h1>
-  <div class="sub">v23 · milling + finished goods in one hall against the south wall · open yard to the saila plant · site plan v7 · 1 unit = 1 ft</div>
+  <div class="sub">v24 · petrol pump after the reference drawing · staff flats moved east · trolley strip behind the pump · new card layout · site plan v7 · 1 unit = 1 ft</div>
   <div class="grp">Views</div>
   <div class="btns">
     <button data-view="overview" class="on">Overview</button>
@@ -81,9 +96,9 @@
     <button data-view="pump">Petrol pump (option)</button>
     <button data-view="staff">Staff flats</button>
     <button data-view="staffIn">Inside staff flats</button>
-    <button data-view="holding">Covered trolley holding</button>
+    <button data-view="holding">Trolley strip (behind the pump)</button>
     <button data-view="holdingIn">Under the trolley roof</button>
-    <button data-view="frontStore">Store (old weighbridge spot)</button>
+    <button data-view="frontStore">Stores A + B</button>
     <button data-view="rice">Rice mill</button>
     <button data-view="saila">Saila plant</button>
     <button data-view="hall">Inside the hall</button>

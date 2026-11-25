@@ -67,11 +67,11 @@ const VIEWS = {
   top: { pos: [220, 1050, -293], tgt: [220, 0, -294] },
   gate: { pos: [232, 22, -660], tgt: [150, 10, -380] },
   front: { pos: [40, 120, -720], tgt: [110, 0, -500] },
-  staff: { pos: [175, 95, -520], tgt: [52, 14, -424], front: 0 },
-  staffIn: { pos: [58, 92, -478], tgt: [50, 0, -421], cut: 3, front: 0 },
-  holding: { pos: [236, 92, -575], tgt: [136, 10, -462], cut: 0, front: 0 },
-  holdingIn: { pos: [176, 13, -520], tgt: [138, 9, -452], cut: 0, front: 0 },
-  pump: { pos: [138, 98, -590], tgt: [50, 6, -468], cut: 0, front: 0 },
+  staff: { pos: [262, 105, -590], tgt: [146, 14, -466], front: 0 },
+  staffIn: { pos: [205, 96, -470], tgt: [146, 0, -465], cut: 3, front: 0 },
+  holding: { pos: [150, 85, -505], tgt: [55, 6, -425], cut: 0, front: 0 },
+  holdingIn: { pos: [109, 12, -425.5], tgt: [30, 7, -425], cut: 0, front: 0 },
+  pump: { pos: [150, 150, -640], tgt: [50, 0, -470], cut: 0, front: 0 },
   rice: { pos: [300, 170, 120], tgt: [95, 10, -90] },
   saila: { pos: [140, 95, -40], tgt: [24, 32, -126], cut: true },
   hall: { pos: [150, 140, 72], tgt: [112, 0, -62], cut: true },
@@ -84,7 +84,7 @@ const VIEWS = {
   ops: { pos: [238, 100, -58], tgt: [158, 8, -142] },
   backLane: { pos: [218, 80, 50], tgt: [146, 4, -14], cut: 0 },
   weighbridge: { pos: [292, 92, 38], tgt: [196, 4, -58], cut: 0 },
-  frontStore: { pos: [252, 86, -548], tgt: [176, 8, -462], cut: 0, front: 0 },
+  frontStore: { pos: [168, 165, -610], tgt: [150, 0, -455], cut: 0, front: 0 },
   junction: { pos: [206, 175, -32], tgt: [208, 0, -142], cut: 0 },
   farm: { pos: [292, 175, -70], tgt: [330, 0, -192] },
   farmer: { pos: [492, 96, -108], tgt: [417, 2, -200] },
@@ -208,19 +208,59 @@ css.domElement.addEventListener('pointerup', e => {
   info.classList.remove('xwide');
   selBox = new THREE.BoxHelper(hit, 0xffc400); scene.add(selBox);
   const d = hit.userData.info;
-  info.innerHTML = `<button class="x" aria-label="Close">×</button>
-    <div class="st st-${d.status}">${STATUS_TXT[d.status] || d.status}</div>
-    <h3>${d.name}</h3>
-    ${d.size ? `<div class="kv"><span>Size</span>${d.size}</div>` : ''}
-    ${d.area ? `<div class="kv"><span>Area</span>${d.area}</div>` : ''}
-    <p>${d.notes || ''}</p>
-    ${d.finance ? `<table class="fin">${d.finance.rows.map(([k, v]) => `<tr class="${k.startsWith('—') ? 'sub' : ''}${/ROI|Net per year|Payback|Profit/.test(k) ? ' hi' : ''}"><td>${k}</td><td>${v}</td></tr>`).join('')}</table><p class="fnote">${d.finance.note}</p>${d.compare ? '<button class="cmp">Compare all three</button>' : ''}` : ''}
-    ${d.round ? `<div class="rd">Detailed in round ${d.round}</div>` : ''}`;
+  info.innerHTML = cardHTML(d);
   info.classList.toggle('wide', !!d.finance);
   info.hidden = false;
   const cb = info.querySelector('.cmp'); if (cb) cb.onclick = showCompare;
   info.querySelector('.x').onclick = () => { info.hidden = true; if (selBox) { scene.remove(selBox); selBox = null; } };
 });
+
+// ---------- v24: info-card renderer — notes become a lead line + bullet points, finance becomes a tidy table ----------
+const esc = (t) => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const ABBR = ['e.g.', 'i.e.', 'etc.', 'approx.', 'vs.', 'No.', 'Rs.', 'incl.', 'excl.', 'St.', 'Dr.', 'Mr.', 'min.', 'max.'];
+function sentences(text) {
+  let t = ' ' + String(text || '').trim();
+  ABBR.forEach((a, i) => { t = t.split(a).join(a.replace(/\./g, `\u0001${i}`)); });
+  const out = t.split(/(?<=[.!?])\s+(?=[A-Z(‘“"'0-9≈]|v\d)/).map(x => x.replace(/\u0001\d+/g, '.').trim()).filter(Boolean);
+  // re-join a sentence that only closes a bracket or is a stray fragment
+  return out.reduce((a, x) => { if (a.length && (x.length < 14 || /^[)\]]/.test(x))) a[a.length - 1] += ' ' + x; else a.push(x); return a; }, []);
+}
+function fmtLine(raw) {
+  let s = esc(raw), head = '';
+  const v = s.match(/^v(\d+)(?:\s*[–-]\s*v?(\d+))?\s*[:,]\s*/);
+  if (v) { head += `<span class="vb">v${v[1]}${v[2] ? '–' + v[2] : ''}</span>`; s = s.slice(v[0].length); }
+  const lb = s.match(/^([A-Z0-9‘][^:.;]{1,42}):\s+/);
+  if (lb && lb[1].replace(/\([^)]*\)/g, '').trim().split(/\s+/).length <= 6) { head += `<b>${lb[1]}:</b> `; s = s.slice(lb[0].length); }
+  if (/\(1\)/.test(s) && /\(2\)/.test(s)) {
+    const parts = s.split(/\s*\((\d)\)\s*/), intro = parts[0].replace(/[:,—–-]\s*$/, ''), items = [];
+    for (let i = 2; i < parts.length; i += 2) items.push(parts[i].replace(/[;,]\s*(and|or)?\s*$/, '').replace(/\.\s*$/, ''));
+    return `${head}${intro}${intro ? ':' : ''}<ol>${items.map(x => `<li>${x}</li>`).join('')}</ol>`;
+  }
+  return head + s;
+}
+function finHTML(f) {
+  const HI = /ROI|Net per year|Net return|Payback|Profit|^Total|^Build cost/;
+  const rows = f.rows.map(([k, v]) => {
+    const sub = /^[—–-]\s/.test(k), key = sub ? k.replace(/^[—–-]\s*/, '').replace(/^\p{Ll}/u, c => c.toUpperCase()) : k;
+    return `<tr class="${sub ? 'sub' : ''}${!sub && HI.test(k) ? ' hi' : ''}"><td>${esc(key)}</td><td>${esc(v)}</td></tr>`;
+  }).join('');
+  return `<div class="sec">Costs + returns</div><table class="fin">${rows}</table>${f.note ? `<div class="fnote">${esc(f.note)}</div>` : ''}`;
+}
+function cardHTML(d) {
+  const all = d.bullets ? d.bullets.slice() : sentences(d.notes);
+  let lead = d.lead || '';
+  if (!lead && all.length > 1 && !/^v\d+/.test(all[0]) && !/^[A-Z0-9‘][^:.;]{1,42}:\s/.test(all[0]) && all[0].length < 240) lead = all.shift();
+  if (!lead && all.length === 1) lead = all.shift();
+  const facts = [['Size', d.size], ['Area', d.area]].filter(([, v]) => v);
+  return `<button class="x" aria-label="Close">×</button>
+    <div class="ihead"><span class="st st-${d.status}">${STATUS_TXT[d.status] || esc(d.status)}</span>${d.round ? `<span class="rdchip">Round ${d.round}</span>` : ''}</div>
+    <h3>${esc(d.name)}</h3>
+    ${facts.length ? `<div class="facts">${facts.map(([k, v]) => `<div class="fact"><span>${k}</span>${esc(v)}</div>`).join('')}</div>` : ''}
+    ${lead ? `<p class="lead">${fmtLine(lead)}</p>` : ''}
+    ${all.length ? `<ul class="pts">${all.map(x => `<li>${fmtLine(x)}</li>`).join('')}</ul>` : ''}
+    ${d.finance ? finHTML(d.finance) : ''}
+    ${d.compare ? '<button class="cmp">Compare all three</button>' : ''}`;
+}
 
 // ---------- compare card for the front-zone variations ----------
 function showCompare() {
@@ -295,5 +335,5 @@ applyFront();
 applyFree();
 frame();
 window.__ready = true;
-window.__view = goTo;
+window.__view = goTo; window.__card = cardHTML;
 window.__scene = scene; window.__cam = (p, t) => { camera.position.set(...p); controls.target.set(...t); controls.update(); }; window.__renderer = renderer;
