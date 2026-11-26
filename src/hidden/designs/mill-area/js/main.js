@@ -4,7 +4,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { initTextures, initMaterials, M, LABELS, PICK, FREE } from './lib.js';
-const CUTS = [], OPTS = [], OPTS_OFF = [], UPPERS = [], UPPERS2 = [], FRONT_ORIG = [], FRONT_VAR = [];
+const CUTS = [], OPTS = [], OPTS_OFF = [], UPPERS = [], UPPERS2 = [], FRONTS = [];
+import { BUILD_COSTS, STORAGE } from './costs.js';
 import * as context from './areas/context.js';
 import * as storage from './areas/storage.js';
 import * as rice from './areas/rice.js';
@@ -59,7 +60,11 @@ Object.values(M).forEach(m => { if (m && m.map) m.map.anisotropy = maxA; });
 context.build(scene); storage.build(scene); rice.build(scene); east.build(scene); flour.build(scene); front.build(scene);
 variants.build(scene);
 const flowG = flow.build(scene);
-scene.traverse(o => { if (o.userData.cut) CUTS.push(o); if (o.userData.option) OPTS.push(o); if (o.userData.optionOff) OPTS_OFF.push(o); if (o.userData.upper && !o.isCSS2DObject) UPPERS.push(o); if (o.userData.upper2 && !o.isCSS2DObject) UPPERS2.push(o); if (o.userData.frontOrig) FRONT_ORIG.push(o); if (o.userData.frontVar) FRONT_VAR.push(o); });
+scene.traverse(o => { if (o.userData.cut) CUTS.push(o); if (o.userData.option) OPTS.push(o); if (o.userData.optionOff) OPTS_OFF.push(o); if (o.userData.upper && !o.isCSS2DObject) UPPERS.push(o); if (o.userData.upper2 && !o.isCSS2DObject) UPPERS2.push(o); // v25: front-zone states 0 (original) … 5; userData.fronts lists the states an object shows in (frontOrig / frontVar kept for older code)
+  if (o.userData.frontOrig) o.userData.fronts = [0]; if (o.userData.frontVar) o.userData.fronts = [o.userData.frontVar]; if (o.userData.fronts) FRONTS.push(o);
+  const d = o.userData.info; if (d && !d.finance && BUILD_COSTS[d.name]) d.finance = BUILD_COSTS[d.name];   // v25: build cost on every new build
+  if (d && !d.storage && STORAGE[d.name]) d.storage = STORAGE[d.name];                                    // v26: storage capacity on every store
+});
 
 // ---------- views ----------
 const VIEWS = {
@@ -72,6 +77,7 @@ const VIEWS = {
   holding: { pos: [150, 85, -505], tgt: [55, 6, -425], cut: 0, front: 0 },
   holdingIn: { pos: [109, 12, -425.5], tgt: [30, 7, -425], cut: 0, front: 0 },
   pump: { pos: [150, 150, -640], tgt: [50, 0, -470], cut: 0, front: 0 },
+  plot4: { pos: [150, 130, -640], tgt: [50, 0, -478], cut: 0, front: 4 }, plot5: { pos: [150, 130, -640], tgt: [50, 0, -478], cut: 0, front: 5 },   // v25: the pump plot with 4 / 5 in place
   rice: { pos: [300, 170, 120], tgt: [95, 10, -90] },
   saila: { pos: [140, 95, -40], tgt: [24, 32, -126], cut: true },
   hall: { pos: [150, 140, 72], tgt: [112, 0, -62], cut: true },
@@ -102,9 +108,9 @@ const VIEWS = {
     const px = cx + Nn[0] * 235 - Uu[0] * 45, py = cy + Nn[1] * 235 - Uu[1] * 45;
     VIEWS['var' + (i + 1)] = { pos: [px, 135, -py], tgt: [cx, 6, -(cy - 8)] };
   });
-  const [ax, ay] = variants.VARIANT_CENTERS[1];
-  const mx = ax + Uu[0] * 60, my = ay + Uu[1] * 60;
-  VIEWS.variants = { pos: [mx + Nn[0] * 820 + Uu[0] * 60, 560, -(my + Nn[1] * 820 + Uu[1] * 60)], tgt: [mx, 0, -(my - 20)] };
+  const [ax, ay] = variants.VARIANT_CENTERS[2];                                               // v25: five copies, centred on the 3rd
+  const mx = ax + Uu[0] * 230, my = ay + Uu[1] * 230;
+  VIEWS.variants = { pos: [mx + Nn[0] * 1450, 960, -(my + Nn[1] * 1450)], tgt: [mx, 0, -(my - 20)] };
 }
 let tween = null;
 function goTo(name, instant = false) {
@@ -143,8 +149,7 @@ function applyCut() {
 function applyOptions() { OPTS.forEach(o => { o.visible = state.options; }); OPTS_OFF.forEach(o => { o.visible = !state.options; }); applyLabels(); }
 // v18: what stands on the real front zone — 0 original (hybrid / today via Options), 1–3 the variations in place
 function applyFront() {
-  FRONT_ORIG.forEach(o => { o.visible = state.front === 0; });
-  FRONT_VAR.forEach(o => { o.visible = o.userData.frontVar === state.front; });
+  FRONTS.forEach(o => { o.visible = o.userData.fronts.includes(state.front); });
   const b = document.getElementById('frontCycle');
   if (b) { b.innerHTML = `Front zone: <b>${variants.FRONT_NAMES[state.front]}</b> ▸`; b.classList.toggle('on', state.front > 0); }
   if (selBox && !visibleUp(selBox.object)) { scene.remove(selBox); selBox = null; info.hidden = true; }
@@ -209,7 +214,7 @@ css.domElement.addEventListener('pointerup', e => {
   selBox = new THREE.BoxHelper(hit, 0xffc400); scene.add(selBox);
   const d = hit.userData.info;
   info.innerHTML = cardHTML(d);
-  info.classList.toggle('wide', !!d.finance);
+  info.classList.toggle('wide', !!(d.finance || d.storage));
   info.hidden = false;
   const cb = info.querySelector('.cmp'); if (cb) cb.onclick = showCompare;
   info.querySelector('.x').onclick = () => { info.hidden = true; if (selBox) { scene.remove(selBox); selBox = null; } };
@@ -246,27 +251,32 @@ function finHTML(f) {
   }).join('');
   return `<div class="sec">Costs + returns</div><table class="fin">${rows}</table>${f.note ? `<div class="fnote">${esc(f.note)}</div>` : ''}`;
 }
+function storeHTML(st) {
+  return `<div class="sec">Storage</div><table class="fin store">${st.rows.map(([k, v]) => `<tr${/^Capacity|^Finished rice/.test(k) ? ' class="hi"' : ''}><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join('')}</table>${st.note ? `<div class="fnote snote">${esc(st.note)}</div>` : ''}`;
+}
 function cardHTML(d) {
   const all = d.bullets ? d.bullets.slice() : sentences(d.notes);
   let lead = d.lead || '';
   if (!lead && all.length > 1 && !/^v\d+/.test(all[0]) && !/^[A-Z0-9‘][^:.;]{1,42}:\s/.test(all[0]) && all[0].length < 240) lead = all.shift();
   if (!lead && all.length === 1) lead = all.shift();
-  const facts = [['Size', d.size], ['Area', d.area]].filter(([, v]) => v);
+  const costRow = d.finance && d.finance.rows.find(([k]) => /^(Build cost|Total)/.test(k));
+  const facts = [['Size', d.size], ['Area', d.area], ['Storage', d.storage && d.storage.capacity], ['Build cost', costRow && costRow[1].split(' (')[0]]].filter(([, v]) => v);
   return `<button class="x" aria-label="Close">×</button>
     <div class="ihead"><span class="st st-${d.status}">${STATUS_TXT[d.status] || esc(d.status)}</span>${d.round ? `<span class="rdchip">Round ${d.round}</span>` : ''}</div>
     <h3>${esc(d.name)}</h3>
-    ${facts.length ? `<div class="facts">${facts.map(([k, v]) => `<div class="fact"><span>${k}</span>${esc(v)}</div>`).join('')}</div>` : ''}
+    ${facts.length ? `<div class="facts">${facts.map(([k, v]) => `<div class="fact${k === 'Build cost' ? ' cost' : k === 'Storage' ? ' cap' : ''}"><span>${k}</span>${esc(v)}</div>`).join('')}</div>` : ''}
     ${lead ? `<p class="lead">${fmtLine(lead)}</p>` : ''}
     ${all.length ? `<ul class="pts">${all.map(x => `<li>${fmtLine(x)}</li>`).join('')}</ul>` : ''}
+    ${d.storage ? storeHTML(d.storage) : ''}
     ${d.finance ? finHTML(d.finance) : ''}
-    ${d.compare ? '<button class="cmp">Compare all three</button>' : ''}`;
+    ${d.compare ? '<button class="cmp">Compare all five</button>' : ''}`;
 }
 
 // ---------- compare card for the front-zone variations ----------
 function showCompare() {
   const C = variants.COMPARE, rows = [['Build cost', 'capex'], ['Built area', 'built'], ['Net return', 'net'], ['ROI', 'roi'], ['Payback', 'payback'], ['Effort', 'effort'], ['Main risk', 'risk']];
-  info.innerHTML = `<button class="x" aria-label="Close">×</button><div class="st st-review">Front zone · 3 variations</div><h3>Compare the variations</h3>
-    <div class="kv"><span>Site</span>Each uses the whole front zone, ≈28,200 sq ft ≈ 6.3 kanal (only the mill’s main road kept; the weighbridge is at the end of the main road since v20)</div>
+  info.innerHTML = `<button class="x" aria-label="Close">×</button><div class="st st-review">Front zone · 5 variations</div><h3>Compare the 5 variations</h3>
+    <div class="kv"><span>Site</span>1–3 use the whole front zone, ≈28,200 sq ft ≈ 6.3 kanal (only the mill’s main road kept). 4–5 keep the original layout (shop row, mill front, stores A + B, staff flats, trolley strip) and replace only the petrol pump, so their build cost includes those parts (≈ Rs 6.4–8.5 cr).</div>
     <table class="fin cmpt"><tr><th></th>${C.map(c => `<th>${c.short}</th>`).join('')}</tr>${rows.map(([l, k]) => `<tr><td>${l}</td>${C.map(c => `<td>${c.compare[k]}</td>`).join('')}</tr>`).join('')}</table>
     <p class="fnote">All figures are planning estimates in PKR (Nov 2026 prices), land already owned (≈ Rs 4.8 cr at FBR value, not included). Click a variation in the 3D view for its breakdown, or use “Front zone ▸” to see each one standing on the real site.</p>`;
   info.classList.add('wide', 'xwide'); info.hidden = false;
@@ -281,8 +291,17 @@ window.addEventListener('keydown', e => {
   if (typing(e) || e.metaKey || e.ctrlKey || e.altKey) return;
   const k = e.key.toLowerCase();
   if (k === 'shift') { keys.add('shift'); return; }
+  if (k === 'h' && !e.repeat) { setHud(document.getElementById('hud').hidden); return; }
   if (k.length === 1 && 'wasdqe'.includes(k)) { keys.add(k); tween = null; e.preventDefault(); }
 });
+// ---------- v25: show / hide the sidebar (button or H) ----------
+function setHud(show) {
+  document.getElementById('hud').hidden = !show; document.getElementById('hudShow').hidden = show;
+  try { localStorage.setItem('gx3d.hud', show ? '1' : '0'); } catch (err) { /* storage unavailable */ }
+}
+document.getElementById('hudHide').addEventListener('click', () => setHud(false));
+document.getElementById('hudShow').addEventListener('click', () => setHud(true));
+try { if (localStorage.getItem('gx3d.hud') === '0') setHud(false); } catch (err) { /* storage unavailable */ }
 window.addEventListener('keyup', e => { keys.delete(e.key.toLowerCase()); if (e.key === 'Shift') keys.delete('shift'); });
 window.addEventListener('blur', () => keys.clear());
 const _kf = new THREE.Vector3(), _kr = new THREE.Vector3(), _km = new THREE.Vector3(), _ko = new THREE.Vector3();

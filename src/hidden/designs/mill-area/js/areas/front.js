@@ -14,11 +14,23 @@ const SHOPFRONT = () => { if (!_sf) { _sf = M.shutter.clone(); _sf.map = M.shutt
 
 export function build(scene) {
   const g0 = new THREE.Group(); g0.name = 'front'; scene.add(g0);
-  const g = new THREE.Group(); g.userData.frontOrig = true; g0.add(g);           // v18: the whole original front zone swaps out when a variation is shown in place
-  today(g);
-  hybrid(g);
-  staffFlats(g);
+  // v25: the front zone has 6 states (0 = original hybrid, 1–3 = full variations, 4–5 = the hybrid with the pump replaced).
+  // userData.fronts lists the states each part shows in: the old mill + the pump only in 0; the rest of the hybrid
+  // (shop row, mill front, stores A + B, staff flats, trolley strip) in 0, 4 and 5.
+  const z0 = new THREE.Group(); z0.userData.fronts = [0]; g0.add(z0); today(z0);
+  const p0 = new THREE.Group(); p0.userData.fronts = [0]; g0.add(p0); hybrid(p0, 'pump');
+  const k0 = new THREE.Group(); k0.name = 'hybridKept'; k0.userData.fronts = [0, 4, 5]; g0.add(k0); keptParts(k0);
   return g0;
+}
+// v25: everything in the original front zone except the petrol pump — shop row, mill front (visitor parking, sales counter,
+// stores A + B), trolley strip, staff flats. Variations 4 and 5 reuse it; their side-by-side copies call it with copy = true
+// (no Options flag, so the copies don't vanish when Options is off).
+export function keptParts(parent, copy = false) {
+  const g = new THREE.Group(); parent.add(g);
+  hybrid(g, 'kept', copy);
+  staffFlats(g);
+  if (copy) g.traverse(o => { delete o.userData.option; });
+  return g;
 }
 
 // ---------- staff flats (v12; v21 layout; v24: moved off the back of the petrol pump into the middle of the old trolley area) ----------
@@ -141,13 +153,15 @@ function today(g) {
   label(z, 'Front zone · old mill (today)', 70, 495, 6, 'review', 1);
 }
 
-function hybrid(g) {
-  const o = new THREE.Group(); o.userData.option = true; g.add(o);
+function hybrid(g, part = 'all', copy = false) {
+  const o = new THREE.Group(); if (!copy) o.userData.option = true; g.add(o);
+  const PX = 111, PY = 440;
+  if (part !== 'kept') {
 
   // ---------- A. petrol pump (west end, ≈2.5 kanal) — v24: laid out after Saad's reference drawing, fitted to the real plot and
   // mirrored so cars enter at the east end (traffic on this side of the road drives west) and leave at the west end ----------
   const pp = new THREE.Group(); pp.name = 'pump'; o.add(pp);
-  const PX = 111, PY = 440, T = pumpTex(), zf = 0.8;
+  const T = pumpTex(), zf = 0.8;
   slab(pp, [[0, PY], [PX, PY], [PX, ytop(PX)], [0, 528]], 0.3, M.concrete);
   segBox(pp, [0, PY], [PX, PY], 1.1, 8, M.brick); segBox(pp, [PX, PY], [PX, ytop(PX)], 1.1, 8, M.brick);          // back wall (trolley strip) + east wall
   // frontage: exit (west, t 2–28), kerbed landscaped median (t 30–74), entry (east, t 76–102), planted corner by the entry
@@ -234,6 +248,9 @@ function hybrid(g) {
   label(pp, 'Parking', 102, 476, 6, '', 2); label(pp, 'Solar-shaded parking', 102, 505, 12, '', 2); label(pp, 'Hi-flow diesel', 53, 499, 9, '', 2); label(pp, 'Air / water', 4.5, 489.5, 8, '', 2);
   label(pp, 'Entry', ...at(89, 9), 2, 'road', 2); label(pp, 'Exit', ...at(15, 9), 2, 'road', 2);
 
+  mergeByMaterial(pp);
+  }
+  if (part === 'pump') return;
   // ---------- B. shop row on the frontage (6 shops) ----------
   const sh = new THREE.Group(); sh.name = 'shops'; o.add(sh);
   const T0 = 116, W = 10.6, D = 22;
@@ -269,7 +286,7 @@ function hybrid(g) {
   tag(mf, { x1: PX, y1: 410, x2: 195, y2: 560 }, { name: 'Option: mill front', status: 'review', notes: 'The part of the front zone between the petrol pump and the mill’s main road, in the original (hybrid) layout. Visitor parking and a single-storey sales counter + visitor reception beside the gate (the head office itself is in the east block, so this stays small). v24 behind them, west to east: store B against the pump’s east wall, the staff flats (moved here from behind the pump) and store A on the old weighbridge spot. Trolley holding moved to the strip behind the pump (v24); the trolleys reach the weighbridge at the end of the main road through the drying loop. The old mill is demolished in this option.', round: 24 });
   label(mf, 'Sales counter + reception', 180.75, 535.5, 16, 'review', 2);
   label(mf, 'Visitor parking', 136, 532, 8, 'review', 2);
-  mergeByMaterial(pp); mergeByMaterial(sh); mergeByMaterial(mf);
+  mergeByMaterial(sh); mergeByMaterial(mf);
 }
 
 // ---------- v24: trolley holding strip behind the petrol pump (the old staff-flats strip, x 0–111 × y 410–440) ----------
@@ -342,13 +359,13 @@ function trolleyStrip(o) {
 const STORE_A = {
   name: 'Option: store A (old weighbridge spot)', status: 'review', size: '25 × 96 ft · 20 ft eaves · clear span', area: '2,400 sq ft ≈ 10.7 marla',
   notes: 'A plain store on the old weighbridge bay (the weighbridge moved to the end of the main road in v20), matching finished goods: white cladding, red trim. Length: since v21 it runs the full depth of the old trolley area, y 412–508. Doors: roller shutters at both ends, north onto the mill front and south onto the paved corner by the drying loop. Today: bagged stock, drums, tarps and spare trolley tyres (≈280 t of bags if filled). Later: deliberately a simple shell on a strong floor, so it can become a workshop + spare-parts store, a garage for the mills’ tractors and trolleys, extra paddy or rice storage, a sales / dealer godown, or shops facing the road; the east wall faces the main road and can take a shutter. Neighbours (v24): the staff flats’ gallery walkway runs along its west side. Not in the three variations (each uses this strip).',
-  finance: { rows: [['Build cost', 'Rs 0.55–0.7 cr (≈ Rs 2,200–3,000/sq ft: PEB frame + cladding, brick plinth, floor slab, 2 roller shutters, lights)'], ['Holds', '≈ 280 t of bagged paddy or rice, or ≈ 8 tractor-trolleys under cover'], ['Paving the old bay', 'Rs 3–5 lakh (most of it is already concrete)']], note: 'Planning estimate at Nov 2026 prices. Storage pays back in avoided rent and spoilage rather than income, so no ROI is shown.' },
+  finance: { rows: [['Build cost', 'Rs 0.55–0.7 cr (≈ Rs 2,200–3,000/sq ft: PEB frame + cladding, brick plinth, floor slab, 2 roller shutters, lights)'], ['Paving the old bay', 'Rs 3–5 lakh (most of it is already concrete)']], note: 'Planning estimate at Nov 2026 prices. Storage pays back in avoided rent and spoilage rather than income, so no ROI is shown.' },
   round: 24,
 };
 const STORE_B = {
   name: 'Option: store B (between the pump and the staff flats)', status: 'review', size: '18 × 94 ft · 16 ft eaves · clear span', area: '≈1,690 sq ft ≈ 7.5 marla',
   notes: 'v24: a second plain store on part of the old trolley-holding area, against the petrol pump’s east wall. Buffer: it stands between the pump and the staff flats, so nobody lives next to the pump wall. Doors: roller shutters at both ends, north onto the mill front and south onto the drying loop (the trolley strip’s entry is right beside it). Uses: bagged paddy or rice overflow, tarps and empty jute bags, spare trolley tyres and tools (it takes over from the old holding area’s store room and stock bay), or a workshop later. Lower than store A (16 ft eaves) so the flats’ upper-floor west windows look over it.',
-  finance: { rows: [['Build cost', 'Rs 0.37–0.5 cr (≈ Rs 2,200–3,000/sq ft)'], ['Holds', '≈ 170 t of bagged paddy or rice']], note: 'Planning estimate at Nov 2026 prices; no ROI shown (storage).' },
+  finance: { rows: [['Build cost', 'Rs 0.37–0.5 cr (≈ Rs 2,200–3,000/sq ft)']], note: 'Planning estimate at Nov 2026 prices; no ROI shown (storage).' },
   round: 24,
 };
 function storeShed(parent, r, info, opts = {}) {
