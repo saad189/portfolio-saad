@@ -15,11 +15,11 @@ export function build(scene) {
   // Sargodha–Gujrat Road, parallel to the slanted frontage
   const u = [220 / 228.166, 60.5 / 228.166], n = [-u[1], u[0]];
   const at = (t, off) => [0 + u[0] * t + n[0] * off, 528 + u[1] * t + n[1] * off];
-  slab(g, [at(-900, 10), at(1600, 10), at(1600, 54), at(-900, 54)], 0.1, M.soil, -0.25);        // verge / shoulders
-  slab(g, [at(-900, 18), at(1600, 18), at(1600, 46), at(-900, 46)], 0.2, M.asphalt, -0.2);        // 28 ft carriageway
-  const dash = new THREE.InstancedMesh(new THREE.BoxGeometry(10, 0.1, 0.6), M.whitePaint, 84);
+  slab(g, [at(-900, 10), at(2000, 10), at(2000, 54), at(-900, 54)], 0.1, M.soil, -0.25);        // verge / shoulders
+  slab(g, [at(-900, 18), at(2000, 18), at(2000, 46), at(-900, 46)], 0.2, M.asphalt, -0.2);        // 28 ft carriageway
+  const dash = new THREE.InstancedMesh(new THREE.BoxGeometry(10, 0.1, 0.6), M.whitePaint, 97);
   const mm = new THREE.Matrix4(), q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.atan2(u[1], u[0]));
-  for (let i = 0; i < 84; i++) { const [x, y] = at(-900 + i * 30, 32); mm.compose(P(x, y, 0.06), q, new THREE.Vector3(1, 1, 1)); dash.setMatrixAt(i, mm); }
+  for (let i = 0; i < 97; i++) { const [x, y] = at(-900 + i * 30, 32); mm.compose(P(x, y, 0.06), q, new THREE.Vector3(1, 1, 1)); dash.setMatrixAt(i, mm); }
   dash.receiveShadow = true; g.add(dash);
   label(g, 'Sargodha – Gujrat Road', ...at(-60, 32), 1, 'road', 1);
   // gate apron joining road to gate
@@ -110,14 +110,14 @@ export function build(scene) {
 
   // ---- trees: boundary rows + outside shelter belts (shisham / eucalyptus) ----
   const r = rng(21), list = [];
-  for (let t = -400; t < 1500; t += 26) { const [x, y] = at(t, 66 + r() * 6), k = r() < 0.5 ? 1 : 0; if (t > -70 && t < 245) continue; list.push([x, y, 1.0, k]); }   // v18: no tree line across the road in front of the mill
+  for (let t = -400; t < 1900; t += 26) { const [x, y] = at(t, 66 + r() * 6), k = r() < 0.5 ? 1 : 0; if (t > -70 && t < 245) continue; list.push([x, y, 1.0, k]); }   // v18: no tree line across the road in front of the mill
   for (let y = -60; y < 520; y += 30) list.push([-40 - r() * 8, y, 1.1, 1]);
   for (let x = -40; x < 480; x += 32) list.push([x, -40 - r() * 8, 1, r() < 0.6 ? 1 : 0]);
   for (let y = -40; y < 300; y += 30) list.push([480 + r() * 8, y, 1, 0]);
   for (let x = 240; x < 480; x += 34) list.push([x, 320 + r() * 8, 1, 1]);
   for (let y = 300; y < 610; y += 34) list.push([260 + r() * 8, y, 1, r() < .5 ? 1 : 0]);
   // scattered farm trees
-  for (let i = 0; i < 90; i++) { const x = -900 + r() * 2200, y = -900 + r() * 2200; if (x > -60 && x < 500 && y > -60 && y < 680) continue; if (x > 470 && x < 1300 && y > 500 && y < 950) continue; list.push([x, y, 0.9 + r() * 0.5, r() < 0.4 ? 1 : 0]); }
+  for (let i = 0; i < 90; i++) { const x = -900 + r() * 2200, y = -900 + r() * 2200; if (x > -60 && x < 500 && y > -60 && y < 680) continue; if (x > 470 && x < 1900 && y > 500 && y < 1150) continue; list.push([x, y, 0.9 + r() * 0.5, r() < 0.4 ? 1 : 0]); }
   trees(g, list);
 
   // neighbouring building behind the saila plant (seen in Saad's photos; assumed to be outside the west wall)

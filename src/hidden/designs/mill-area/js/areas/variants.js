@@ -8,16 +8,17 @@
 // skipped, and the wall to the mill road jogs round the gate guard room so it stays on the mill side.
 import * as THREE from 'three';
 import { ytop } from '../site.js';
-import { M, P, box, boxR, slab, segBox, cyl, block, label, tag, car, truck, person, trees, waterTank, acUnit, solarArray, strut, panel, railRect, shutter, mergeByMaterial, rng } from '../lib.js';
+import { M, P, box, boxR, slab, segBox, cyl, block, floorsBlock, partition, gableShed, label, tag, car, truck, tractor, person, trees, waterTank, acUnit, solarArray, strut, panel, railRect, shutter, mergeByMaterial, rng } from '../lib.js';
+import { keptParts } from './front.js';
 
 const U = [220 / 228.166, 60.5 / 228.166], N = [-U[1], U[0]];
-const SHIFT = [520, 790, 1060];                                         // ft along the road from the real front zone (v12: clear of the compound)
+const SHIFT = [520, 790, 1060, 1330, 1600];                             // ft along the road from the real front zone (v12: clear of the compound; v25: + 4 and 5)
 const at = (t, off = 0) => [U[0] * t + N[0] * off, 528 + U[1] * t + N[1] * off];
 const SITE = [[0, 410], [195, 410], [195, ytop(195)], [0, 528]];
 const FACE_ROAD = Math.atan2(N[0], -N[1]);                              // rotation.y for a plane facing the road
 export const VARIANT_CENTERS = SHIFT.map(s => [98 + U[0] * s, 480 + U[1] * s]);
 export const COMPARE = [];
-export const FRONT_NAMES = ['Original (hybrid)', '1 · Petrol pump', '2 · Restaurant + motel', '3 · Market'];
+export const FRONT_NAMES = ['Original (hybrid)', '1 · Petrol pump', '2 · Restaurant + motel', '3 · Market', '4 · Shops + flats', '5 · Godowns + restaurant'];
 
 // ---------- local textures / materials ----------
 function tex(w, h, draw, repeat) {
@@ -59,7 +60,9 @@ function mats() {
     martSign: std({ map: textSign([['MART  ·  CAFÉ  ·  ATM', 70, 0.55]], '#f2c230', '#0f3d27', 1024, 128, 'sans-serif'), emissive: 0x332200 }),
     karahiSign: std({ map: textSign([['KARAHI HOUSE', 92, 0.42], ['Karahi  ·  Tikka  ·  BBQ  ·  Family Hall', 40, 0.8]], '#5a1a12', '#ffd76a'), emissive: 0x2a0800 }),
     motelSign: std({ map: textSign([['MOTEL  ·  20 ROOMS', 74, 0.55]], '#1d2329', '#ffffff', 1024, 128, 'sans-serif') }),
-    marketSign: std({ map: textSign([['MANGOWAL TRADE CENTRE', 64, 0.45], ['Shops  ·  Offices  ·  Showrooms', 38, 0.82]], '#1f3b57', '#ffffff') }),
+    marketSign: std({ map: textSign([['MANGOWAL TRADE CENTRE', 64, 0.45], ['Shops on two floors', 38, 0.82]], '#1f3b57', '#ffffff') }),
+    plazaSign: std({ map: textSign([['MANGOWAL PLAZA', 78, 0.45], ['Shops  ·  Family flats', 40, 0.82]], '#6b2d1f', '#fff3dc') }),
+    godownSign: std({ map: textSign([['GODOWNS FOR RENT', 70, 0.42], ['Paddy  ·  Rice  ·  Wheat  ·  Fertiliser', 38, 0.8]], '#1d2329', '#ffffff') }),
     shopSigns: std({ map: tex(2048, 64, (x, w, h) => {
       const names = ['MOBILE ZONE', 'PHARMACY', 'BANK', 'TAILORS', 'HARDWARE', '', 'BAKERY', 'AGRI STORE', 'GARMENTS', 'ELECTRONICS', 'SHOES', 'GENERAL STORE'];
       const cols = ['#c0392b', '#16a085', '#1f3b57', '#8e44ad', '#d35400', '#555', '#b7950b', '#27ae60', '#2c3e50', '#2980b9', '#7f3f2a', '#117a65'];
@@ -75,12 +78,12 @@ const arrowGeo = (() => { const s = new THREE.Shape([[-1.2, -4], [1.2, -4], [1.2
 function arrow(parent, x, y, dir) { const a = new THREE.Mesh(arrowGeo, M.whitePaint); a.position.copy(P(x, y, 0.36)); a.rotation.y = dir; parent.add(a); }   // dir: 0 = north, +π/2 = west
 
 // ---------- common frame for one variation ----------
-function frame(scene, i, title, inPlace = false) {
+function frame(scene, i, title, inPlace = false, kept = false) {
   const g = new THREE.Group(); g.name = 'variant' + (i + 1) + (inPlace ? 'InPlace' : ''); scene.add(g);
   const s = inPlace ? 0 : SHIFT[i]; g.position.set(U[0] * s, 0, -(U[1] * s));
   if (inPlace) g.userData.frontVar = i + 1;
   if (!inPlace) slab(g, [[0, 404], [226, 404], [226, ytop(226) + 1], [0, 527]], 0.12, M.soil, -0.08);
-  slab(g, SITE, 0.3, M.concrete);
+  slab(g, SITE, kept ? 0.2 : 0.3, M.concrete);                                             // v25: lower under a copy of the original layout (its own slabs sit on top)
   slab(g, [at(0, 0), at(202, 0), at(202, 18), at(0, 18)], 0.25, M.road, -0.05);          // apron to the road
   if (inPlace) {
     // real site: main road, gate, west + east walls already exist. Wall to the loop, and to the mill road with a jog round the guard room
@@ -94,7 +97,8 @@ function frame(scene, i, title, inPlace = false) {
   slab(g, [[195.5, 410], [219.5, 410], [219.5, 588.3], [195.5, ytop(195.5)]], 0.28, M.road);
   [[195, ytop(195)], [220, 588.5]].forEach(([x, y]) => box(g, x - 1.8, y - 1.8, x + 1.8, y + 1.8, 19, M.brick));
   // boundary walls: south, west, and the wall between the variation and the mill road
-  segBox(g, [0, 410], [220, 410], 1.1, 9, M.brick); segBox(g, [0, 410], [0, 528], 1.1, 9, M.brick); segBox(g, [195, 410], [195, ytop(195) - 3], 1.1, 9, M.brick);
+  segBox(g, [0, 410], [220, 410], 1.1, 9, M.brick); segBox(g, [0, 410], [0, 528], 1.1, 9, M.brick);
+  if (!kept) segBox(g, [195, 410], [195, ytop(195) - 3], 1.1, 9, M.brick);                  // the original layout's mill front opens onto the main road
   segBox(g, [220, 410], [220, 588.5], 1.1, 9, M.brick);
   label(g, title, 98, 480, 52, 'variant', 1);
   label(g, 'Mill main road (kept)', 207.5, 470, 6, 'road', 2);
@@ -104,8 +108,8 @@ function card(g, info, inPlace) { tag(g, null, info); if (!inPlace) COMPARE.push
 
 export function build(scene) {
   mats();
-  v1(scene); v2(scene); v3(scene);                       // side-by-side copies east of the compound
-  v1(scene, true); v2(scene, true); v3(scene, true);     // v18: in-place copies on the real front zone (cycled from the HUD)
+  v1(scene); v2(scene); v3(scene); v4(scene); v5(scene);                                  // side-by-side copies east of the compound
+  v1(scene, true); v2(scene, true); v3(scene, true); v4(scene, true); v5(scene, true);    // v18: in-place copies on the real front zone (cycled from the HUD)
 }
 
 // ======================= VARIATION 1: full petrol pump =======================
@@ -280,58 +284,241 @@ function v2(scene, inPlace = false) {
 // ======================= VARIATION 3: built market (shops for sale or rent) =======================
 function v3(scene, inPlace = false) {
   const g = frame(scene, 2, 'Variation 3 · Market of shops', inPlace), v = V;
-  // two G+2 rows: Row A faces the road, Row B faces an inner courtyard; 11 shops per row on the ground floor
-  const row = (y1, y2, faceY, label_) => {
-    const H1 = 12, H2 = 10.5, top = H1 + 2 * H2;
+  // two G+1 rows (v26: shops on both floors, no offices or flats): Row A faces the road, Row B faces an inner courtyard
+  const row = (y1, y2, faceY, label_, backY) => {
+    const H1 = 12, H2 = 11, top = H1 + H2;
     const segs = [[10, 70], [78, 174]];                                               // 8 ft passage at x 70–78 (v12: rows run to x 174)
     segs.forEach(([a, b]) => {
-      box(g, a, y1, b, y2, H1, M.plaster); box(g, a, y1, b, y2, 2 * H2, v.marketUpper, H1); box(g, a - .3, y1 - .3, b + .3, y2 + .3, 3, M.plaster, top);
+      box(g, a, y1, b, y2, H1, M.plaster); box(g, a, y1, b, y2, H2, M.plaster, H1); box(g, a - .3, y1 - .3, b + .3, y2 + .3, 3, M.plaster, top);
       box(g, a, faceY - 0.3, b, faceY + 0.3, H1 - 1.5, v.shopFront, 0.3);              // ground-floor shop fronts
+      box(g, a, faceY - 0.3, b, faceY + 0.3, H2 - 3, v.shopFront, H1 + 0.6);           // first-floor shop fronts (v26)
+      if (backY) box(g, a, backY - 0.3, b, backY + 0.3, H2 - 3, v.shopFront, H1 + 0.6); // Row A: first-floor shops also open onto the courtyard gallery
       box(g, a - .2, faceY - 2.5, b + .2, faceY + 2.5, 0.5, M.darkMetal, H1 - 0.6);     // canopy / sign shelf
       for (let x = a; x <= b + 0.1; x += 12) box(g, x - .25, faceY - 0.5, x + .25, faceY + 0.5, top, M.stoneDark);
     });
+    sign(g, v.shopSigns, 164, 2.0, 92, faceY + 0.55, top - 1.6);                     // first-floor shop signs
     const ss = sign(g, v.shopSigns, 164, 2.2, 92, faceY + 0.55, H1 + 0.8); return ss;
   };
-  row(466, 496, 496, 'A'); row(414, 444, 444, 'B');
+  row(466, 496, 496, 'A', 466); row(414, 444, 444, 'B');
   // galleries for the upper floors on the courtyard side of both rows, stair cores at the ends
-  [[444, 448, 448], [462, 466, 462]].forEach(([y1, y2, ry]) => [12, 22.5].forEach(z => { box(g, 10, y1, 174, y2, 0.6, M.slab, z); panel(g, [10, ry], [174, ry], z + 0.6, 3.4, M.railBlue); }));
-  [[2, 414, 10, 444], [174, 414, 182, 444], [2, 466, 10, 496], [174, 466, 182, 496]].forEach(([a, b, c, d]) => box(g, a, b, c, d, 36, M.stoneDark));
+  [[444, 448, 448], [462, 466, 462]].forEach(([y1, y2, ry]) => [12].forEach(z => { box(g, 10, y1, 174, y2, 0.6, M.slab, z); panel(g, [10, ry], [174, ry], z + 0.6, 3.4, M.railBlue); }));
+  [[2, 414, 10, 444], [174, 414, 182, 444], [2, 466, 10, 496], [174, 466, 182, 496]].forEach(([a, b, c, d]) => box(g, a, b, c, d, 26, M.stoneDark));
   // courtyard: paving, trees, benches, fountain
   box(g, 10, 448, 174, 462, 0.4, M.tile, 0.3, false);
   trees(g, [[30, 455, 0.45, 0], [56, 455, 0.45, 0], [116, 455, 0.45, 0], [142, 455, 0.45, 0], [166, 455, 0.45, 0]], 77);
   cyl(g, 92, 455, 3.5, 1.4, M.stoneDark, 0.3, 20); cyl(g, 92, 455, 3, 0.2, M.water, 1.6, 20);
   box(g, 182.5, 410.6, 194.4, 500, 0.05, M.asphalt, 0.3, false);                                    // service lane to the back (v12)
   // roofs: tanks + solar
-  [20, 50, 110, 140, 166].forEach(x => { waterTank(g, x, 470, 36); waterTank(g, x, 418, 36, 0xe9e9e4); });
-  solarArray(g, 90, 481, 37, 144, 22, 0.15, 0); solarArray(g, 90, 429, 37, 144, 22, 0.15, 0);
+  [20, 50, 110, 140, 166].forEach(x => { waterTank(g, x, 470, 23); waterTank(g, x, 418, 23, 0xe9e9e4); });
+  solarArray(g, 90, 481, 24, 144, 22, 0.15, 0); solarArray(g, 90, 429, 24, 144, 22, 0.15, 0);
   // name board on top of Row A, front parking + service road, guard/ATM kiosk, people
-  sign(g, v.marketSign, 46, 6, 92, 497, 39); box(g, 68, 495.5, 116, 496.5, 8, M.darkMetal, 36);
+  sign(g, v.marketSign, 46, 6, 92, 497, 29); box(g, 68, 495.5, 116, 496.5, 8, M.darkMetal, 26);
   for (let x = 14; x < 178; x += 9) box(g, x - .2, 500, x + .2, 517, 0.05, M.whitePaint, 0.32, false);
   [[18.5, 0xffffff], [27.5, 0x1f2a44], [45.5, 0xb0b5ba], [63.5, 0x7a1f1f], [90.5, 0xffffff], [108.5, 0x2b2f36], [126.5, 0xd8d8d8], [135.5, 0x2f6db0], [153.5, 0xffffff], [171.5, 0x7a1f1f]].forEach(([x, c]) => car(g, x, 508.5, 0, c));
   box(g, 187, 519, 194, 526, 9, M.beige); box(g, 186.9, 521, 187.2, 525, 6, M.darkMetal, 0.5);
   [[30, 498], [33, 499], [96, 498], [120, 450], [60, 457]].forEach(([x, y], i) => person(g, x, y, 0.3, [M.kurta, M.kurta2, M.kurta3][i % 3]));
-  label(g, 'Row A · 13 road-front shops + 26 units above', 92, 481, 40, '', 2); label(g, 'Row B · 13 courtyard shops + 26 units above', 92, 429, 40, '', 2);
+  label(g, 'Row A · 13 road-front shops + 13 shops above', 92, 481, 30, '', 2); label(g, 'Row B · 13 courtyard shops + 13 shops above', 92, 429, 30, '', 2);
   label(g, 'Courtyard', 92, 455, 6, '', 2); label(g, 'Parking ≈ 36 cars', 92, 508.5, 6, '', 2);
   mergeByMaterial(g);
   card(g, {
     name: 'Variation 3 · Market of shops (sale or rent)', short: 'Market', status: 'review',
-    size: 'Site 195 × 118–172 ft (≈202 ft road frontage)', area: '28,200 sq ft ≈ 6.3 kanal · two G+2 rows ≈31,500 sq ft built',
-    notes: 'A built market: Row A (13 shops facing the road, 12 × 30 ft) and Row B (13 shops facing a landscaped courtyard), each with two upper floors of offices / showrooms reached by galleries and four stair cores — 78 units in all (v12: rows extended east over the old weighbridge strip, +12 units). Front parking for ≈36 cars and a service lane along the east side, central passage to the courtyard, guard + ATM kiosk, roof tanks and solar. Can be built in phases (Row A first).',
+    size: 'Site 195 × 118–172 ft (≈202 ft road frontage)', area: '28,200 sq ft ≈ 6.3 kanal · two G+1 rows ≈21,000 sq ft built',
+    notes: 'v26: shops on both floors and nothing else, Saad’s call: no flats and no offices in the trade centre. Row A: 13 shops face the road (12 × 30 ft). Row B: 13 shops face a landscaped courtyard. Upstairs: each row has a first floor of 13 more shops, reached by open galleries on the courtyard side and four stair cores, so 52 shops in all. Row A’s upper shops show their fronts and signs to the road too. Around it: front parking for ≈36 cars, a service lane along the east side, a central passage to the courtyard, a guard + ATM kiosk, roof tanks and solar. Phasing: it can be built Row A first (v12: rows extended east over the old weighbridge strip).',
     finance: {
       rows: [
-        ['Build cost', 'Rs 14–18 cr'],
-        ['— construction (≈31,500 sq ft @ Rs 4,000–5,000)', 'Rs 12.6–15.8 cr'],
-        ['— parking, courtyard, utilities, lift, approvals', 'Rs 1.5–2.2 cr'],
-        ['Units', '26 ground shops + 52 upper units = 78'],
-        ['Sell all', '≈ Rs 27–42 cr (road shops 0.9–1.4 cr, courtyard 0.45–0.7, upper 0.15–0.35 each)'],
-        ['Profit if sold', '≈ Rs 10–26 cr over 3–5 years (≈ 5–21 cr after land at FBR)'],
-        ['Rent all', '≈ Rs 8–14 lakh/month full → ≈ 0.7–1.2 cr/yr net (80 % let)'],
-        ['Hybrid', 'Sell the 52 upper units (≈ 9.5–15 cr, most of the build cost back) and rent the 26 ground shops (≈ 0.4–0.7 cr/yr)'],
-        ['ROI', 'Sell ≈ 15–25 %/yr · Rent ≈ 4–8 %/yr · Payback: sell 3–5 yrs, rent 12–25 yrs'],
+        ['Build cost', 'Rs 9.6–12.3 cr'],
+        ['— construction (≈21,000 sq ft @ Rs 4,000–5,000)', 'Rs 8.4–10.5 cr'],
+        ['— parking, courtyard, utilities, stairs, approvals', 'Rs 1.2–1.8 cr'],
+        ['Units', '26 ground-floor shops + 26 first-floor shops = 52'],
+        ['Sell all', '≈ Rs 24–39 cr (road shops 0.9–1.4 cr, courtyard 0.45–0.7, first floor 0.25–0.45 each)'],
+        ['Profit if sold', '≈ Rs 12–29 cr over 3–5 years (≈ 7–24 cr after land at FBR)'],
+        ['Rent all', '≈ Rs 8–13.5 lakh/month full → ≈ 0.75–1.3 cr/yr net (80 % let)'],
+        ['Hybrid', 'Sell the 26 first-floor shops (≈ 6.5–11.7 cr, most of the build cost back) and rent the 26 ground shops (≈ 0.55–0.95 cr/yr)'],
+        ['ROI', 'Sell ≈ 20–35 %/yr · Rent ≈ 6–13 %/yr · Payback: sell 3–5 yrs, rent 8–16 yrs'],
       ],
-      note: 'Comparable: a 21-marla main-road plaza in Mangowal with 27 shops is listed at Rs 31.9 cr (≈ 1.2 cr per unit with land). Lowest effort if rented, but 78 units is a lot for a small town — phase it and pre-sell Row A before starting Row B. Land (≈ Rs 4.8 cr FBR for the whole front zone) not included in the build cost.',
+      note: 'First-floor shops rent for much less than ground-floor ones in a small town (assumed Rs 8,000–15,000 a month against Rs 30,000–50,000 on the road); a mobile, electronics or tailoring cluster is what usually fills them. Comparable: a 21-marla main-road plaza in Mangowal with 27 shops is listed at Rs 31.9 cr. Phase it and pre-sell Row A before starting Row B. Land (≈ Rs 4.8 cr FBR for the whole front zone) not included in the build cost.',
     },
-    compare: { capex: 'Rs 14–18 cr', built: '≈31,500 sq ft (78 units)', net: 'Sell: ≈ 10–26 cr profit · Rent: ≈ 0.7–1.2 cr/yr', roi: 'Sell ≈ 15–25 %/yr · Rent ≈ 4–8 %', payback: 'Sell 3–5 yrs · Rent 12–25 yrs', effort: 'Low (rent) to medium (sales)', risk: 'Small-town demand / sell-out speed' },
-    round: 12,
+    compare: { capex: 'Rs 9.6–12.3 cr', built: '≈21,000 sq ft (52 shops on 2 floors)', net: 'Sell: ≈ 12–29 cr profit · Rent: ≈ 0.75–1.3 cr/yr', roi: 'Sell ≈ 20–35 %/yr · Rent ≈ 6–13 %', payback: 'Sell 3–5 yrs · Rent 8–16 yrs', effort: 'Low (rent) to medium (sales)', risk: 'Small-town demand for first-floor shops' },
+    round: 26,
   }, inPlace);
+}
+
+// ======================= VARIATIONS 4 + 5 (v25): the original layout with the pump replaced =======================
+// Both keep everything the original (hybrid) front zone has apart from the petrol pump: the shop row, the mill front
+// (visitor parking, sales counter, stores A + B), the staff flats and the trolley strip. Only the pump plot
+// (x 0–111 × y 440–frontage, ≈11,400 sq ft ≈ 2.5 kanal, ≈115 ft of frontage) changes. In place they swap out just the
+// pump; side by side they are built with a copy of the rest of the original layout.
+const PLOT = [[0, 440], [111, 440], [111, ytop(111)], [0, 528]];
+const ANG = Math.atan2(U[1], U[0]);
+const FLAG = (m, k) => { if (k) m.userData[k] = true; return m; };
+// a group whose local plan coords are (t, off): t = ft along the frontage from the west corner, off + = towards the road
+function alongRoad(g) { const r = new THREE.Group(); r.position.copy(P(0, 528, 0)); r.rotation.y = ANG; g.add(r); return r; }
+function keptVariant(scene, i, title, inPlace, fill) {
+  mats();
+  let g;
+  if (inPlace) { g = new THREE.Group(); g.name = 'variant' + (i + 1) + 'InPlace'; g.userData.fronts = [i + 1]; scene.add(g); }
+  else { g = frame(scene, i, title, false, true); keptParts(g, true); }
+  const p = new THREE.Group(); p.name = 'plot' + (i + 1); g.add(p);
+  slab(p, PLOT, 0.3, M.concrete);
+  segBox(p, [0, 440], [111, 440], 1.1, 8, M.brick);                                    // wall to the trolley strip
+  segBox(p, [111, 440], [111, ytop(111) - 1], 1.1, 8, M.brick);                        // wall to store B + the mill front
+  slab(p, [at(0, 0), at(115, 0), at(115, 18), at(0, 18)], 0.25, M.road, -0.05);       // apron to the road
+  const info = fill(p, alongRoad(p));
+  tag(p, null, info); if (!inPlace) COMPARE.push(info);
+  if (inPlace) label(g, title, 55, 490, 46, 'variant', 1);
+  mergeByMaterial(p);
+  return g;
+}
+const KEPT_ROWS = [
+  ['— kept from the original layout: shop row, mill front, stores A + B, staff flats, trolley strip + solar roof', 'Rs 6.4–8.5 cr (0.55–0.75 + 0.55–0.8 + 0.55–0.7 + 0.37–0.5 + 3.5–4.5 + 0.85–1.2)'],
+];
+
+// ---------- 4 · shops + flats: a G+2 road-front plaza on the pump plot ----------
+function v4(scene, inPlace = false) {
+  return keptVariant(scene, 3, 'Variation 4 · Shops + flats', inPlace, (p, r) => {
+    const v = V, FH = 11, B = { x1: 8, y1: -56, x2: 96, y2: -20 }, SW = (96 - 16) / 6, FW = (96 - 8) / 3;
+    // front parking along the road (perpendicular bays)
+    box(r, 2, -20, 108, -0.6, 0.05, M.asphalt, 0.3, false);
+    for (let t = 12; t <= 102; t += 9) box(r, t - .2, -18, t + .2, -3.5, 0.05, M.whitePaint, 0.36, false);
+    [[16.5, 0xffffff], [25.5, 0x1f2a44], [43.5, 0xb0b5ba], [61.5, 0x7a1f1f], [79.5, 0xd8d8d8], [97.5, 0x2f6db0]].forEach(([t, c]) => car(r, t, -10.5, 0, c));
+    // the building: 6 shops + lobby on the ground floor, 3 flats on each upper floor, gallery at the back
+    floorsBlock(r, B, 3, FH, M.beige, { parapet: 3, bands: M.slab, colSpacing: 14.7 });
+    for (let i = 0; i < 6; i++) {
+      const t0 = 16 + i * SW;
+      FLAG(box(r, t0 + 0.5, -20.45, t0 + SW - 0.5, -19.95, 8.6, v.shopFront, 0.3), 'cut');
+      FLAG(box(r, t0 + 0.2, -20.7, t0 + SW - 0.2, -20.1, 1.9, [M.trimRed, M.canopyBand, M.steelBlue][i % 3], 9.2), 'cut');
+      if (i) partition(r, [t0, -55.3], [t0, -20.7], 0.8, 10);
+      box(r, t0 + 2, -31, t0 + SW - 2, -29.4, 3.2, M.wood, 0.8); box(r, t0 + 1, -55, t0 + SW - 1, -53.4, 7.5, M.steelBlue, 0.8);
+    }
+    partition(r, [16, -55.3], [16, -20.7], 0.8, 10);
+    FLAG(box(r, 9.5, -20.45, 14.5, -19.95, 8, M.glass, 0.3), 'cut');                                         // lobby door to the flats' stair
+    for (let k = 0; k < 6; k++) box(r, 9.2, -54 + k * 3, 15.2, -51 + k * 3, 1.6 * (k + 1), M.plaster, 0.8);  // stair up to the 1st floor
+    box(r, 8, -20, 96, -16.6, 0.45, M.canopyBand, 10.4);                                                       // canopy over the shop walk
+    [1, 2].forEach(f => {
+      const k = f === 1 ? 'upper' : 'upper2', z = f * FH;
+      [B.x1 + FW, B.x1 + 2 * FW].forEach(t => FLAG(partition(r, [t, -55.3], [t, -20.7], z + 0.8, 10), k));
+      for (let n = 0; n < 3; n++) {
+        const t1 = B.x1 + n * FW;
+        FLAG(box(r, t1 + 6, -20, t1 + 23, -16.4, 0.5, M.slab, z), k); FLAG(box(r, t1 + 6, -16.7, t1 + 23, -16.3, 3.2, M.glass, z + 0.5), k);   // balcony
+        FLAG(box(r, t1 + 3, -52, t1 + 9.5, -46.5, 2, M.cushion, z + 0.8), k); FLAG(box(r, t1 + 15, -30, t1 + 23, -27, 2.4, M.cushion, z + 0.8), k);   // bed + sofa
+        FLAG(partition(r, [t1 + 12, -55.3], [t1 + 12, -38], z + 0.8, 10), k);
+      }
+      FLAG(box(r, B.x1, -61, B.x2, -56, 0.6, M.slab, z), k); FLAG(box(r, B.x1, -61.2, B.x2, -60.8, 3.3, M.railBlue, z + 0.6), k);   // rear gallery
+    });
+    const rf = new THREE.Group(); rf.userData.cut = true; r.add(rf);
+    [22, 52, 82].forEach(t => waterTank(rf, t, -50, 3 * FH)); solarArray(rf, 52, -35, 3 * FH + 1.4, 76, 18, 0.18, 0);
+    sign(r, v.plazaSign, 40, 6.2, 52, -19.2, 3 * FH + 4.6); box(r, 31, -20.4, 73, -19.6, 7.5, M.darkMetal, 3 * FH + 0.4);
+    // behind: residents' parking along the back wall, a small garden in the west corner, the drive down the west side
+    for (let x = 26; x <= 104; x += 9) box(p, x - .2, 442, x + .2, 456, 0.05, M.whitePaint, 0.36, false);
+    [[30.5, 0xffffff], [48.5, 0x2b2f36], [57.5, 0xb0b5ba], [84.5, 0x7a1f1f], [93.5, 0xd8d8d8]].forEach(([x, c]) => car(p, x, 449, Math.PI, c));
+    box(p, 1.5, 441.5, 21, 470, 0.25, M.grass, 0.3, false); trees(p, [[7, 450, 0.45, 0], [15, 463, 0.4, 0]], 44);
+    person(p, 12, 455, 0.3, M.kurta2); person(r, 40, -8, 0.3, M.kurta3); person(r, 70, -18, 0.3);
+    label(r, '6 shops · 6 family flats above (G+2)', 52, -38, 37, '', 2); label(r, 'Front parking ≈ 11 cars', 52, -10, 6, '', 2);
+    label(p, 'Residents’ parking + garden', 56, 451, 6, '', 2);
+    return {
+      name: 'Variation 4 · Shops + flats', short: 'Shops + flats', status: 'review',
+      size: 'Pump plot ≈111 × 88–118 ft (≈115 ft of frontage) + the rest of the original layout', area: 'Plot ≈11,400 sq ft ≈ 2.5 kanal · plaza 88 × 36 ft, G+2 ≈ 9,500 sq ft',
+      notes: 'v25: the original front zone with the petrol pump replaced. Kept: the shop row, the mill front (visitor parking, sales counter, stores A + B), the staff flats and the trolley strip are all exactly as in the original layout. Pump plot: a G+2 plaza set 20 ft back from the road behind a strip of front parking: 6 road-front shops (≈13 × 36 ft) and a lobby with the stair on the ground floor, and 3 family flats (≈29 × 36 ft, 2 beds, front balcony) on each upper floor, reached by an open gallery at the back. Behind: residents’ parking along the trolley-strip wall and a small garden, reached by the drive down the west side. Roof: water tanks and solar. Without the pump there are no tank-distance rules, so homes can stand here. With the old shop row the road front carries 12 shops in all.',
+      finance: {
+        rows: [
+          ['Build cost', 'Rs 10.6–13.8 cr for the whole front zone (plaza Rs 4.2–5.3 cr)'],
+          ['— plaza: ≈9,500 sq ft @ Rs 4,000–5,000', 'Rs 3.8–4.75 cr'],
+          ['— front + rear parking, garden, utilities, approvals', 'Rs 0.35–0.55 cr'],
+          ...KEPT_ROWS,
+          ['Rent (plaza)', '6 shops × Rs 25,000–45,000 + 6 flats × Rs 25,000–40,000 a month ≈ Rs 36–61 lakh/yr'],
+          ['Net per year', '≈ Rs 0.7 cr (0.55–0.9): plaza ≈ 0.28–0.47 + shop row ≈ 0.1–0.2 + trolley-roof solar ≈ 0.18–0.24'],
+          ['ROI on the earning parts (plaza, shop row, trolley strip ≈ Rs 5.6–7.25 cr)', '≈ 11 %/yr (8–16 %)'],
+          ['Payback', '≈ 9 years (6–13)'],
+          ['Or sell the plaza', '6 shops ≈ 0.7–1.1 cr + 6 flats ≈ 0.3–0.5 cr each ≈ Rs 6–9.6 cr (the build cost back plus ≈ 1–4 cr)'],
+        ],
+        note: 'Planning estimates at Nov 2026 prices (±40 % until quotations); rents are assumptions to check with 2–3 local dealers. Staff flats and stores earn nothing directly: they serve the mill. Rent counted at 85 % let, less upkeep. Land already owned (≈ Rs 4.8 cr FBR for the whole front zone, not included).',
+      },
+      compare: { capex: 'Rs 10.6–13.8 cr (plaza 4.2–5.3) incl. the kept layout', built: 'Plaza ≈9,500 sq ft + the original layout (≈8,300 sq ft flats, 2 stores, 6 shops)', net: '≈ Rs 0.7 cr/yr (0.55–0.9) + the mill uses', roi: '≈ 11 % on the earning parts (8–16)', payback: '≈ 9 yrs (6–13)', effort: 'Low — tenants + a caretaker', risk: 'Small-town rents; families living by the mill gate' },
+      round: 25,
+    };
+  });
+}
+
+// ---------- 5 · godowns + karahi restaurant (v26: the restaurant replaces the farm store) ----------
+function v5(scene, inPlace = false) {
+  return keptVariant(scene, 4, 'Variation 5 · Godowns + karahi restaurant', inPlace, (p, r) => {
+    const v = V, GD = { x1: 2, y1: 442, x2: 109, y2: 480 };
+    // godown: one PEB shed split into two rentable units, shutters onto the yard
+    const gd = new THREE.Group(); p.add(gd);
+    gableShed(gd, GD, { eave: 18, rise: 3, wall: M.cladWhite, roof: M.roofWhite, trim: M.trimGreen, cut: true, frames: 24 });
+    [15, 42, 69, 96].forEach(x => shutter(gd, x, GD.y2, 'N', 12, 13, true, true));
+    box(gd, 55.2, 442.6, 55.8, 479.4, 16, M.cladWhite, 0.3);
+    const stack = (x1, y1, x2, y2, h) => { box(gd, x1, y1, x2, y2, 0.5, M.pallet, 0.3); box(gd, x1 + .2, y1 + .2, x2 - .2, y2 - .2, h, M.bags, 0.8); };
+    [[4, 22], [26, 52], [58, 82], [86, 107]].forEach(([a, b], i) => { stack(a, 444, b, 458, [9, 10, 8.5, 10][i]); stack(a, 461, b, 471, [7, 8, 9, 6][i]); });
+    // truck gate (west part of the frontage) + yard
+    truck(p, 36, 487.5, Math.PI / 2, true); tractor(p, 92, 491, Math.PI / 2, true, 0);
+    [[4, -1.5], [50, -1.5]].forEach(([t, o]) => { const [x, y] = at(t, o); box(p, x - 1.2, y - 1.2, x + 1.2, y + 1.2, 6, M.brick); });
+    box(r, 8.5, -1.9, 9.3, -1.1, 15, M.steelDark, 0); box(r, 33.5, -1.9, 34.3, -1.1, 15, M.steelDark, 0); sign(r, v.godownSign, 26, 4.5, 21.4, -1, 13);
+    block(r, { x1: 43, y1: -16, x2: 49, y2: -10 }, 1, 9, M.house, { parapet: 1 });                             // guard cabin
+    label(r, 'Truck gate', 27, 4, 2, 'road', 2);
+    // karahi restaurant, G+1 (east part of the frontage): karahi line behind the glass, dining hall; family hall upstairs, roof terrace
+    const RR = { x1: 56, y1: -46, x2: 101, y2: -18 }, FH = 12.5, cut = (m, k) => { m.userData.cut = true; if (k) m.userData[k] = true; return m; };
+    floorsBlock(r, RR, 2, FH, v.brickRed, { parapet: 3, bands: M.timber, colSpacing: 15 });
+    cut(box(r, 58, -18.4, 99, -17.9, 9.5, M.glass, 0.6));                                                       // glass front onto the road
+    cut(box(r, 58, -18.4, 99, -17.9, 8, M.glass, FH + 1.6), 'upper');                                           // family-hall glazing
+    box(r, 56, -18, 101, -14.4, 0.45, M.timber, 10.6);                                                         // timber canopy
+    for (let k = 0; k < 5; k++) {                                                                              // open karahi line behind the glass
+      const t = 61 + k * 8; box(r, t - 3.2, -22.5, t + 3.2, -19.6, 3, M.stainless, 0.8);
+      const w = new THREE.Mesh(new THREE.SphereGeometry(1.4, 14, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), v.wok); w.position.copy(P(t, -21, 4.9)); r.add(w);
+      const f = new THREE.Mesh(new THREE.ConeGeometry(0.9, 1.4, 8), v.flame); f.position.copy(P(t, -21, 3.9)); r.add(f);
+    }
+    box(r, 57.5, -23, 99.5, -19.2, 1.4, M.stainless, 9.4);                                                     // steel hood over the line
+    for (let t = 60; t < 98; t += 9) [-30, -38].forEach(o => { box(r, t - 2.5, o - 1.4, t + 2.5, o + 1.4, 0.2, M.wood, 2.6); });   // dining tables
+    for (let t = 60; t < 98; t += 9) [-27, -38].forEach(o => { const m = box(r, t - 2.5, o - 1.4, t + 2.5, o + 1.4, 0.2, M.wood, FH + 3.4); m.userData.upper = true; });   // family-hall tables
+    box(r, 96, -45, 100, -33, 0.3, M.plaster, 0.8); for (let k = 0; k < 7; k++) box(r, 96, -45 + k * 1.6, 100, -43.4 + k * 1.6, 1.7 * (k + 1), M.plaster, 0.8);   // stair to the family hall
+    // roof: tanks + kitchen exhaust on the west half, terrace with umbrellas on the east half
+    const rf = new THREE.Group(); rf.userData.cut = true; r.add(rf);
+    waterTank(rf, 61, -42, 2 * FH); waterTank(rf, 66, -42, 2 * FH, 0xe9e9e4); cyl(rf, 64, -24, 1.1, 6, M.steelDark, 2 * FH, 10);
+    [[82, -26], [92, -26], [82, -38], [92, -38]].forEach(([t, o]) => { cyl(rf, t, o, 1.4, 0.12, M.wood, 2 * FH + 2.8, 10); cyl(rf, t, o, 0.08, 6.5, M.steel, 2 * FH, 6); const u = new THREE.Mesh(new THREE.ConeGeometry(3, 1.2, 8), v.umbrella); u.position.copy(P(t, o, 2 * FH + 6.6)); rf.add(u); });
+    box(r, 66, -18.6, 92, -17.9, 5.8, M.timber, 2 * FH + 0.4); sign(r, v.karahiSign, 25, 4, 79, -17.7, 2 * FH + 3.5);
+    // front parking (5 bays) + tandoor and charpais by the side door on the yard
+    box(r, 56, -14.2, 104, -0.6, 0.05, M.asphalt, 0.3, false);
+    for (let t = 56; t <= 101; t += 9) box(r, t - .2, -13.5, t + .2, -1.5, 0.05, M.whitePaint, 0.36, false);
+    [[60.5, 0xffffff], [69.5, 0x7a1f1f], [87.5, 0x1f2a44], [96.5, 0xb0b5ba]].forEach(([t, c]) => car(r, t, -7.5, 0, c));
+    box(r, 50.5, -40, 55.5, -35, 4.5, M.brick, 0.3); cyl(r, 53, -37.5, 1.8, 1.2, M.stoneDark, 4.5, 12);          // tandoor
+    [[52.5, -28], [52.5, -23]].forEach(([t, o]) => box(r, t - 1.8, o - 3, t + 1.8, o + 3, 1.6, v.charpai, 0.3));
+    person(r, 74, -16, 0.3, M.kurta2); person(r, 77, -16.5, 0.3, M.kurta3); person(p, 30, 484, 0.3, M.kurta3); person(p, 33, 485, 0.3);
+    label(p, 'Godowns · 2 units for rent', 55.5, 461, 26, '', 2); label(r, 'Karahi house · family hall above', 78.5, -32, 32, '', 2);
+    label(r, 'Karahi line behind glass', 78.5, -20, 10, '', 2); label(p, 'Truck yard', 40, 500, 4, '', 2);
+    return {
+      name: 'Variation 5 · Godowns + karahi restaurant', short: 'Godowns + restaurant', status: 'review',
+      size: 'Pump plot ≈111 × 88–118 ft (≈115 ft of frontage) + the rest of the original layout', area: 'Plot ≈11,400 sq ft ≈ 2.5 kanal · restaurant 45 × 28 ft, G+1 ≈ 2,520 sq ft · godowns 107 × 38 ft ≈ 4,070 sq ft',
+      notes: 'v26: Saad’s call: a karahi restaurant instead of the farm store (v25), next to the two rentable godowns. Kept: the shop row, the mill front (visitor parking, sales counter, stores A + B), the staff flats and the trolley strip, exactly as in the original layout. Restaurant (east part of the frontage, G+1, in the karahi-house style of variation 2): an open karahi line of 5 stations behind the glass front, so the road sees the flames, a dining hall behind it, a family hall upstairs and a roof terrace with umbrellas. About 110 covers in all. A tandoor and charpais sit by the side door, with 5 parking bays in front. In the evenings, when the godowns are quiet, the truck yard doubles as overflow parking. Godowns (back wall): one PEB shed in two rentable units of ≈2,030 sq ft, two shutters each onto the yard, ≈400–450 t of bags; the mill can use them itself at harvest. Truck gate: 46 ft on the west part of the frontage, with a guard cabin; trucks load side-on along the godown face.',
+      storage: {
+        capacity: '≈ 400–450 t of bags (2 godown units)',
+        rows: [
+          ['Capacity', '≈ 400–450 t of bagged paddy, rice, wheat or fertiliser in two units of ≈ 200–225 t'],
+          ['Bags', '≈ 10,000–11,000 × 40 kg paddy bags, or ≈ 8,000–9,000 × 50 kg bags'],
+          ['Stacks', 'Up to ≈ 12 ft (15–16 bags) under 18 ft eaves, two rows of blocks per unit with a 6 ft aisle to the shutters'],
+          ['Floor use', '≈ 4,070 sq ft · ≈ 0.1–0.11 t per sq ft'],
+          ['Days of milling', '≈ 4–7 days of paddy at ≈ 65–95 t a day, if the mill uses them itself'],
+        ],
+        note: 'Godown demand is seasonal (harvest months), so a yearly lease to an arhti or a fertiliser dealer is safer than monthly lets.',
+      },
+      finance: {
+        rows: [
+          ['Build cost', 'Rs 9.3–12.5 cr for the whole front zone (plot Rs 2.9–4.0 cr)'],
+          ['— restaurant: ≈2,520 sq ft @ Rs 5,500–7,000 (kitchen civil, family-hall finish)', 'Rs 1.4–1.75 cr'],
+          ['— karahi line, tandoor, hood + extraction, cold room, furniture, roof terrace', 'Rs 0.4–0.6 cr'],
+          ['— godowns: ≈4,070 sq ft PEB @ Rs 2,200–3,200', 'Rs 0.9–1.3 cr'],
+          ['— yard paving, gate, guard cabin, front parking, lights, approvals', 'Rs 0.2–0.35 cr'],
+          ...KEPT_ROWS,
+          ['Restaurant income', 'Leased to a karahi brand ≈ Rs 2.5–4 lakh/month ≈ 0.3–0.48 cr/yr · or run it: ≈ 80–150 diners a day × Rs 1,300–1,500 ≈ 3.8–8.2 cr/yr of sales, ≈ 0.4–1.2 cr/yr net'],
+          ['Godown rent', 'Rs 12–20/sq ft a month ≈ Rs 6–10 lakh/yr'],
+          ['Net per year (restaurant leased)', '≈ Rs 0.8 cr (0.63–1.0): restaurant 0.3–0.48 + godowns ≈ 0.05–0.08 + shop row ≈ 0.1–0.2 + trolley-roof solar ≈ 0.18–0.24'],
+          ['Net per year (run it yourselves)', '≈ Rs 0.75–1.7 cr, depending on the cook and the crowd'],
+          ['ROI on the earning parts (plot, shop row, trolley strip ≈ Rs 4.3–5.95 cr)', '≈ 15 %/yr leased (11–23 %)'],
+          ['Payback', '≈ 6.5 years leased (4.5–9.5)'],
+        ],
+        note: 'Planning estimates at Nov 2026 prices (±40 % until quotations); restaurant figures scale down variation 2’s (200 diners × Rs 1,500 for a bigger hall). A lease to an established karahi name is the low-effort route; running it pays more but needs a cook and staff of ≈ 15–20. Kitchen smoke goes up the roof stack, away from the godowns. Land already owned.',
+      },
+      compare: { capex: 'Rs 9.3–12.5 cr (plot 2.9–4.0) incl. the kept layout', built: 'Restaurant ≈2,520 sq ft (G+1) + godowns ≈4,070 sq ft + the original layout', net: '≈ Rs 0.8 cr/yr leased (0.63–1.0) · run it: 0.75–1.7', roi: '≈ 15 % on the earning parts (11–23)', payback: '≈ 6.5 yrs (4.5–9.5)', effort: 'Low if leased to a karahi brand; high if run', risk: 'Restaurant operator and footfall; seasonal godown demand' },
+      round: 26,
+    };
+  });
 }
